@@ -1,6 +1,8 @@
-# Instaliranje neophodnih datoteke
+# Instaliranje neophodnih biblioteka
 
-Potreban je boost, cmake i openssl, pomoću homebrew-a: 
+Neophodne biblioteke: cmake, openssl i boost.
+
+Instaliranje pomoću homebrew-a: 
 
 ```
 brew install cmake openssl boost 
