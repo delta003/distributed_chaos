@@ -14,6 +14,23 @@ using namespace boost::property_tree;
 
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 
+void json_to_string(const ptree& json, string& out);
+
+inline string make_json(const string& ip, const string& port) {
+  ptree json;
+  json.put("port", port);
+  json.put("ip", ip);
+  string out;
+  json_to_string(json, out);
+  return out;
+}
+
+inline string make_json(const ptree& json) {
+  string out;
+  json_to_string(json, out);
+  return out;
+}
+
 inline void json_to_string(const ptree& json, string& out) {
   std::ostringstream oss;
   write_json(oss, json);
@@ -23,6 +40,14 @@ inline void json_to_string(const ptree& json, string& out) {
 inline void string_to_json(const string& str, ptree& out) {
   std::istringstream iss(str);
   read_json(iss, out);
+}
+
+inline string make_addr(const ptree& json) {
+  return json.get<string>("ip") + ":" + json.get<string>("port");
+}
+
+inline string make_addr(const string& ip, const string& port) {
+  return ip + ":" + port;
 }
 
 
@@ -35,14 +60,14 @@ void send(shared_ptr<HttpServer::Response> response, const string& body) {
 }
 
 void send_ok(shared_ptr<HttpServer::Response> response, ptree& json) {
-  json.put("status", "OK");
+  json.put("status", "ok");
   string json_str;
   json_to_string(json, json_str);
   send(response, json_str);
 }
 
 void send_wait(shared_ptr<HttpServer::Response> response, ptree& json) {
-  json.put("status", "WAIT");
+  json.put("status", "wait");
   string json_str;
   json_to_string(json, json_str);
   send(response, json_str);
@@ -50,7 +75,15 @@ void send_wait(shared_ptr<HttpServer::Response> response, ptree& json) {
 
 void send_error(shared_ptr<HttpServer::Response> response, const string& error_msg) {
   ptree json;
-  json.put("status", "ERROR");
+  json.put("status", "error");
+  json.put("message", error_msg);
+  string json_str;
+  json_to_string(json, json_str);
+  send(response, json_str);
+}
+
+void send_error(shared_ptr<HttpServer::Response> response, ptree& json, const string& error_msg) {
+  json.put("status", "error");
   json.put("message", error_msg);
   string json_str;
   json_to_string(json, json_str);
