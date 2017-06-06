@@ -2,14 +2,15 @@
 #define UTIL_HPP
 
 #include <sstream>
+#include <cstring>
 #include "http/server_http.hpp"
 
 #define BOOST_SPIRIT_THREADSAFE
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-using namespace boost::property_tree;
 using namespace std;
+using namespace boost::property_tree;
 
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 
@@ -19,8 +20,14 @@ inline void json_to_string(const ptree& json, string& out) {
   out = oss.str();
 }
 
+inline void string_to_json(const string& str, ptree& out) {
+  std::istringstream iss(str);
+  read_json(iss, out);
+}
+
+
 inline void log(stringstream& logz, const string& handler, const string& error_msg) {
-  logz << handler << "{\n" << error_msg << "}\n"; 
+  logz << "@" << handler << " : " << error_msg << "\n"; 
 }
 
 void send(shared_ptr<HttpServer::Response> response, const string& body) {

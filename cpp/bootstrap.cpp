@@ -8,6 +8,7 @@
 #include <boost/property_tree/json_parser.hpp>
 
 #include <iostream>
+#include <cstring>
 #include <sstream>
 
 using namespace std;
@@ -25,32 +26,36 @@ namespace Handlers {
   void reset(HttpServer& server) {
   server.resource["/api/reset"]["GET"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
       try {
+        log(logstream, "reset_request", request->content.string());
         ptree out;
         uuid = 0;
         last_ip = "null";
         last_port = "null";
         send_ok(response, out);
       } catch (exception& e) {
-        log(logstream, "reset", e.what());
+        log(logstream, "reset_error", e.what());
       }
     };
   }
   void hello(HttpServer& server) {
     server.resource["/api/hello"]["POST"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
       try {
+        string req_str = request->content.string();
+        log(logstream, "hello_request", req_str);
         ptree in;
-        read_json(request->content, in);
+        string_to_json(req_str, in);
         string ip = in.get<string>("ip");
         string port = in.get<string>("port");
-
         ptree out;
         out.put("ip", last_ip);
         out.put("port", last_port);
         out.put("uuid", uuid);
-
+        uuid++;
+        last_ip = ip;
+        last_port = port;
         send_ok(response, out);
       } catch (exception& e) {
-        log(logstream, "hello", e.what());
+        log(logstream, "hello_error", e.what());
         send_error(response, e.what());
       }
     };
@@ -58,13 +63,20 @@ namespace Handlers {
   void logz(HttpServer& server) {
     server.resource["/logz"]["GET"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
       try {
+        log(logstream, "logz_request", request->content.string());
         send(response, logstream.str());
       } catch (exception& e) {
-        log(logstream, "logz", e.what());
+        log(logstream, "logz_error", e.what());
         send_error(response, e.what());
       }
     };
   }
+  void index(HttpServer& server) {
+    server.default_resource["GET"]=[&server](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+      send(response, "");
+    };
+  }
+
 } // Handlers
 
 int main(int argc, char *argv[]) {
@@ -78,6 +90,7 @@ int main(int argc, char *argv[]) {
   Handlers::reset(server);
   Handlers::hello(server);
   Handlers::logz(server);
+  Handlers::index(server);
 
   thread server_thread([&server](){
       server.start();
