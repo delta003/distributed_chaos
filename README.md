@@ -14,3 +14,10 @@ KIDS projekat
 - Run `mvn package` to build
 - See `dropwizard-template.yml` for server configuration
 - Run `sh start_server.sh` to start server
+
+## C++
+- Install cmake, openssl and boost
+```
+brew install cmake openssl boost gcc
+```
+- Use start.sh & stop.sh to create/destroy nodes and bootstrap server.
