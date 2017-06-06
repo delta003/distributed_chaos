@@ -6,14 +6,13 @@ KIDS projekat
 - Dizajn https://docs.google.com/document/d/1YzOaIMauOf1US_li-Wa6A-0cFraVSx2Tim-j10xJb0k/edit?usp=sharing
 
 ## AngularJs
-- Each server should serve static files from `/angularjs/app` and routes with 
-`/api` prefix should return Content-Type:application/json
+- Each server should serve static files from `/angularjs/app` and routes with `/api` prefix should return Content-Type:application/json
 
 ## Java
 - Install Maven
-- Run `mvn package` to build
-- See `dropwizard-template.yml` for server configuration
-- Run `sh start_server.sh` to start server
+- Run `./build` to build
+- Run `./start_bootstrap` to start bootstrap server (on port 8080, to change port you must make changes in `config.yml` and `./start_bootstrap`)
+- Run `./start_node $PORT` to start node server on port $PORT
 
 ## C++
 - Install cmake, openssl, boost and gcc
