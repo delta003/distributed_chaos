@@ -2,7 +2,7 @@ version: 0.1
 
 assets:
   overrides:
-    /: /Users/mbakovic/distributed_chaos/angularjs/app
+    /: ../angularjs/app
 
 server:
   type: simple
