@@ -1,6 +1,6 @@
-// Bootstrap
+// Bootstrap server.
 
-#include "server_http.hpp"
+#include "http/server_http.hpp"
 #include "util.hpp"
 
 #define BOOST_SPIRIT_THREADSAFE

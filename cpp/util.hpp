@@ -2,7 +2,7 @@
 #define UTIL_HPP
 
 #include <sstream>
-#include "server_http.hpp"
+#include "http/server_http.hpp"
 
 #define BOOST_SPIRIT_THREADSAFE
 #include <boost/property_tree/ptree.hpp>

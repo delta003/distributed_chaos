@@ -1,6 +1,6 @@
-# test client
+// Klijenat za testiranje.
 
-#include "client_http.hpp"
+#include "http/client_http.hpp"
 #include "util.hpp"
 
 #define BOOST_SPIRIT_THREADSAFE
