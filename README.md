@@ -16,7 +16,7 @@ KIDS projekat
 - Run `sh start_server.sh` to start server
 
 ## C++
-- Install cmake, openssl and boost
+- Install cmake, openssl, boost and gcc
 ```
 brew install cmake openssl boost gcc
 ```
