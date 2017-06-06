@@ -1,6 +1,7 @@
 // Bootstrap server.
 
 #include "http/server_http.hpp"
+
 #include "util.hpp"
 
 #define BOOST_SPIRIT_THREADSAFE
@@ -16,16 +17,16 @@ using namespace boost::property_tree;
 
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 
+stringstream logstream;
+
 int uuid = 0;
 string last_ip = "null";
 string last_port = "null";
 
-stringstream logstream;
-
 namespace Handlers {
   void reset(HttpServer& server) {
   server.resource["/api/reset"]["GET"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
-      try {
+    try {
         log(logstream, "reset_request", request->content.string());
         ptree out;
         uuid = 0;
@@ -34,6 +35,7 @@ namespace Handlers {
         send_ok(response, out);
       } catch (exception& e) {
         log(logstream, "reset_error", e.what());
+        send_error(response, e.what());
       }
     };
   }
@@ -73,7 +75,8 @@ namespace Handlers {
   }
   void index(HttpServer& server) {
     server.default_resource["GET"]=[&server](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
-      send(response, "");
+      ptree out;
+      send_ok(response, out);
     };
   }
 

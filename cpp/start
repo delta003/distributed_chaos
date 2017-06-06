@@ -13,8 +13,9 @@ if [ $1 = "bs" ]; then
   fi
 
   if g++ -O2 -std=c++11 $CWD/bootstrap.cpp -I/usr/local/include/boost -o $CWD/bin/bs_$2 -lboost_system; then
-    $CWD/bin/bs_$2 $2 &
-    echo "Boostrap startovan na portu:" $2
+    if $CWD/bin/bs_$2 $2 & then
+      echo "Boostrap startovan na portu:" $2
+    fi
   fi
 fi
 
@@ -26,7 +27,8 @@ if [ $1 = "node" ]; then
   fi
 
   if g++ -O2 -std=c++11 $CWD/node.cpp -I/usr/local/include/boost -o $CWD/bin/node_$3 -lboost_system; then
-    $CWD/bin/node_$3 $2 $3 $4 $5 &
-    echo "Node startovan na portu:" $3
+    if $CWD/bin/node_$3 $2 $3 $4 $5 & then
+      echo "Node startovan na portu:" $3
+    fi
   fi
 fi
