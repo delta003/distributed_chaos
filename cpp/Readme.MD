@@ -1,4 +1,4 @@
-# Instaliranje beophodne datoteke
+# Instaliranje neophodnih datoteke
 
 Potreban je boost, cmake i openssl, pomoću homebrew-a: 
 
