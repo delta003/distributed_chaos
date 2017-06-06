@@ -4,16 +4,17 @@ import com.mbakovic.kids.core.Node;
 import com.mbakovic.kids.model.IPAndPort;
 import com.mbakovic.kids.resources.BasicResource;
 import com.mbakovic.kids.resources.BootstrapResource;
+import com.mbakovic.kids.resources.NetworkResource;
 import com.mbakovic.kids.resources.PingResource;
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-public final class NodeApplication extends Application<AppConfiguration> {
+public final class AppApplication extends Application<AppConfiguration> {
 
     public static void main(final String[] args) throws Exception {
-        new NodeApplication().run(args);
+        new AppApplication().run(args);
     }
 
     @Override
@@ -44,11 +45,13 @@ public final class NodeApplication extends Application<AppConfiguration> {
                     configuration.getNode().getBootstrapPort()
             ));
             // TODO
-            // Initialize Node
+            // Initialize Node and join the network
 
             // API
             final BasicResource basicResource = new BasicResource();
             environment.jersey().register(basicResource);
+            final NetworkResource networkResource = new NetworkResource();
+            environment.jersey().register(networkResource);
         }
     }
 

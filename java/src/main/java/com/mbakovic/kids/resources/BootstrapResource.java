@@ -15,16 +15,15 @@ public final class BootstrapResource implements BootstrapService {
 
     @Override
     public StatusResponse hello(IPAndPortRequest request) {
-        if (Bootstrap.getInstance().lock()) {
-            IPAndPort lastNode = Bootstrap.getInstance().getLastNode();
-            IPAndPortAndUUIDResponse response = new IPAndPortAndUUIDResponse(lastNode.getIp(), lastNode.getPort(),
-                    String.valueOf(Bootstrap.getInstance().getUUID()));
-            Bootstrap.getInstance().setLastNode(new IPAndPort(request.getIp(), request.getPort()));
-            Bootstrap.getInstance().release();
-            return response;
-        } else {
+        if (!Bootstrap.getInstance().lock()) {
             return StatusResponse.ofWait();
         }
+        IPAndPort lastNode = Bootstrap.getInstance().getLastNode();
+        IPAndPortAndUUIDResponse response = new IPAndPortAndUUIDResponse(lastNode.getIp(), lastNode.getPort(),
+                String.valueOf(Bootstrap.getInstance().getUUID()));
+        Bootstrap.getInstance().setLastNode(new IPAndPort(request.getIp(), request.getPort()));
+        Bootstrap.getInstance().release();
+        return response;
     }
 
     @Override
