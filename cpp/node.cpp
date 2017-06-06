@@ -12,6 +12,8 @@
 #include <iostream>
 #include <cstring>
 #include <sstream>
+#include <algorithm>
+#include <utility>
 
 using namespace std;
 using namespace boost::property_tree;
@@ -46,40 +48,61 @@ edge e_prev("prev");
 edge e_next("next");
 vector<edge> e_children;
 
-inline void edge_to_json(const edge& edge, ptree& json) {
-  json.put("uuid", node_info.uuid);
-  json.put("ip", edge.ip);
-  json.put("port", edge.port);
-  json.put("type", edge.type);
-}
-
-inline void add_edge(const edge& edge, ptree& out) {
-  ptree json;
-  if (edge.exists()) {
-    edge_to_json(edge, json);
-    out.push_back(json);
+namespace network {
+  inline void edge_to_json(const edge& edge, ptree& json) {
+    json.put("uuid", node_info.uuid);
+    json.put("ip", edge.ip);
+    json.put("port", edge.port);
+    json.put("type", edge.type);
   }
-}
 
-inline void add_edge(const string& type, ptree& out) {
-  if (type == "parent" && parent.exist()) {
-    if (parent.exists()) {
-      edge_to_json("out");
+  inline void add_edge(const edge& edge, ptree& out) {
+    ptree json;
+    if (edge.exists()) {
+      edge_to_json(edge, json);
+      out.push_back(std::make_pair("", json));
+    }
+  }
+
+  inline void add_edge(const string& type, ptree& out) {
+    if (type == "parent" && e_parent.exists()) {
+        edge_to_json(e_parent, out);
+        return;
     } 
+    if (type == "prev" && e_prev.exists()) {
+        edge_to_json(e_prev, out);
+        return;
+    } 
+    if (type == "next" && e_next.exists()) {
+        edge_to_json(e_next, out);
+        return;
+    } 
+    out.put("", "null");
   }
-}
 
-inline void add_edges(const vector<edge>& edges, ptree& out) {
-  for (auto edge: edges) {
-    add_edge(edge, out);
+  inline void add_edges(const vector<edge>& edges, ptree& out) {
+    for (auto edge: edges) {
+      add_edge(edge, out);
+    }
   }
-}
+} // network helpers
 
 namespace Handlers {
   void index(HttpServer& server) {
     server.default_resource["GET"]=[&server](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
       send(response, "");
       // TODO: servirati staticke fajlove ovde
+    };
+  }
+  void logz(HttpServer& server) {
+    server.resource["/logz"]["GET"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+      try {
+        log(logstream, "logz_request", request->content.string());
+        send(response, logstream.str());
+      } catch (exception& e) {
+        log(logstream, "logz_error", e.what());
+        send_error(response, e.what());
+      }
     };
   }
   namespace basic {
@@ -132,6 +155,7 @@ namespace Handlers {
     }
   } // basic
   namespace network {
+    using namespace ::network;
     void edges(HttpServer& server) {
     server.resource["/api/network/edges"]["GET"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
       try {
@@ -156,9 +180,9 @@ namespace Handlers {
           string req_str = request->content.string();
           log(logstream, "get_edge_request", req_str);
           ptree in;
-          string_to_json(req_str, in);ptree out;
+          string_to_json(req_str, in);
           ptree out;
-          add_edge(out, )
+          add_edge(in.get<string>("type"), out);
           send_ok(response, out);
         } catch (exception& e) {
           log(logstream, "edges_error", e.what());
@@ -182,10 +206,16 @@ int main(int argc, char *argv[]) {
   HttpServer server;
   server.config.port=atoi(argv[2]);
 
+  // / i /logz
   Handlers::index(server);
+  Handlers::logz(server);
+  // Basic
   Handlers::basic::ok(server);
   Handlers::basic::info(server);
   Handlers::basic::check(server);
+  // Network
+  Handlers::network::edges(server);
+  Handlers::network::edges(server);
 
   thread server_thread([&server](){
       server.start();
