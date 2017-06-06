@@ -1,12 +1,22 @@
 # Stopiranje cvora ili bootstrap-a
 # Koriscenje 
-#   ./stop bs <port> - stopiranje bootstrapa
-#   ./stop node ...
+#   ./stop bs <port>         - stopiranje bootstrapa
+#   ./stop node <port_cvora> - stopiranje cvora
+
+CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ $1 = "bs" ]; then
   if killall -9 bs_$2; then
-    if rm bin/bs_$2; then
+    if rm $CWD/bin/bs_$2; then
       echo "Zaustavljen boostrap na portu:" $2
+    fi
+  fi
+fi
+
+if [ $1 = "node" ]; then
+  if killall -9 node_$2; then
+    if rm $CWD/bin/node_$2; then
+      echo "Zaustavljen node na portu:" $2
     fi
   fi
 fi

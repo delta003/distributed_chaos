@@ -1,17 +1,32 @@
 # Pokretanje cvora ili bootstrap-a
 # Koriscenje 
 #   ./start bs <port> - pokretanje bootstrapa
-#   ./start node ..;
+#   ./start node <ip_cvora> <port_cvora> <ip_bootstrapa> <port_bootstrapa> - pokretanje cvora
+
+CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ $1 = "bs" ]; then
   
-  if pgrep -x bs_$2 > /dev/null || pgrep -x bs_$2 > /dev/null; then
+  if pgrep -x bs_$2 > /dev/null || pgrep -x node_$2 > /dev/null; then
     echo "Port zauzet."
     exit 0
   fi
 
-  if g++ -O2 -std=c++11 bootstrap.cpp -I/usr/local/include/boost -o bin/bs_$2 -lboost_system; then
-    ./bin/bs_$2 $2 &
+  if g++ -O2 -std=c++11 $CWD/bootstrap.cpp -I/usr/local/include/boost -o $CWD/bin/bs_$2 -lboost_system; then
+    $CWD/bin/bs_$2 $2 &
     echo "Boostrap startovan na portu:" $2
+  fi
+fi
+
+if [ $1 = "node" ]; then
+  
+  if pgrep -x node_$3 > /dev/null || pgrep -x bs_$3 > /dev/null; then
+    echo "Port zauzet."
+    exit 0
+  fi
+
+  if g++ -O2 -std=c++11 $CWD/node.cpp -I/usr/local/include/boost -o $CWD/bin/node_$3 -lboost_system; then
+    $CWD/bin/node_$3 $2 $3 $4 $5 &
+    echo "Node startovan na portu:" $3
   fi
 fi
