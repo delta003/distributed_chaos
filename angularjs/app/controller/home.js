@@ -12,6 +12,7 @@
         initController();
 
         function initController() {
+            
         }
 
         function loadData(request) {

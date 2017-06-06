@@ -9,12 +9,27 @@
     function NodeService($http) {
         var service = {};
 
-        service.GetData = GetData;
+        service.NetworkVisualize = NetworkVisualize;
+        service.JobsIds = JobsIds;
+        service.JobsKill = JobsKill;
+        service.JobsVisualize = JobsVisualize;
 
         return service;
 
-        function GetData(request) {
-            return $http.post('/api/get-data', request).then(handleSuccess, handleError('Error getting data'));
+        function NetworkVisualize() {
+            return $http.get('/api/network/visualize').then(handleSuccess, handleError('Error making request'));
+        }
+
+        function JobsIds() {
+            return $http.get('/api/jobs/ids').then(handleSuccess, handleError('Error making request'));
+        }
+
+        function JobsKill(jobid) {
+            return $http.get('/api/jobs/kill/' + jobid).then(handleSuccess, handleError('Error making request'));
+        }
+
+        function JobsVisualize(jobid) {
+            return $http.get('/api/jobs/visualize/' + jobid).then(handleSuccess, handleError('Error making request'));
         }
 
         // private functions

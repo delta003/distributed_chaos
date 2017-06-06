@@ -2,29 +2,15 @@ version: 0.1
 
 assets:
   overrides:
-    /: /Users/mbakovic/distributed_chaos/angularjs/app
+    /: ../angularjs/app
 
 server:
+  type: simple
   rootPath: /api/*
   applicationContextPath: /
-  applicationConnectors:
-    - type: http
-      port: 8080
-    - type: https
-      port: 8443
-      keyStorePath: example.keystore
-      keyStorePassword: example
-      validateCerts: false
-      validatePeers: false
-  adminConnectors:
-    - type: http
-      port: 8081
-    - type: https
-      port: 8444
-      keyStorePath: example.keystore
-      keyStorePassword: example
-      validateCerts: false
-      validatePeers: false
+  connector:
+    type: http
+    port: 8080
 
 # Logging settings.
 logging:
