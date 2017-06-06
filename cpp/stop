@@ -1,0 +1,12 @@
+# Stopiranje cvora ili bootstrap-a
+# Koriscenje 
+#   ./stop bs <port> - stopiranje bootstrapa
+#   ./stop node ...
+
+if [ $1 = "bs" ]; then
+  if killall -9 bs_$2; then
+    if rm bin/bs_$2; then
+      echo "Zaustavljen boostrap na portu:" $2
+    fi
+  fi
+fi

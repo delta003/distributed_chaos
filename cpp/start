@@ -1,0 +1,17 @@
+# Pokretanje cvora ili bootstrap-a
+# Koriscenje 
+#   ./start bs <port> - pokretanje bootstrapa
+#   ./start node ..;
+
+if [ $1 = "bs" ]; then
+  
+  if pgrep -x bs_$2 > /dev/null || pgrep -x bs_$2 > /dev/null; then
+    echo "Port zauzet."
+    exit 0
+  fi
+
+  if g++ -O2 -std=c++11 bs.cpp -I/usr/local/include/boost -o bin/bs_$2 -lboost_system; then
+    ./bin/bs_$2 $2 &
+    echo "Boostrap startovan na portu:" $2
+  fi
+fi
