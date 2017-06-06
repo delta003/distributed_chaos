@@ -20,4 +20,4 @@ KIDS projekat
 ```
 brew install cmake openssl boost gcc
 ```
-- Use cpp/start.sh and cpp/stop.sh to create/destroy nodes and bootstrap servers.
+- Use cpp/start.sh and cpp/stop.sh to create or destroy nodes and bootstrap servers.
