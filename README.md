@@ -23,6 +23,6 @@ brew install cmake openssl boost gcc
 
 ## Unit Tests
 
-- Install homebrew, openssl,cmake, boost and gcc
+- Install homebrew, openssl, cmake, boost and gcc
 - Edit /cpp/test_config.hpp
 - Run ./cpp/test
