@@ -74,7 +74,6 @@ namespace Bootstrap {
     ASSERT_EQ(response.first.ip, "");
     ASSERT_EQ(response.first.port, "");
     
-
     old_ip = node_ip;
     old_port = node_port;
     node_ip = "100.220.100.50";
