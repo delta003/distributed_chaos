@@ -235,9 +235,6 @@ namespace Node {
       __test_set_edge_t1(port, "next");
       stop_node(port);
     }
-    void test_set_and_get() {
-
-    }
   } // network
 };
 
@@ -246,6 +243,17 @@ void clean_up() {
     string port = "200" + to_string(i);
     stop_bootstrap(port);
     stop_node(port);
+  }
+}
+void output_results() {
+  cout << "Failed: " << failures << " | Passed: " << oks << "\n";
+  if (failures > 0) {
+    cout << "Failed tests: ";
+    for (int i = 0; i < failed_tests.size(); i++) {
+      if (i != 0) cout << ", ";
+      cout << failed_tests[i];
+    }
+    cout << "" << endl;
   }
 }
 
@@ -268,24 +276,19 @@ int main(int argc, char *argv[]) {
 
   DBG = print_response;
 
-  // RUN_TEST(Bootstrap::test_reset); // boostrap/api/reset
-  // RUN_TEST(Bootstrap::test_hello); // boostrap/api/hello
+  RUN_TEST(Bootstrap::test_reset); // boostrap/api/reset
+  RUN_TEST(Bootstrap::test_hello); // boostrap/api/hello
 
-  // RUN_TEST(Node::basic::test_ok); // node/api/basic/ok
-  // RUN_TEST(Node::basic::test_info); // node/api/basic/info
-  // RUN_TEST(Node::basic::test_check); // node/api/basic/check
+  RUN_TEST(Node::basic::test_ok); // node/api/basic/ok
+  RUN_TEST(Node::basic::test_info); // node/api/basic/info
+  RUN_TEST(Node::basic::test_check); // node/api/basic/check
 
   RUN_TEST(Node::network::test_edges); // node/api/network/edges
-  // RUN_TEST(Node::network::test_get_edge); // node/api/network/get_edge
-  // RUN_TEST(Node::network::test_set_edge); // node/api/network/set_edge
+  RUN_TEST(Node::network::test_get_edge); // node/api/network/get_edge
+  RUN_TEST(Node::network::test_set_edge); // node/api/network/set_edge
 
   clean_up(); // za svaki slucaj
-  cout << "\nFailures: " << failures << " | Passed: " << oks << "\n";
-  cout << "Failed tests: ";
-  for (int i = 0; i < failed_tests.size(); i++) {
-    if (i != 0) cout << ", ";
-    cout << failed_tests[i];
-  }
-  cout << "" << endl;
+
+  output_results();
   return 0;
 }
