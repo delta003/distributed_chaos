@@ -1,8 +1,13 @@
 // Unit tests.
+// Pokrenuti pomocu test makefajla.
+// Videti test_config.hpp pre pokretanja.
+// Potrebno je da portovi 2000-2009 budu slobodni.
 
 #include "http/client_http.hpp"
 
 #include "util.hpp"
+#include "node.hpp"
+#include "test_config.hpp"
 
 #define BOOST_SPIRIT_THREADSAFE
 #include <boost/property_tree/ptree.hpp>
@@ -10,78 +15,118 @@
 
 #include <cstdlib>
 #include <cstdio>
-#include <cassert>
 #include <cstring>
 #include <chrono>
 #include <thread>
+#include <stdexcept>
 
 using namespace std;
 
+using config::Node::start_node;
+using config::Node::stop_node;
+using config::Bootstrap::start_bootstrap;
+using config::Bootstrap::stop_bootstrap;
+using config::print_response;
+using requests::status;
+
 typedef SimpleWeb::Client<SimpleWeb::HTTP> HttpClient;
 
-string cwd() {
-  string file = __FILE__;
-  while (file.back() != '/') {
-    file.pop_back();
+void clean_up();
+
+int failures = 0;
+vector<string> failed_tests;
+int oks = 0;
+
+template <typename A, typename B>
+void assert_eq(A a, B b, int line) {
+  if (a == b) {
+    return;
   }
-  return file;
+  std::ostringstream oss;
+  oss << "Mismatch @ line " << line << " got " << a << " expected " << b << "\n";
+  throw std::runtime_error(oss.str());  
 }
 
+void assert_true(bool expression, int line) {
+  if (!expression) {
+    std::ostringstream oss;
+    oss << "Mismatch @ line " << line << " epxression is false\n";
+    throw std::runtime_error(oss.str());  
+  }
+}
+
+#define ASSERT_EQ(a, b) assert_eq(a, b, __LINE__)
+#define ASSERT_TRUE(a) assert_true(a, __LINE__)
+#define RUN_TEST(f) run(f, #f)
+
 namespace Bootstrap {
-  void start_bootstrap(string port) {
-    string exec = cwd() + "start bs " + port + " > /dev/null";
-    system(exec.c_str());
-    this_thread::sleep_for(chrono::seconds(1));
-  }
-
-  void stop_bootstrap(string port) {
-    string exec = cwd() + "stop bs " + port + " > /dev/null";
-    system(exec.c_str());
-  }
-
   void test_hello() {
     string port = "2000";
     start_bootstrap(port);
-    HttpClient client("localhost:" + port);
+    pair<node, status> response; 
+    string node_ip, node_port, old_ip, old_port;
 
-    ptree json;
-    read_json(client.request("POST", "/api/hello", make_json("1.1.1.1", "224"))->content, json);
-    assert(json.get<int>("uuid") == 0);
+    node_ip = "192.220.100.50";
+    node_port = "30000";
+    response = requests::hello("localhost", port, node_ip, node_port);
+    ASSERT_EQ(response.second.code, "ok");
+    ASSERT_EQ(response.first.uuid, 0);
+    ASSERT_EQ(response.first.ip, "");
+    ASSERT_EQ(response.first.port, "");
+    
 
-    read_json(client.request("POST", "/api/hello", make_json("2.1.1.1", "225"))->content, json);
-    assert(json.get<int>("uuid") == 1);
-    assert(json.get<string>("ip") == "1.1.1.1");
-    assert(json.get<string>("port") == "224");
+    old_ip = node_ip;
+    old_port = node_port;
+    node_ip = "100.220.100.50";
+    node_port = "224";
+    response = requests::hello("localhost", port, node_ip, node_port);
+    ASSERT_EQ(response.second.code, "ok");
+    ASSERT_EQ(response.first.uuid, 1);
+    ASSERT_EQ(response.first.ip, old_ip);
+    ASSERT_EQ(response.first.port, old_port);
 
-    read_json(client.request("POST", "/api/hello", make_json("3.1.1.1", "226"))->content, json);
-    assert(json.get<int>("uuid") == 2);
-    assert(json.get<string>("ip") == "2.1.1.1");
-    assert(json.get<string>("port") == "225");
+    old_ip = node_ip;
+    old_port = node_port;
+    node_ip = "200.220.100.50";
+    node_port = "324";
+    response = requests::hello("localhost", port, node_ip, node_port);
+    ASSERT_EQ(response.second.code, "ok");
+    ASSERT_EQ(response.first.uuid, 2);
+    ASSERT_EQ(response.first.ip, old_ip);
+    ASSERT_EQ(response.first.port, old_port);
 
-    client.request("GET", "/api/reset");
-    read_json(client.request("POST", "/api/hello", make_json("4.1.1.1", "227"))->content, json);
-    assert(json.get<int>("uuid") == 0);
+    status reset_response = requests::reset("localhost", port);
+    ASSERT_EQ(reset_response.code, "ok");
 
-    read_json(client.request("POST", "/api/hello", make_json("1.1.1.1", "224"))->content, json);
-    assert(json.get<int>("uuid") == 1);
-    assert(json.get<string>("ip") == "4.1.1.1");
-    assert(json.get<string>("port") == "227");
+    old_ip = node_ip;
+    old_port = node_port;
+    node_ip = "288.255.100.50";
+    node_port = "5554";
+    response = requests::hello("localhost", port, node_ip, node_port);
+    ASSERT_EQ(response.second.code, "ok");
+    ASSERT_EQ(response.first.uuid, 0);
+    ASSERT_EQ(response.first.ip, "");
+    ASSERT_EQ(response.first.port, "");
+
+    old_ip = node_ip;
+    old_port = node_port;
+    node_ip = "123.255.101.50";
+    node_port = "3004";
+    response = requests::hello("localhost", port, node_ip, node_port);
+    ASSERT_EQ(response.second.code, "ok");
+    ASSERT_EQ(response.first.uuid, 1);
+    ASSERT_EQ(response.first.ip, old_ip);
+    ASSERT_EQ(response.first.port, old_port);
 
     stop_bootstrap(port);
-
-    cout << "Boostrap Hello Test: OK" << endl;
   }
 
   void test_reset() {
     string port = "2000";
     start_bootstrap(port);
-    HttpClient client("localhost:" + port);
-    ptree json;
-    read_json(client.request("GET", "/api/reset")->content, json);
-    assert(json.get<string>("status") == "ok");
+    status response = requests::reset("localhost", port);
+    ASSERT_EQ(response.code, "ok");
     stop_bootstrap(port);
-
-    cout << "Boostrap Reset Test: OK" << endl;
   }
 
   void test_logz() {
@@ -92,76 +137,155 @@ namespace Bootstrap {
     client.request("POST", "/api/hello", "not a json");
     client.request("GET", "/api/reset", "resetuj se!!!");
     auto response = client.request("GET", "/logz");
-    cout << response->content.rdbuf() << endl;
+    cout << response->content.rdbuf();
     stop_bootstrap(port);
   }
-
 } // Bootstrap
 
 namespace Node {
-  void start_node(string node_port, string boot_port) {
-    string exec = cwd() + "start node localhost " + node_port + " localhost " + boot_port + " > /dev/null";
-    system(exec.c_str());
-  }
-
-  void stop_node(string node_port) {
-    string exec = cwd() + "stop node " + node_port + " > /dev/null";
-    system(exec.c_str());
-  }
-
   namespace basic {
     void test_ok() {
       string port = "2000";
       start_node(port, "300");
       this_thread::sleep_for(chrono::seconds(1));
-      HttpClient client("localhost:" + port);
-      ptree json;
-      read_json(client.request("GET", "/api/basic/ok")->content, json);
-      assert(json.get<string>("status") == "ok");
+      status response = requests::ok("localhost", port);
+      ASSERT_EQ(response.code, "ok");
       stop_node(port);
-      cout << "Node Basic Ok Test: OK" << endl;
     }
     void test_info() {
       string port = "2000";
       start_node(port, "300");
       this_thread::sleep_for(chrono::seconds(1));
-      HttpClient client("localhost:" + port);
-      ptree json;
-      read_json(client.request("GET", "/api/basic/info")->content, json);
-      assert(json.get<int>("uuid") == 0);
-      assert(json.get<string>("ip") == "localhost");
-      assert(json.get<string>("port") == port);
+      pair<node, status> response = requests::info("localhost", port);
+      ASSERT_EQ(response.first.uuid, 0);
+      ASSERT_EQ(response.first.ip, "localhost");
+      ASSERT_EQ(response.first.port, port);
+      ASSERT_EQ(response.second.code, "ok");
       stop_node(port);
-      cout << "Node Basic Info Test: OK" << endl;
     }
     void test_check() {
-      string port_1 = "2016";
-      string port_2 = "2224";
+      string port_1 = "2001";
+      string port_2 = "2002";
       start_node(port_1, "300");
       start_node(port_2, "300");
       this_thread::sleep_for(chrono::seconds(1));
-      HttpClient client(make_addr("localhost", port_1));
-      ptree in;
-      in.put("ip", "localhost");
-      in.put("port", port_2);
-      ptree out;
-      read_json(client.request("POST", "/api/basic/check", make_json(in))->content, out);
-      assert(out.get<string>("alive") == "true");
-      stop_node(port_2);
-      read_json(client.request("POST", "/api/basic/check", make_json(in))->content, out);
-      assert(out.get<string>("alive") == "false");
-      stop_node(port_1);
-      cout << "Node Check Test: OK" << endl;
-    }
-  }
+      pair<string, status> response;
 
+      response = requests::check("localhost", port_1, "localhost", port_2);
+      ASSERT_EQ(response.first, "true");
+      ASSERT_EQ(response.second.code, "ok");
+
+      stop_node(port_2);
+      response = requests::check("localhost", port_1, "localhost", port_2);
+      ASSERT_EQ(response.first, "false");
+      ASSERT_EQ(response.second.code, "ok");
+
+      stop_node(port_1);
+    }
+  } // basic
+  namespace network {
+    using namespace ::network;
+    void test_edges() {
+      string port = "2000";
+      start_node(port, "300");
+      this_thread::sleep_for(chrono::seconds(1));
+      pair<vector<edge>, status> response = requests::edges("localhost", port);
+      ASSERT_EQ(response.second.code, "ok");
+      ASSERT_EQ(response.first.size(), 0);
+      stop_node(port);
+    }
+    void test_get_edge() {
+      pair<edge, status> response;
+      string port = "2000";
+      start_node(port, "300");
+      this_thread::sleep_for(chrono::seconds(1));
+
+      response = requests::get_edge("localhost", port, "prev");
+      ASSERT_EQ(response.second.code, "ok");
+      ASSERT_TRUE(!response.first.exists());
+
+      response = requests::get_edge("localhost", port, "next");
+      ASSERT_EQ(response.second.code, "ok");
+      ASSERT_TRUE(!response.first.exists());
+
+      response = requests::get_edge("localhost", port, "parent");
+      ASSERT_EQ(response.second.code, "ok");
+      ASSERT_TRUE(!response.first.exists());
+      stop_node(port);
+    }
+    void __test_set_edge_t1(string port, string type) {
+      pair<edge, status> response;
+
+      edge new_edge = edge(224, "1.1.1.5", "2013", type);
+      response = requests::set_edge("localhost", port, new_edge);
+      ASSERT_EQ(response.second.code, "ok");
+      ASSERT_TRUE(!response.first.exists());
+
+      response = requests::set_edge("localhost", port, new_edge);
+      ASSERT_EQ(response.second.code, "ok");
+      ASSERT_TRUE(response.first.exists());
+      ASSERT_EQ(response.first, new_edge); // oldedge == new_edge
+    }
+    void test_set_edge() {
+      string port = "2000";
+      start_node(port, "300");
+      this_thread::sleep_for(chrono::seconds(1));
+      __test_set_edge_t1(port, "parent");
+      __test_set_edge_t1(port, "prev");
+      __test_set_edge_t1(port, "next");
+      stop_node(port);
+    }
+    void test_set_and_get() {
+
+    }
+  } // network
 };
 
+void clean_up() {
+  for (int i = 0; i < 10; i++) {
+    string port = "200" + to_string(i);
+    stop_bootstrap(port);
+    stop_node(port);
+  }
+}
+
+void run(function<void()> const& test, string test_name) {
+  try {
+    cout << "Running " << test_name << "\n";
+    test();
+    cout << test_name << ": OK\n\n";
+    ++oks;
+  } catch (exception& e) {
+    cout << e.what();
+    cout << test_name << ": FAIL\n";
+    ++failures;
+    failed_tests.push_back(test_name);
+    clean_up();
+  }
+}
+
 int main(int argc, char *argv[]) {
-  // Bootstrap::test_hello();
-  // Bootstrap::test_reset();
-  // Node::basic::test_ok();
-  // Node::basic::test_info();
-  Node::basic::test_check();
+
+  DBG = print_response;
+
+  // RUN_TEST(Bootstrap::test_reset); // boostrap/api/reset
+  // RUN_TEST(Bootstrap::test_hello); // boostrap/api/hello
+
+  // RUN_TEST(Node::basic::test_ok); // node/api/basic/ok
+  // RUN_TEST(Node::basic::test_info); // node/api/basic/info
+  // RUN_TEST(Node::basic::test_check); // node/api/basic/check
+
+  RUN_TEST(Node::network::test_edges); // node/api/network/edges
+  // RUN_TEST(Node::network::test_get_edge); // node/api/network/get_edge
+  // RUN_TEST(Node::network::test_set_edge); // node/api/network/set_edge
+
+  clean_up(); // za svaki slucaj
+  cout << "\nFailures: " << failures << " | Passed: " << oks << "\n";
+  cout << "Failed tests: ";
+  for (int i = 0; i < failed_tests.size(); i++) {
+    if (i != 0) cout << ", ";
+    cout << failed_tests[i];
+  }
+  cout << "" << endl;
   return 0;
 }

@@ -49,8 +49,8 @@ namespace Handlers {
         string ip = in.get<string>("ip");
         string port = in.get<string>("port");
         ptree out;
-        out.put("ip", last_ip);
-        out.put("port", last_port);
+        if (last_ip != "null") out.put("ip", last_ip);
+        if (last_port != "null") out.put("port", last_port);
         out.put("uuid", uuid);
         uuid++;
         last_ip = ip;

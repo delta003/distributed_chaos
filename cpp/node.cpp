@@ -4,88 +4,23 @@
 #include "http/client_http.hpp"
 
 #include "util.hpp"
+#include "node.hpp"
 
 #define BOOST_SPIRIT_THREADSAFE
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include <iostream>
-#include <cstring>
-#include <sstream>
-#include <algorithm>
-#include <utility>
-
 using namespace std;
 using namespace boost::property_tree;
-
-struct node_info {
-  int uuid;
-  string ip;
-  string port;
-  string bootstrap_ip;
-  string bootstrap_port;
-} node_info;
-
-// type = {parent, child, prev, next}
-struct edge {
-  edge() {}
-  edge(string _type) : type(_type) { ip = port = "null"; }
-  edge(string _type, string _ip, string _port) :
-    type(_type), ip(_ip), port(_port) {}
-  string type;
-  string ip;
-  string port;
-  bool exists() const { return ip != "null" && port != "null"; }
-};
+using requests::status;
 
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 typedef SimpleWeb::Client<SimpleWeb::HTTP> HttpClient;
 
+
+int WAIT = 1;
+
 stringstream logstream;
-
-edge e_parent("parent");
-edge e_prev("prev");
-edge e_next("next");
-vector<edge> e_children;
-
-namespace network {
-  inline void edge_to_json(const edge& edge, ptree& json) {
-    json.put("uuid", node_info.uuid);
-    json.put("ip", edge.ip);
-    json.put("port", edge.port);
-    json.put("type", edge.type);
-  }
-
-  inline void add_edge(const edge& edge, ptree& out) {
-    ptree json;
-    if (edge.exists()) {
-      edge_to_json(edge, json);
-      out.push_back(std::make_pair("", json));
-    }
-  }
-
-  inline void add_edge(const string& type, ptree& out) {
-    if (type == "parent" && e_parent.exists()) {
-        edge_to_json(e_parent, out);
-        return;
-    } 
-    if (type == "prev" && e_prev.exists()) {
-        edge_to_json(e_prev, out);
-        return;
-    } 
-    if (type == "next" && e_next.exists()) {
-        edge_to_json(e_next, out);
-        return;
-    } 
-    out.put("", "null");
-  }
-
-  inline void add_edges(const vector<edge>& edges, ptree& out) {
-    for (auto edge: edges) {
-      add_edge(edge, out);
-    }
-  }
-} // network helpers
 
 namespace Handlers {
   void index(HttpServer& server) {
@@ -109,6 +44,7 @@ namespace Handlers {
     void ok(HttpServer& server) {
     server.resource["/api/basic/ok"]["GET"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
       try {
+          if (WAIT) send_wait(response);     
           log(logstream, "ok_request", request->content.string());
           ptree out;
           send_ok(response, out);
@@ -121,11 +57,13 @@ namespace Handlers {
     void info(HttpServer& server) {
     server.resource["/api/basic/info"]["GET"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
       try {
+          if (WAIT) send_wait(response);
           log(logstream, "info_request", request->content.string());
           ptree out;
           out.put("uuid", node_info.uuid);
           out.put("ip", node_info.ip);
           out.put("port", node_info.port);
+
           send_ok(response, out);
         } catch (exception& e) {
           log(logstream, "info_error", e.what());
@@ -136,20 +74,27 @@ namespace Handlers {
     void check(HttpServer& server) {
     server.resource["/api/basic/check"]["POST"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
       try {
+          if (WAIT) send_wait(response);
           string req_str = request->content.string();
           log(logstream, "check_request", req_str);
           ptree in;
           string_to_json(req_str, in);
           HttpClient client(make_addr(in));
           ptree out;
-          read_json(client.request("GET", "/api/basic/ok")->content, out);
-          out.put("alive", "true");
-          send_ok(response, out);
+          try {
+            read_json(client.request("GET", "/api/basic/ok")->content, out);
+            out.put("alive", "true");
+            if (key_exists(out, "message")) {
+              log(logstream, "check_response_error", out.get<string>("message"));
+            }
+            send_ok(response, out);
+          } catch (exception& e) {
+            out.put("alive", "false");
+            send_ok(response, out);
+          }
         } catch (exception& e) {
           log(logstream, "check_error", e.what());
-          ptree out;
-          out.put("alive", "false");
-          send_error(response, out, e.what());
+          send_error(response, e.what());
         }
       };
     }
@@ -159,14 +104,14 @@ namespace Handlers {
     void edges(HttpServer& server) {
     server.resource["/api/network/edges"]["GET"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
       try {
+          if (WAIT) send_wait(response);
           log(logstream, "edges_request", request->content.string());
           ptree out;
           ptree edges;
-          add_edge(e_parent, edges);
-          add_edge(e_next, edges);
-          add_edge(e_prev, edges);
-          add_edges(e_children, edges);
-          out.add_child("edges", edges);
+          add_all_edges(edges);
+          if (!edges.empty()) {
+            out.add_child("edges", edges);
+          }
           send_ok(response, out);
         } catch (exception& e) {
           log(logstream, "edges_error", e.what());
@@ -175,23 +120,49 @@ namespace Handlers {
       };
     }
     void get_edge(HttpServer& server) {
-    server.resource["/api/network/edges"]["POST"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    server.resource["/api/network/get_edge"]["POST"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
       try {
+          if (WAIT) send_wait(response);
           string req_str = request->content.string();
           log(logstream, "get_edge_request", req_str);
           ptree in;
           string_to_json(req_str, in);
           ptree out;
-          add_edge(in.get<string>("type"), out);
+          add_edge(in.get<string>("type"), out, "edge");
           send_ok(response, out);
         } catch (exception& e) {
-          log(logstream, "edges_error", e.what());
+          log(logstream, "get_edge_error", e.what());
+          send_error(response, e.what());
+        }
+      };
+    }
+    void set_edge(HttpServer& server) {
+    server.resource["/api/network/set_edge"]["POST"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+      try {
+          if (WAIT) send_wait(response);
+          string req_str = request->content.string();
+          log(logstream, "set_edge_request", req_str);
+          ptree in;
+          string_to_json(req_str, in);
+          edge new_edge;
+          json_to_edge(in.get_child("edge"), new_edge);
+          ptree out;
+          add_edge(in.get_child("edge").get<string>("type"), out, "oldedge");
+          set_new_edge(new_edge);
+          send_ok(response, out);
+        } catch (exception& e) {
+          log(logstream, "set_edge_error", e.what());
           send_error(response, e.what());
         }
       };
     }
   } // network
 } // Handlers
+
+void worker() {
+  this_thread::sleep_for(chrono::milliseconds(100));
+  WAIT = 0;
+}
 
 int main(int argc, char *argv[]) {
   if (argc != 5) {
@@ -200,8 +171,8 @@ int main(int argc, char *argv[]) {
   }
   node_info.ip = argv[1];
   node_info.port = argv[2];
-  node_info.bootstrap_ip = argv[3];
-  node_info.bootstrap_port = argv[4];
+  bootstrap_ip = argv[3];
+  bootstrap_port = argv[4];
 
   HttpServer server;
   server.config.port=atoi(argv[2]);
@@ -215,12 +186,16 @@ int main(int argc, char *argv[]) {
   Handlers::basic::check(server);
   // Network
   Handlers::network::edges(server);
-  Handlers::network::edges(server);
+  Handlers::network::get_edge(server);
+  Handlers::network::set_edge(server);
 
   thread server_thread([&server](){
       server.start();
   });
-    
+
+  thread worker_thread(worker);
+
+  worker_thread.join();
   server_thread.join();
 
   return 0;

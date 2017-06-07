@@ -16,6 +16,11 @@ typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 
 void json_to_string(const ptree& json, string& out);
 
+inline bool key_exists(const ptree& json, const string& key) {
+  ptree::const_assoc_iterator it = json.find(key);
+  return it != json.not_found();
+}
+
 inline string make_json(const string& ip, const string& port) {
   ptree json;
   json.put("port", port);
@@ -35,6 +40,12 @@ inline void json_to_string(const ptree& json, string& out) {
   std::ostringstream oss;
   write_json(oss, json);
   out = oss.str();
+}
+
+inline string json_to_string(const ptree& json) {
+  std::ostringstream oss;
+  write_json(oss, json);
+  return oss.str();
 }
 
 inline void string_to_json(const string& str, ptree& out) {
@@ -66,7 +77,8 @@ void send_ok(shared_ptr<HttpServer::Response> response, ptree& json) {
   send(response, json_str);
 }
 
-void send_wait(shared_ptr<HttpServer::Response> response, ptree& json) {
+void send_wait(shared_ptr<HttpServer::Response> response) {
+  ptree json;
   json.put("status", "wait");
   string json_str;
   json_to_string(json, json_str);
