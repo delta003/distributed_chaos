@@ -234,6 +234,14 @@ namespace Node {
       __test_set_edge_t1(port, "next");
       stop_node(port);
     }
+    void test_get_set_edges() {
+      string port = "2000";
+      start_node(port, "300");
+      this_thread::sleep_for(chrono::seconds(1));
+
+    
+      stop_node(port);
+    }
   } // network
 };
 
@@ -285,6 +293,7 @@ int main(int argc, char *argv[]) {
   RUN_TEST(Node::network::test_edges); // node/api/network/edges
   RUN_TEST(Node::network::test_get_edge); // node/api/network/get_edge
   RUN_TEST(Node::network::test_set_edge); // node/api/network/set_edge
+  RUN_TEST(Node::network::test_get_set_edges); // get_edge + set_edge + edges
 
   clean_up(); // za svaki slucaj
 

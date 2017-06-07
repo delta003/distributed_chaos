@@ -29,8 +29,8 @@ namespace config {
   } // Bootstrap
 
   namespace Node {
-    void start_node(string node_port, string boot_port) {
-      string exec = git_root() + "/cpp/start node localhost " + node_port + " localhost " + boot_port + " > /dev/null 2>&1";
+    void start_node(string node_port, string bootstrap_port) {
+      string exec = git_root() + "/cpp/start node localhost " + node_port + " localhost " + bootstrap_port + " > /dev/null 2>&1";
       system(exec.c_str());
     }
 
