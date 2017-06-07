@@ -20,3 +20,9 @@ KIDS projekat
 brew install cmake openssl boost gcc
 ```
 - Use cpp/start.sh and cpp/stop.sh to create or destroy nodes and bootstrap servers.
+
+## Unit Tests
+
+- Install homebrew, openssl,cmake, boost and gcc
+- Edit /cpp/test_config.hpp
+- Run ./cpp/test
