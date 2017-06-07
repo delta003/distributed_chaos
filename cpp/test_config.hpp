@@ -1,5 +1,4 @@
 // Unit tests config.
-// Pokrenuti pomocu test makefajla.
 // Treba promeniti sledeće metode:
 //  Bootstrap::start_bootstrap() i Bootstrap::stop_bootstrap() - pokretanje i stopiranje bs-a.
 //  Node::start_node() i Node::stop_node() - pokretanje i stopiranje noda.
