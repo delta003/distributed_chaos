@@ -168,15 +168,15 @@ namespace Node {
       start_node(port_1, "300");
       start_node(port_2, "300");
       this_thread::sleep_for(chrono::seconds(1));
-      pair<string, status> response;
+      pair<bool, status> response;
 
       response = requests::check("localhost", port_1, "localhost", port_2);
-      ASSERT_EQ(response.first, "true");
+      ASSERT_EQ(response.first, true);
       ASSERT_EQ(response.second.code, "ok");
 
       stop_node(port_2);
       response = requests::check("localhost", port_1, "localhost", port_2);
-      ASSERT_EQ(response.first, "false");
+      ASSERT_EQ(response.first, false);
       ASSERT_EQ(response.second.code, "ok");
 
       stop_node(port_1);

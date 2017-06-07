@@ -20,8 +20,8 @@ typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 stringstream logstream;
 
 int uuid = 0;
-string last_ip = "null";
-string last_port = "null";
+string last_ip;
+string last_port;
 
 namespace Handlers {
   void reset(HttpServer& server) {
@@ -30,8 +30,8 @@ namespace Handlers {
         log(logstream, "reset_request", request->content.string());
         ptree out;
         uuid = 0;
-        last_ip = "null";
-        last_port = "null";
+        last_ip = "";
+        last_port = "";
         send_ok(response, out);
       } catch (exception& e) {
         log(logstream, "reset_error", e.what());
@@ -49,8 +49,10 @@ namespace Handlers {
         string ip = in.get<string>("ip");
         string port = in.get<string>("port");
         ptree out;
-        if (last_ip != "null") out.put("ip", last_ip);
-        if (last_port != "null") out.put("port", last_port);
+        if (!last_ip.empty() && !last_port.empty()) {
+          out.put("ip", last_ip);
+          out.put("port", last_port);
+        } 
         out.put("uuid", uuid);
         uuid++;
         last_ip = ip;

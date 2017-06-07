@@ -42,15 +42,15 @@ struct node {
 
 // type = {parent, child, prev, next}
 struct edge {
-  edge() { ip = port = "null"; }
-  edge(string _type) : type(_type) { ip = port = "null"; }
+  edge() { }
+  edge(string _type) : type(_type) { }
   edge(int _uuid, string _ip, string _port, string _type) :
     type(_type), ip(_ip), port(_port), uuid(_uuid) {}
   int uuid;
   string type;
   string ip;
   string port;
-  bool exists() const { return ip != "null" && port != "null"; }
+  bool exists() const { return !ip.empty() && !port.empty(); }
   bool operator==(edge other) const {
     if (other.uuid == uuid && other.type == type && other.ip == ip && other.port == port) {
       return true;
@@ -202,14 +202,14 @@ namespace requests { //wrapperi za request (treba ga surround sa try/catch)
     if (DBG) cout << json_to_string(out);
     return make_pair(node(out), status(out));
   }
-  pair<string, status> check(string ip, string port, string check_ip, string check_port) {
+  pair<bool, status> check(string ip, string port, string check_ip, string check_port) {
     HttpClient client(make_addr(ip, port));
     ptree in, out;
     in.put("ip", check_ip);
     in.put("port", check_port);
     read_json(client.request("POST", "/api/basic/check", make_json(in))->content, out);
     if (DBG) cout << json_to_string(out);
-    return make_pair(out.get<string>("alive"), status(out));
+    return make_pair(out.get<bool>("alive"), status(out));
   }
   pair<edge, status> get_edge(string ip, string port, string type) {
     HttpClient client(make_addr(ip, port));
