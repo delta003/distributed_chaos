@@ -35,6 +35,9 @@ struct node {
       port = json.get<string>("port");
     }
   }
+  bool operator<(const node& other) const {
+    return uuid < other.uuid;
+  }
 } node_info;
 
 // type = {parent, child, prev, next}
@@ -53,6 +56,9 @@ struct edge {
       return true;
     }
     return false;
+  }
+  bool operator<(const edge& other) const {
+    return uuid < other.uuid;
   }
 };
 
@@ -213,7 +219,7 @@ namespace requests { //wrapperi za request (treba ga surround sa try/catch)
     if (DBG) cout << json_to_string(out);
     edge res;
     if (key_exists(out, "edge")) {
-      json_to_edge(out, res);
+      json_to_edge(out.get_child("edge"), res);
     }
     return make_pair(res, status(out));
   }

@@ -239,7 +239,32 @@ namespace Node {
       start_node(port, "300");
       this_thread::sleep_for(chrono::seconds(1));
 
-    
+      edge edge_1(1, "1.1.2.4", "80", "parent");
+      edge edge_2(2, "1.5.2.1", "69", "next");
+      edge edge_3(3, "100.55.2.4", "777", "prev");
+      requests::set_edge("localhost", port, edge_1);
+      requests::set_edge("localhost", port, edge_2);
+      requests::set_edge("localhost", port, edge_3);
+
+      pair<edge, status> r1 = requests::get_edge("localhost", port, edge_1.type);
+      ASSERT_EQ(r1.second.code, "ok");
+      ASSERT_EQ(r1.first, edge_1);
+      r1 = requests::get_edge("localhost", port, edge_2.type);
+      ASSERT_EQ(r1.second.code, "ok");
+      ASSERT_EQ(r1.first, edge_2);
+      r1 = requests::get_edge("localhost", port, edge_3.type);
+      ASSERT_EQ(r1.second.code, "ok");
+      ASSERT_EQ(r1.first, edge_3);
+
+      pair<vector<edge>, status> r2 = requests::edges("localhost", port);
+      ASSERT_EQ(r2.second.code, "ok");
+      ASSERT_EQ(r2.first.size(), 3);
+
+      sort(r2.first.begin(), r2.first.end());
+      ASSERT_EQ(r2.first[0], edge_1);
+      ASSERT_EQ(r2.first[1], edge_2);
+      ASSERT_EQ(r2.first[2], edge_3);
+
       stop_node(port);
     }
   } // network
@@ -294,7 +319,7 @@ int main(int argc, char *argv[]) {
   RUN_TEST(Node::network::test_get_edge); // node/api/network/get_edge
   RUN_TEST(Node::network::test_set_edge); // node/api/network/set_edge
   RUN_TEST(Node::network::test_get_set_edges); // get_edge + set_edge + edges
-
+  
   clean_up(); // za svaki slucaj
 
   output_results();
