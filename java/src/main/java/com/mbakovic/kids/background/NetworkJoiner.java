@@ -1,9 +1,10 @@
-package com.mbakovic.kids.core;
+package com.mbakovic.kids.background;
 
 public class NetworkJoiner implements Runnable {
 
+    // This must finish and release Node lock
     @Override
     public void run() {
-        // TODO (join Node to network)
+
     }
 }

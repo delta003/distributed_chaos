@@ -108,7 +108,7 @@ public class NetworkResource implements NetworkService {
         }
         log.info("Node reset initiated!");
         // This do not release, NetworkJoiner will release the lock
-        //Node.getInstance().release();
+        // Node.getInstance().release();
         return new EdgesResponse(Node.getInstance().reset());
     }
 

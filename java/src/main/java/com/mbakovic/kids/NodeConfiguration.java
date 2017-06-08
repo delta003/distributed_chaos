@@ -9,6 +9,9 @@ public final class NodeConfiguration {
     private String type;
 
     @NotEmpty
+    private String port;
+
+    @NotEmpty
     private String bootstrapIP;
 
     @NotEmpty
@@ -46,5 +49,13 @@ public final class NodeConfiguration {
 
     public boolean isBootstrap() {
         return type.equals("bootstrap");
+    }
+
+    public String getPort() {
+        return port;
+    }
+
+    public void setPort(String port) {
+        this.port = port;
     }
 }

@@ -1,5 +1,6 @@
 package com.mbakovic.kids.core;
 
+import com.mbakovic.kids.background.NetworkJoiner;
 import com.mbakovic.kids.model.Edge;
 import com.mbakovic.kids.model.EdgeType;
 import com.mbakovic.kids.model.IPAndPort;
@@ -73,8 +74,7 @@ public final class Node extends Server {
 
     public List<Edge> reset() {
         List<Edge> ret = edges;
-        edges = new ArrayList<>();
-        new Thread(new NetworkJoiner()).start();
+        joinNetwork();
         return ret;
     }
 
@@ -83,5 +83,10 @@ public final class Node extends Server {
         ret.addAll(edges);
         edges.subList(2, 5).clear();
         return ret;
+    }
+
+    public void joinNetwork() {
+        edges = new ArrayList<>();
+        new Thread(new NetworkJoiner()).start();
     }
 }

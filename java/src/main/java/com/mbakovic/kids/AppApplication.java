@@ -1,17 +1,27 @@
 package com.mbakovic.kids;
 
+import com.mbakovic.kids.background.JobExecutor;
+import com.mbakovic.kids.background.NodeHealthcheck;
 import com.mbakovic.kids.core.Node;
 import com.mbakovic.kids.model.IPAndPort;
+import com.mbakovic.kids.model.IPAndPortAndUUID;
 import com.mbakovic.kids.resources.BasicResource;
 import com.mbakovic.kids.resources.BootstrapResource;
 import com.mbakovic.kids.resources.NetworkResource;
 import com.mbakovic.kids.resources.PingResource;
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
+import io.dropwizard.jetty.HttpConnectorFactory;
+import io.dropwizard.server.SimpleServerFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
+import org.apache.log4j.Logger;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public final class AppApplication extends Application<AppConfiguration> {
+    private static Logger log = Logger.getLogger(AppApplication.class);
 
     public static void main(final String[] args) throws Exception {
         new AppApplication().run(args);
@@ -24,8 +34,7 @@ public final class AppApplication extends Application<AppConfiguration> {
 
     @Override
     public void run(final AppConfiguration configuration,
-                    final Environment environment) throws ClassNotFoundException {
-
+                    final Environment environment) throws Exception {
         // Add ping service
         final PingResource pingResource = new PingResource();
         environment.jersey().register(pingResource);
@@ -33,21 +42,35 @@ public final class AppApplication extends Application<AppConfiguration> {
         if (configuration.getNode().isBootstrap()) {
             // Run as bootstrap
 
-            // API
+            // Set API
             final BootstrapResource bootstrapResource = new BootstrapResource();
             environment.jersey().register(bootstrapResource);
         } else {
             // Run as node
+
+            // Set myself
+            String myIP = InetAddress.getLocalHost().getHostAddress();
+            String myPort = configuration.getNode().getPort();
+            log.info(String.format("Node %s:%s", myIP, myPort));
+            Node.getInstance().setMyself(new IPAndPortAndUUID(myIP, myPort, null));
 
             // Set bootstrap
             Node.getInstance().setBootstrap(new IPAndPort(
                     configuration.getNode().getBootstrapIP(),
                     configuration.getNode().getBootstrapPort()
             ));
-            // TODO
-            // Initialize Node and join the network
 
-            // API
+            // Join network
+            if (!Node.getInstance().lock()) {
+                throw new Exception("Unable to take lock when joining.");
+            }
+            Node.getInstance().joinNetwork();
+
+            // Start background tasks
+            new Thread(new JobExecutor()).start();
+            new Thread(new NodeHealthcheck()).start();
+
+            // Set API
             final BasicResource basicResource = new BasicResource();
             environment.jersey().register(basicResource);
             final NetworkResource networkResource = new NetworkResource();

@@ -1,5 +1,6 @@
 node:
   type: _
+  port: _  # Same as server.connector.port
   bootstrapIP: 127.0.0.1
   bootstrapPort: 8080
 

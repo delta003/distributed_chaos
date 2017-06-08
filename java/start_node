@@ -2,5 +2,5 @@
 if [ $# -ne 1 ]; then
     printf "Port is missing.\n"
 else
-    java -Ddw.node.type=node -Ddw.server.connector.port=$1 -jar target/distributed-chaos-0.1.jar server config.yml
+    java -Ddw.node.type=node -Ddw.server.connector.port=$1 -Ddw.node.port=$1 -jar target/distributed-chaos-0.1.jar server config.yml
 fi
