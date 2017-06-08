@@ -1,8 +1,13 @@
 package com.mbakovic.kids.model;
 
+import com.google.api.client.util.Key;
+
 public class Point {
 
+    @Key
     private String x;
+
+    @Key
     private String y;
 
     public Point(String x, String y) {

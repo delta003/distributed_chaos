@@ -1,9 +1,13 @@
 package com.mbakovic.kids.model;
 
+import com.google.api.client.util.Key;
+
 public class IPAndPort {
 
+    @Key
     private String ip;
 
+    @Key
     private String port;
 
     public IPAndPort(String ip, String port) {

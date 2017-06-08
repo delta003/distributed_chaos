@@ -1,12 +1,21 @@
 package com.mbakovic.kids.model;
 
+import com.google.api.client.util.Key;
+
 import java.util.List;
 
 public class Job {
 
+    @Key
     private String width;
+
+    @Key
     private String height;
+
+    @Key
     private String p;
+
+    @Key
     private List<Point> points;
 
     public Job(String width, String height, String p, List<Point> points) {

@@ -3,13 +3,14 @@ package com.mbakovic.kids.core;
 import com.mbakovic.kids.model.Edge;
 import com.mbakovic.kids.model.EdgeType;
 import com.mbakovic.kids.model.IPAndPort;
+import com.mbakovic.kids.model.IPAndPortAndUUID;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public final class Node extends Server {
 
-    private int uuid;
-    private IPAndPort myself;
+    private IPAndPortAndUUID myself;
     private IPAndPort bootstrap;
     private List<Edge> edges;
 
@@ -21,21 +22,16 @@ public final class Node extends Server {
 
     private Node() {
         super();
+        myself = null;
+        bootstrap = null;
+        edges = new ArrayList<>();
     }
 
-    public int getUuid() {
-        return uuid;
-    }
-
-    public void setUuid(int uuid) {
-        this.uuid = uuid;
-    }
-
-    public IPAndPort getMyself() {
+    public IPAndPortAndUUID getMyself() {
         return myself;
     }
 
-    public void setMyself(IPAndPort myself) {
+    public void setMyself(IPAndPortAndUUID myself) {
         this.myself = myself;
     }
 
@@ -62,5 +58,30 @@ public final class Node extends Server {
             }
         }
         return null;
+    }
+
+    public Edge replaceEdge(Edge edge) {
+        Edge oldedge = getEdgeByType(edge.getType());
+        if (oldedge == null) {
+            edges.add(edge);
+            return null;
+        }
+        edges.remove(oldedge);
+        edges.add(edge);
+        return oldedge;
+    }
+
+    public List<Edge> reset() {
+        List<Edge> ret = edges;
+        edges = new ArrayList<>();
+        new Thread(new NetworkJoiner()).start();
+        return ret;
+    }
+
+    public List<Edge> getEdgesAndClear() {
+        List<Edge> ret = new ArrayList<>();
+        ret.addAll(edges);
+        edges.subList(2, 5).clear();
+        return ret;
     }
 }

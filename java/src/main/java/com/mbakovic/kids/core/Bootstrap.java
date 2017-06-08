@@ -1,11 +1,11 @@
 package com.mbakovic.kids.core;
 
-import com.mbakovic.kids.model.IPAndPort;
+import com.mbakovic.kids.model.IPAndPortAndUUID;
 
 public final class Bootstrap extends Server {
 
     private int uuidCounter;
-    private IPAndPort lastNode;
+    private IPAndPortAndUUID lastNode;
 
     private static Bootstrap ourInstance = new Bootstrap();
 
@@ -23,11 +23,11 @@ public final class Bootstrap extends Server {
         return uuidCounter++;
     }
 
-    public IPAndPort getLastNode() {
+    public IPAndPortAndUUID getLastNode() {
         return lastNode;
     }
 
-    public void setLastNode(IPAndPort lastNode) {
+    public void setLastNode(IPAndPortAndUUID lastNode) {
         this.lastNode = lastNode;
     }
 

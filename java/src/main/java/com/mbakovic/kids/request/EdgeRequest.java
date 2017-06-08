@@ -1,11 +1,23 @@
 package com.mbakovic.kids.request;
 
 import com.mbakovic.kids.model.Edge;
-import com.mbakovic.kids.model.EdgeType;
 
-public class EdgeRequest extends Edge {
+public class EdgeRequest {
 
-    public EdgeRequest(String ip, String port, String uuid, EdgeType type) {
-        super(ip, port, uuid, type);
+    private Edge edge;
+
+    public EdgeRequest() {
+    }
+
+    public EdgeRequest(Edge edge) {
+        this.edge = edge;
+    }
+
+    public Edge getEdge() {
+        return edge;
+    }
+
+    public void setEdge(Edge edge) {
+        this.edge = edge;
     }
 }

@@ -9,11 +9,10 @@ import com.mbakovic.kids.request.IPAndPortRequest;
 import com.mbakovic.kids.response.CheckResponse;
 import com.mbakovic.kids.response.IPAndPortAndUUIDResponse;
 import com.mbakovic.kids.response.StatusResponse;
+import org.apache.log4j.Logger;
 
 public final class BasicResource implements BasicService {
-
-    public BasicResource() {
-    }
+    private static Logger log = Logger.getLogger(BasicResource.class);
 
     @Override
     public StatusResponse ok() {
@@ -22,8 +21,7 @@ public final class BasicResource implements BasicService {
 
     @Override
     public StatusResponse info() {
-        IPAndPort node = Node.getInstance().getMyself();
-        return new IPAndPortAndUUIDResponse(node.getIp(), node.getPort(), String.valueOf(Node.getInstance().getUuid()));
+        return new IPAndPortAndUUIDResponse(Node.getInstance().getMyself());
     }
 
     @Override
@@ -32,6 +30,7 @@ public final class BasicResource implements BasicService {
             return StatusResponse.ofError("IP or port is null.");
         }
         StatusResponse response = HttpHelper.getInstance().basicOk(new IPAndPort(request.getIp(), request.getPort()));
+        log.info(String.format("Check for node %s:%s", request.getIp(), request.getPort()));
         if (response == null) {
             return new CheckResponse(Bool.FALSE);
         }

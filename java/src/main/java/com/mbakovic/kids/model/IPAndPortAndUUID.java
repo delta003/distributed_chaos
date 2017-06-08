@@ -2,18 +2,14 @@ package com.mbakovic.kids.model;
 
 import com.google.api.client.util.Key;
 
-public class Edge extends IPAndPort {
+public class IPAndPortAndUUID extends IPAndPort {
 
     @Key
     private String uuid;
 
-    @Key
-    private EdgeType type;
-
-    public Edge(String ip, String port, String uuid, EdgeType type) {
+    public IPAndPortAndUUID(String ip, String port, String uuid) {
         super(ip, port);
         this.uuid = uuid;
-        this.type = type;
     }
 
     public String getUuid() {
@@ -22,14 +18,6 @@ public class Edge extends IPAndPort {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
-    public EdgeType getType() {
-        return type;
-    }
-
-    public void setType(EdgeType type) {
-        this.type = type;
     }
 
     public int uuid() {
