@@ -5,16 +5,15 @@
     <title>Distributed Chaos</title>
     <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" />
     <link href="static/app.css" rel="stylesheet" />
+    <link ret="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.0/vis.min.css" />
 
     <!-- <base href="/"> -->
 </head>
 <body>
-<div class="jumbotron">
-    <div class="container">
-        <div class="col-sm-8 col-sm-offset-2">
-            <div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }" ng-if="flash" ng-bind="flash.message"></div>
-            <div ng-view></div>
-        </div>
+<div class="container">
+    <div class="row">
+        <div ng-class="{ 'alert': flash, 'alert-success': flash.type === 'success', 'alert-danger': flash.type === 'error' }" ng-if="flash" ng-bind="flash.message"></div>
+        <div ng-view></div>
     </div>
 </div>
 
@@ -22,6 +21,7 @@
 <script src="//code.angularjs.org/1.2.20/angular.js"></script>
 <script src="//code.angularjs.org/1.2.20/angular-route.js"></script>
 <script src="//code.angularjs.org/1.2.13/angular-cookies.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.20.0/vis.min.js"></script>
 
 <script src="app.js"></script>
 <script src="service/flash.js"></script>
