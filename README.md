@@ -11,7 +11,7 @@ KIDS projekat
 ## Java
 - Install Maven `mvn install`
 - Run `./build` to build
-- Run `./start_bootstrap` to start bootstrap server (on port 8080, to change port you must make changes in `config.yml` and `./start_bootstrap`)
+- Run `./start_bootstrap` to start bootstrap server (on port 9080, to change port you must make changes in `config.yml` and `./start_bootstrap`)
 - Run `./start_node $PORT` to start node server on port $PORT
 
 ## C++
