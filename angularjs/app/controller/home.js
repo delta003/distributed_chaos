@@ -20,7 +20,7 @@
         function loadJobIds() {
             // NodeService.JobsIds()
             //     .then(function (response)) {
-            //         vm.jobids = JSON.parse(response.jobids);
+            //         vm.jobids = response.jobids;
             //     });
             vm.jobids = [1, 2, 3, 4];
         }
@@ -45,7 +45,7 @@
             //     { start_uuid: "3", end_uuid: "1", type: "next" },
             //     { start_uuid: "3", end_uuid: "2", type: "prev" }
             // ];
-            // showNetwork(nodes, edges);
+            showNetwork(nodes, edges);
         }
 
         function getColor(type) {
