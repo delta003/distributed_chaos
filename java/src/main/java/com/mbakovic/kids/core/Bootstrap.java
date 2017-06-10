@@ -1,10 +1,12 @@
 package com.mbakovic.kids.core;
 
+import com.mbakovic.kids.model.Bool;
 import com.mbakovic.kids.model.IPAndPortAndUUID;
 
 public final class Bootstrap extends Server {
 
     private int uuidCounter;
+    private Bool canReset;
     private IPAndPortAndUUID lastNode;
 
     private static Bootstrap ourInstance = new Bootstrap();
@@ -17,6 +19,7 @@ public final class Bootstrap extends Server {
         super();
         uuidCounter = 0;
         lastNode = null;
+        canReset = Bool.TRUE;
     }
 
     public int getUUID() {
@@ -31,8 +34,16 @@ public final class Bootstrap extends Server {
         this.lastNode = lastNode;
     }
 
+    public Bool getCanReset() {
+        return canReset;
+    }
+
+    public void setCanReset(Bool canReset) {
+        this.canReset = canReset;
+    }
+
     public void reset() {
-        uuidCounter = 0;
         lastNode = null;
+        canReset = Bool.FALSE;
     }
 }

@@ -48,4 +48,12 @@ public class StatusResponse {
     public static StatusResponse ofError(String msg) {
         return new StatusResponse(Status.ERROR, msg);
     }
+
+    @Override
+    public String toString() {
+        return "StatusResponse{" +
+                "status=" + status +
+                ", message='" + message + '\'' +
+                '}';
+    }
 }

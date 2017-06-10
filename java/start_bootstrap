@@ -1,2 +1,2 @@
 #!/bin/bash
-java -Ddw.node.type=bootstrap -Ddw.server.connector.port=8080 -jar target/distributed-chaos-0.1.jar server config.yml
+java -Ddw.node.type=bootstrap -Ddw.server.connector.port=9080 -jar target/distributed-chaos-0.1.jar server config.yml

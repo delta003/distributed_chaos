@@ -7,7 +7,15 @@ import java.util.List;
 
 public class JobRequest extends Job {
 
+    public JobRequest() {
+    }
+
     public JobRequest(String width, String height, String p, List<Point> points) {
         super(width, height, p, points);
+    }
+
+    @Override
+    public String toString() {
+        return "JobRequest{}";
     }
 }

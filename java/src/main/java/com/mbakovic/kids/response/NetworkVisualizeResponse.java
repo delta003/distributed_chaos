@@ -15,6 +15,9 @@ public class NetworkVisualizeResponse extends StatusResponse {
     @Key
     List<DirectedEdge> edges;
 
+    public NetworkVisualizeResponse() {
+    }
+
     public NetworkVisualizeResponse(List<IPAndPortAndUUID> nodes, List<DirectedEdge> edges) {
         super(Status.OK, null);
         this.nodes = nodes;
@@ -35,5 +38,13 @@ public class NetworkVisualizeResponse extends StatusResponse {
 
     public void setEdges(List<DirectedEdge> edges) {
         this.edges = edges;
+    }
+
+    @Override
+    public String toString() {
+        return "NetworkVisualizeResponse{" +
+                "nodes=" + nodes +
+                ", edges=" + edges +
+                '}';
     }
 }

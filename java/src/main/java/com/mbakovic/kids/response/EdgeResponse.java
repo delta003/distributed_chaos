@@ -11,6 +11,9 @@ public class EdgeResponse extends StatusResponse {
     @Key
     private Edge edge;
 
+    public EdgeResponse() {
+    }
+
     public EdgeResponse(Edge edge) {
         super(Status.OK, null);
         this.edge = edge;
@@ -22,5 +25,12 @@ public class EdgeResponse extends StatusResponse {
 
     public void setEdge(Edge edge) {
         this.edge = edge;
+    }
+
+    @Override
+    public String toString() {
+        return "EdgeResponse{" +
+                "edge=" + edge +
+                '}';
     }
 }

@@ -15,6 +15,9 @@ public class DirectedEdge {
 
     private EdgeType type;
 
+    public DirectedEdge() {
+    }
+
     public DirectedEdge(String startUUID, String endUUID, EdgeType type) {
         this.startUUID = startUUID;
         this.endUUID = endUUID;
@@ -43,5 +46,14 @@ public class DirectedEdge {
 
     public void setType(EdgeType type) {
         this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "DirectedEdge{" +
+                "startUUID='" + startUUID + '\'' +
+                ", endUUID='" + endUUID + '\'' +
+                ", type=" + type +
+                '}';
     }
 }

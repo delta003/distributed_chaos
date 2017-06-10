@@ -23,6 +23,9 @@ public class AdoptResponse extends StatusResponse {
     @Key
     Edge next;
 
+    public AdoptResponse() {
+    }
+
     public AdoptResponse(Bool redirect, Bool createLevel, List<Edge> edges, Edge next) {
         super(Status.OK, null);
         this.redirect = redirect;
@@ -73,5 +76,15 @@ public class AdoptResponse extends StatusResponse {
 
     public void setNext(Edge next) {
         this.next = next;
+    }
+
+    @Override
+    public String toString() {
+        return "AdoptResponse{" +
+                "redirect=" + redirect +
+                ", createLevel=" + createLevel +
+                ", edges=" + edges +
+                ", next=" + next +
+                '}';
     }
 }

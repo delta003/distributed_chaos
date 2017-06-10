@@ -17,6 +17,9 @@ public class IPAndPortAndUUIDResponse extends StatusResponse {
     @Key
     private String uuid;
 
+    public IPAndPortAndUUIDResponse() {
+    }
+
     public IPAndPortAndUUIDResponse(String ip, String port, String uuid) {
         super(Status.OK, null);
         this.ip = ip;
@@ -53,5 +56,14 @@ public class IPAndPortAndUUIDResponse extends StatusResponse {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    @Override
+    public String toString() {
+        return "IPAndPortAndUUIDResponse{" +
+                "ip='" + ip + '\'' +
+                ", port='" + port + '\'' +
+                ", uuid='" + uuid + '\'' +
+                '}';
     }
 }

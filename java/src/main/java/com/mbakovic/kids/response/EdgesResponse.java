@@ -13,6 +13,9 @@ public class EdgesResponse extends StatusResponse {
     @Key
     private List<Edge> edges;
 
+    public EdgesResponse() {
+    }
+
     public EdgesResponse(List<Edge> edges) {
         super(Status.OK, null);
         this.edges = edges;
@@ -24,5 +27,12 @@ public class EdgesResponse extends StatusResponse {
 
     public void setEdges(List<Edge> edges) {
         this.edges = edges;
+    }
+
+    @Override
+    public String toString() {
+        return "EdgesResponse{" +
+                "edges=" + edges +
+                '}';
     }
 }

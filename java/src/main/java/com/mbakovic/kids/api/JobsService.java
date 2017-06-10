@@ -8,7 +8,12 @@ import javax.ws.rs.core.MediaType;
 
 @Path("/jobs")
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public interface JobsService {
+
+    @GET
+    @Path("/all")
+    StatusResponse all();
 
     @POST
     @Path("/create/{jobid}")

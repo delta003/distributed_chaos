@@ -10,6 +10,9 @@ public class Point {
     @Key
     private String y;
 
+    public Point() {
+    }
+
     public Point(String x, String y) {
         this.x = x;
         this.y = y;
@@ -37,5 +40,13 @@ public class Point {
 
     public double y() {
         return Double.parseDouble(y);
+    }
+
+    @Override
+    public String toString() {
+        return "Point{" +
+                "x='" + x + '\'' +
+                ", y='" + y + '\'' +
+                '}';
     }
 }

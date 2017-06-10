@@ -11,14 +11,11 @@ import com.mbakovic.kids.resources.NetworkResource;
 import com.mbakovic.kids.resources.PingResource;
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
-import io.dropwizard.jetty.HttpConnectorFactory;
-import io.dropwizard.server.SimpleServerFactory;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import org.apache.log4j.Logger;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 public final class AppApplication extends Application<AppConfiguration> {
     private static Logger log = Logger.getLogger(AppApplication.class);

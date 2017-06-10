@@ -10,6 +10,9 @@ public class IPAndPort {
     @Key
     private String port;
 
+    public IPAndPort() {
+    }
+
     public IPAndPort(String ip, String port) {
         this.ip = ip;
         this.port = port;

@@ -11,6 +11,9 @@ public class CheckResponse extends StatusResponse {
     @Key
     private Bool alive;
 
+    public CheckResponse() {
+    }
+
     public CheckResponse(Bool alive) {
         super(Status.OK, null);
         this.alive = alive;
@@ -22,5 +25,12 @@ public class CheckResponse extends StatusResponse {
 
     public void setAlive(Bool alive) {
         this.alive = alive;
+    }
+
+    @Override
+    public String toString() {
+        return "CheckResponse{" +
+                "alive=" + alive +
+                '}';
     }
 }
