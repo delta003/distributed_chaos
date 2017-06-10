@@ -26,9 +26,7 @@ string last_port;
 
 namespace Handlers {
 void reset(HttpServer& server) {
-  server.resource["/api/reset"]["GET"] = [](
-      shared_ptr<HttpServer::Response> response,
-      shared_ptr<HttpServer::Request> request) {
+  server.resource["/api/reset"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
       log(logstream, "reset_request", request->content.string());
       ptree out;
@@ -46,9 +44,7 @@ void reset(HttpServer& server) {
   };
 }
 void reset_done(HttpServer& server) {
-  server.resource["/api/reset_done"]["GET"] = [](
-      shared_ptr<HttpServer::Response> response,
-      shared_ptr<HttpServer::Request> request) {
+  server.resource["/api/reset_done"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
       log(logstream, "reset_done_request", request->content.string());
       ptree out;
@@ -61,9 +57,7 @@ void reset_done(HttpServer& server) {
   };
 }
 void hello(HttpServer& server) {
-  server.resource["/api/hello"]["POST"] = [](
-      shared_ptr<HttpServer::Response> response,
-      shared_ptr<HttpServer::Request> request) {
+  server.resource["/api/hello"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
       string req_str = request->content.string();
       log(logstream, "hello_request", req_str);
@@ -88,9 +82,7 @@ void hello(HttpServer& server) {
   };
 }
 void logz(HttpServer& server) {
-  server.resource["/logz"]["GET"] = [](
-      shared_ptr<HttpServer::Response> response,
-      shared_ptr<HttpServer::Request> request) {
+  server.resource["/logz"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
       log(logstream, "logz_request", request->content.string());
       send(response, logstream.str());
@@ -101,9 +93,7 @@ void logz(HttpServer& server) {
   };
 }
 void index(HttpServer& server) {
-  server.default_resource["GET"] = [&server](
-      shared_ptr<HttpServer::Response> response,
-      shared_ptr<HttpServer::Request> request) {
+  server.default_resource["GET"] = [&server](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     ptree out;
     send_ok(response, out);
   };

@@ -20,7 +20,6 @@
 #include <thread>
 #include <mutex>
 #include <stdexcept>
-#include <thread>
 
 using namespace std;
 
@@ -295,7 +294,7 @@ void test_adopt() {
   requests::set_edge(ip, port, e_next);
 
   vector<edge> children{edge(1, "0.0.0.1", "2002", "child"), edge(2, "5.0.0.1", "2003", "child"), edge(3, "6.0.0.1", "2004", "child"),
-                        edge(4, "22.0.0.1", "2005", "child"), edge(5, "66.0.0.1", "2006", "child")};
+                        edge(4, "22.0.0.1", "2005", "child"), edge(50, "66.0.0.1", "2006", "child")};
 
   auto r = requests::adopt(ip, port, children[0], true).first;
   ASSERT_EQ(r.redirect, false);
@@ -313,15 +312,15 @@ void test_adopt() {
   ASSERT_EQ(r.redirect, false);
   ASSERT_EQ(r.create_level, false);
 
-  r = requests::adopt(ip, port, children[3], true).first;
+  r = requests::adopt(ip, port, children[3], false).first;
   ASSERT_EQ(r.redirect, false);
   ASSERT_EQ(r.create_level, false);
 
-  r = requests::adopt(ip, port, children[4], true).first;
+  r = requests::adopt(ip, port, children[4], false).first;
+  auto r2 = r.edges;
   ASSERT_EQ(r.redirect, false);
   ASSERT_EQ(r.create_level, true);
 
-  auto r2 = requests::edges(ip, port).first;
   sort(r2.begin(), r2.end());  // sort by uuid
   ASSERT_EQ(r2[0], children[0]);
   ASSERT_EQ(r2[1], children[1]);
@@ -391,46 +390,6 @@ void run(function<void()> const& test, string test_name) {
   }
 }
 
-std::mutex mtx;
-int port = 2000;
-
-// interaktivni end to end test
-void end_to_end_test() {
-  clean_up();
-  string ip = "localhost";
-  string bs_port = "2099";
-  start_bootstrap(bs_port);
-
-  cout << "Koriscenje:\n"
-       << "  1) up n - spawnuje n novih nodova.\n  2) k|kill n - ubija cvor sa uuid-om n.\n"
-       << "  3) k2|kill2 n m - ubija dva cvora istovremeno.\n  4) q|quit - napusta program i stopira mrezu.\n\n";
-
-  string cmd;
-  while (1) {
-    cin >> cmd;
-    if (cmd == "up") {
-      int broj;
-      cin >> broj;
-      vector<thread> pool;
-      ostringstream oss;
-      for (int i = 0; i < broj; i++) {
-        oss << "Node " << i << " started {ip = " << ip << ", port = " << port << "}\n";
-        pool.push_back(thread(start_node, to_string(port), bs_port));
-        ++port;
-      }
-      for (int i = 0; i < broj; i++) {
-        pool[i].join();
-      }
-      cout << oss.str();
-    } else if (cmd == "kill" || cmd == "k") {
-    } else if (cmd == "kill2" || cmd == "k2") {
-    } else if (cmd == "q" || cmd == "quit") {
-      break;
-    }
-  }
-  clean_up();
-}
-
 int main(int argc, char* argv[]) {
   DBG = print_response;
 
@@ -445,10 +404,8 @@ int main(int argc, char* argv[]) {
   // RUN_TEST(Node::network::test_get_edge); // node/api/network/get_edge
   // RUN_TEST(Node::network::test_set_edge); // node/api/network/set_edge
   // RUN_TEST(Node::network::test_get_set_edges); // get_edge + set_edge + edges
-  // RUN_TEST(Node::network::test_adopt); // node/api/network/adopt
+  RUN_TEST(Node::network::test_adopt);  // node/api/network/adopt
   // RUN_TEST(Node::network::test_visualize); // node/api/network/visualize
-
-  end_to_end_test();
 
   if (oks + failures > 0) {
     output_results();

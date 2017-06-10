@@ -39,15 +39,14 @@ void stop_bootstrap(string port) {
 }  // Bootstrap
 
 namespace Node {
-void start_node(string node_port, string bootstrap_port) {
-  string exec = git_root() + "/cpp/start node localhost " + node_port +
-                " localhost " + bootstrap_port + " > /dev/null 2>&1";
+void start_node_public(string node_ip, string node_port, string bootstrap_ip, string bootstrap_port) {
+  string exec = git_root() + "/cpp/start node " + node_ip + " " + node_port + " " + bootstrap_ip + " " + bootstrap_port + " > /dev/null 2>&1";
   system(exec.c_str());
 }
+void start_node(string node_port, string bootstrap_port) { start_node_public("localhost", node_port, "localhost", bootstrap_port); }
 
 void stop_node(string node_port) {
-  string exec =
-      git_root() + "/cpp/stop node " + node_port + " > /dev/null 2>&1";
+  string exec = git_root() + "/cpp/stop node " + node_port + " > /dev/null 2>&1";
   system(exec.c_str());
 }
 }  // Node

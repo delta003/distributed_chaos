@@ -76,7 +76,7 @@ namespace basic {
 void ok(HttpServer& server) {
   server.resource["/api/basic/ok"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      if (WAIT) send_wait(response);
+      // if (WAIT) send_wait(response);
       log(logstream, "ok_request", request->content.string());
       ptree out;
       send_ok(response, out);
@@ -89,7 +89,7 @@ void ok(HttpServer& server) {
 void info(HttpServer& server) {
   server.resource["/api/basic/info"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      if (WAIT) send_wait(response);
+      // if (WAIT) send_wait(response);
       log(logstream, "info_request", request->content.string());
       ptree out;
       out.put("uuid", node_info.uuid);
@@ -303,6 +303,7 @@ void join(bool first_join) {
       return;
     }
     node x = requests::info(bs_node.ip, bs_node.port).first;
+    log(logstream, "join-node-bootstrap-returned", x);
     vector<edge> edges = requests::edges(x.ip, x.port).first;
     log(logstream, "join-bootstrap-edges", edges);
     if (!get_edge(edges, "parent").exists()) {
@@ -315,7 +316,7 @@ void join(bool first_join) {
         log(logstream, "join-x_next", x_next);
         requests::set_edge(x_next.ip, x_next.port, node_to_edge(node_info, "prev"));
         e_prev = node_to_edge(x, "prev");
-        e_next = x_next;
+        e_next = edge(x_next, "next");
       } else {  // prvi u drugom levelu
         log(logstream, "join-line", __LINE__);
         requests::adopt(x.ip, x.port, node_to_edge(node_info, "child"), false);
@@ -324,47 +325,55 @@ void join(bool first_join) {
     } else {
       log(logstream, "join-line", __LINE__);
       edge parent = get_edge(edges, "parent");
+      log(logstream, "join-parent", parent);
       adopt_response response = requests::adopt(parent.ip, parent.port, node_to_edge(node_info, "child"), true).first;
       log(logstream, "join-adopt_response", response);
       if (response.redirect == true) {
         log(logstream, "join-line", __LINE__);
-        e_parent = response.next;
+        parent = response.next;
         response = requests::adopt(response.next.ip, response.next.port, node_to_edge(node_info, "child"), false).first;
         log(logstream, "join-adopt_response", response);
       }
       if (response.create_level == false) {
-        e_parent = parent;
+        e_parent = edge(parent, "parent");
         log(logstream, "join-line", __LINE__);
         edge x_next = requests::set_edge(x.ip, x.port, node_to_edge(node_info, "next")).first;
+        log(logstream, "join-x_next", x_next);
         requests::set_edge(x_next.ip, x_next.port, node_to_edge(node_info, "prev"));
+        log(logstream, "join-this_parent", e_parent);
         e_prev = node_to_edge(x, "prev");
-        e_next = x_next;
+        e_next = edge(x_next, "next");
       } else {  // T.T
         log(logstream, "join-line", __LINE__);
-        log(logstream, "join-new-level-edges", edges);
+        log(logstream, "join-new-level-edges", response.edges);
         edge this_prev_0 = get_edge(response.edges, "child", 0);
         edge this_prev_1 = get_edge(response.edges, "child", 1);
         edge this_prev_2 = get_edge(response.edges, "child", 2);
         edge this_prev_3 = get_edge(response.edges, "child", 3);
-        edge new_prev_1_next = requests::get_edge(x.ip, x.port, "next").first;
-        requests::set_edge(this_prev_1.ip, this_prev_1.port, new_prev_1_next, "next");
-        requests::set_edge(new_prev_1_next.ip, new_prev_1_next.port, this_prev_1, "prev");
+        log(logstream, "join-this_prev_0", this_prev_0);
+        log(logstream, "join-this_prev_1", this_prev_1);
+        log(logstream, "join-this_prev_2", this_prev_2);
+        log(logstream, "join-this_prev_3", this_prev_3);
+        edge new_next = requests::get_edge(x.ip, x.port, "next").first;
+        edge new_prev = requests::get_edge(this_prev_2.ip, this_prev_2.port, "prev").first;
+        log(logstream, "join-this_new_prev_1_next", new_next);
+        log(logstream, "join-this_new_prev_2_next", new_prev);
+        requests::set_edge(new_next.ip, new_next.port, new_prev, "prev");
+        requests::set_edge(new_prev.ip, new_prev.port, new_next, "next");
         requests::adopt(this_prev_0.ip, this_prev_0.port, this_prev_2, false);
         requests::set_edge(this_prev_2.ip, this_prev_2.port, this_prev_0, "parent");
         requests::adopt(this_prev_0.ip, this_prev_0.port, this_prev_3, false);
         requests::set_edge(this_prev_3.ip, this_prev_3.port, this_prev_0, "parent");
         requests::adopt(this_prev_1.ip, this_prev_1.port, node_to_edge(node_info, "child"), false);
-        e_parent = this_prev_1;
+        e_parent = edge(this_prev_1, "parent");
         requests::set_edge(this_prev_3.ip, this_prev_3.port, node_to_edge(node_info, "next"));
         requests::set_edge(this_prev_2.ip, this_prev_2.port, node_to_edge(node_info, "prev"));
-        e_next = this_prev_2;
-        e_prev = this_prev_3;
+        e_next = edge(this_prev_2, "next");
+        e_prev = edge(this_prev_3, "prev");
       }
     }
   } catch (exception& e) {
-    cout << e.what() << endl;
-    cout << "JOIN NETWORK FAILED" << endl;
-    exit(1);
+    log(logstream, "JOIN NETWORK FAILED", e.what());
   }
 }
 void recover() {}

@@ -12,6 +12,8 @@
 #include <utility>
 #include <vector>
 
+#include "util.hpp"
+
 typedef SimpleWeb::Client<SimpleWeb::HTTP> HttpClient;
 
 bool DBG = false;
@@ -43,6 +45,10 @@ struct edge {
   edge() {}
   edge(string _type) : type(_type) {}
   edge(int _uuid, string _ip, string _port, string _type) : type(_type), ip(_ip), port(_port), uuid(_uuid) {}
+  edge(edge& other, string type) {
+    *this = other;
+    this->type = type;
+  }
   int uuid;
   string type;
   string ip;
@@ -66,7 +72,7 @@ struct vedge {  //
 };
 
 struct adopt_response {
-  adopt_response() {}
+  adopt_response() { redirect = create_level = false; }
   bool redirect, create_level;
   vector<edge> edges;
   edge next;
@@ -79,12 +85,20 @@ struct visualize_response {
 };
 
 std::ostream& operator<<(std::ostream& stream, const edge& rhs) {
-  stream << rhs.uuid << " " << rhs.ip << " " << rhs.port << " " << rhs.type;
+  if (rhs.exists()) {
+    stream << rhs.uuid << " " << rhs.ip << " " << rhs.port << " " << rhs.type;
+  } else {
+    stream << "null";
+  }
   return stream;
 }
 
 std::ostream& operator<<(std::ostream& stream, const node& rhs) {
-  stream << rhs.uuid << " " << rhs.ip << " " << rhs.port;
+  if (rhs.exists()) {
+    stream << rhs.uuid << " " << rhs.ip << " " << rhs.port;
+  } else {
+    stream << "null";
+  }
   return stream;
 }
 
@@ -403,7 +417,7 @@ pair<adopt_response, status> adopt(string ip, string port, edge new_edge, bool c
     res.next = json_to_edge(out.get_child("next"));
   }
   if (key_exists(out, "edges")) {
-    json_to_edges(out, res.edges);
+    json_to_edges(out.get_child("edges"), res.edges);
   }
   return make_pair(res, status(out));
 }

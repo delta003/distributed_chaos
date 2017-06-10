@@ -1,0 +1,9 @@
+# Pokretanje interaktivnog client-a
+# Koriscenje ./client
+
+CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if g++ -O2 -std=c++11 $CWD/client.cpp -I/usr/local/include/boost -o $CWD/bin/client -lboost_system -lboost_filesystem; then
+  $CWD/bin/client
+  rm $CWD/bin/client
+fi
