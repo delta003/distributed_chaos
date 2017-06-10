@@ -1,0 +1,65 @@
+// This should be background task, it should block
+// APIs that change state of the node (or some getter apis if needed),
+// but getter APIs like /api/basic/ok must work
+join():
+	get ip, port and uuid from bootstrap with hello
+ 	if this.uuid is null:
+ 		// Set uuid only on first join
+		set uuid returned by bootstrap
+	if ip is null:
+		// Node is first one
+		this.next = this
+		this.prev = this
+		return
+	x = node returned by bootstrap
+	parent = x.get_edge(parent)
+	if parent is null:
+		edges = x.edges  // Edges of x
+		if edges.prev == edges.next:
+			// Node joins top level circle
+			xNext = x.set_edge(next, this)
+			xNext.set_edge(prev, this)  // This should return x, you can assert
+			this.prev = X
+			this.next = xNext
+		else:
+			// Node is first in second level
+			x.adopt(this)
+			this.parent = x
+			this.next = this;
+			this.prev = this;
+	else:
+		// Standard join
+		parent.adopt(this, can_redirect=true)
+		if redirected to y:
+			y.adopt(this, can_redirect=false)
+			parent = y
+		this.parent = parent
+		if not create_level:
+			// Join layer
+			xNext = x.set_edge(next, this)
+			xNext.set_edge(prev, this)  // This should return x, you can assert
+			this.prev = x
+			this.next = xNext
+			return
+		// New level should be created, adopt returned edges with 5 children
+		thisPrev0 = edges.child[0] // Zero based index, this one gets two new children
+		thisPrev1 = edges.child[1] // This one gets one child
+		thisPrev2 = edges.child[2]  // First node in new level
+		thisPrev3 = edges.child[3] // This should be x, you can assert
+		// Exclude thisPrev2 and thisPrev3 from layer
+		newPrev1Next = x.get_edge(next)
+		thisPrev1.set_edge(next, newPrev1Next) // This should return thisPrev2, you can assert
+		newPrev1Next.set_edge(prev, thisPrev1) // This should return x, you can assert
+		// Change parents
+		thisPrev0.adopt(thisPrev2) // this will succeed, you can assert
+		thisPrev2.set_edge(parent, thisPrev0)
+		thisPrev0.adopt(thisPrev3) // this will succeed, you can assert
+		thisPrev3.set_edge(parent, thisPrev0)
+		thisPrev1.adopt(this) // this will succeed, you can assert
+		this.parent = thisPrev1
+		// Make circle in new layer
+		thisPrev3.set_edge(next, this)
+		thisPrev2.set_edge(prev, this)
+		this.next = thisPrev2
+		this.prev = thisPrev3
+		// Log something happy :)
