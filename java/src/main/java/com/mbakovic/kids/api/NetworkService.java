@@ -5,14 +5,12 @@ import com.mbakovic.kids.request.EdgeRequest;
 import com.mbakovic.kids.request.EdgeTypeRequest;
 import com.mbakovic.kids.response.StatusResponse;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 @Path("/network")
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public interface NetworkService {
 
     @GET

@@ -3,14 +3,12 @@ package com.mbakovic.kids.api;
 import com.mbakovic.kids.request.IPAndPortRequest;
 import com.mbakovic.kids.response.StatusResponse;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public interface BootstrapService {
 
     @POST
@@ -20,4 +18,8 @@ public interface BootstrapService {
     @GET
     @Path("/reset")
     StatusResponse reset();
+
+    @GET
+    @Path("/reset_done")
+    StatusResponse resetDone();
 }

@@ -7,6 +7,9 @@ public class IPAndPortAndUUID extends IPAndPort {
     @Key
     private String uuid;
 
+    public IPAndPortAndUUID() {
+    }
+
     public IPAndPortAndUUID(String ip, String port, String uuid) {
         super(ip, port);
         this.uuid = uuid;
@@ -22,5 +25,10 @@ public class IPAndPortAndUUID extends IPAndPort {
 
     public int uuid() {
         return Integer.parseInt(uuid);
+    }
+
+    @Override
+    public String toString() {
+        return super.toString();
     }
 }

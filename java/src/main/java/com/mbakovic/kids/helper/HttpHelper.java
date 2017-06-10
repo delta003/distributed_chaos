@@ -2,17 +2,20 @@ package com.mbakovic.kids.helper;
 
 import com.google.api.client.http.*;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.http.json.JsonHttpContent;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson.JacksonFactory;
-import com.mbakovic.kids.model.Edge;
 import com.mbakovic.kids.model.IPAndPort;
 import com.mbakovic.kids.model.Status;
-import com.mbakovic.kids.response.EdgesResponse;
-import com.mbakovic.kids.response.StatusResponse;
+import com.mbakovic.kids.request.AdoptRequest;
+import com.mbakovic.kids.request.EdgeRequest;
+import com.mbakovic.kids.request.EdgeTypeRequest;
+import com.mbakovic.kids.request.IPAndPortRequest;
+import com.mbakovic.kids.response.*;
 import org.apache.log4j.Logger;
 
-import java.util.List;
+import java.io.*;
 
 public final class HttpHelper {
     private static Logger log = Logger.getLogger(HttpHelper.class);
@@ -30,12 +33,7 @@ public final class HttpHelper {
 
     private HttpHelper() {
         requestFactory =
-            HTTP_TRANSPORT.createRequestFactory(new HttpRequestInitializer() {
-                @Override
-                public void initialize(HttpRequest request) {
-                    request.setParser(new JsonObjectParser(JSON_FACTORY));
-                }
-            });
+            HTTP_TRANSPORT.createRequestFactory(request -> request.setParser(new JsonObjectParser(JSON_FACTORY)));
     }
 
     public HttpRequestFactory getRequestFactory() {
@@ -44,9 +42,24 @@ public final class HttpHelper {
 
     // API wrappers
 
+    public IPAndPortAndUUIDResponse bootstrapHello(IPAndPort ipAndPort, IPAndPortRequest request) {
+        try {
+//            java.io.OutputStream os = new FileOutputStream(new File("/Users/mbakovic/Desktop/log.json"));
+//            new JsonHttpContent(JSON_FACTORY, request).writeTo(os);
+            HttpRequest httpRequest = getRequestFactory().buildPostRequest(
+                    new GenericUrl("http://" + ipAndPort.toString() + "/api/hello"),
+                    new JsonHttpContent(JSON_FACTORY, request)
+            );
+            return httpRequest.execute().parseAs(IPAndPortAndUUIDResponse.class);
+        } catch (Exception e) {
+            log.error("bootstrapHello failed: " + e.getMessage());
+            return null;
+        }
+    }
+
     public StatusResponse bootstrapReset(IPAndPort ipAndPort) {
         try {
-            HttpRequest httpRequest = HttpHelper.getInstance().getRequestFactory().buildGetRequest(
+            HttpRequest httpRequest = getRequestFactory().buildGetRequest(
                     new GenericUrl("http://" + ipAndPort.toString() + "/api/reset")
             );
             return httpRequest.execute().parseAs(StatusResponse.class);
@@ -58,8 +71,8 @@ public final class HttpHelper {
 
     public StatusResponse basicOk(IPAndPort ipAndPort) {
         try {
-            HttpRequest httpRequest = HttpHelper.getInstance().getRequestFactory().buildGetRequest(
-                    new GenericUrl(ipAndPort.getIp() + ":" + ipAndPort.getPort() + "/api/basic/ok")
+            HttpRequest httpRequest = getRequestFactory().buildGetRequest(
+                    new GenericUrl("http://" + ipAndPort.toString() + "/api/basic/ok")
             );
             return httpRequest.execute().parseAs(StatusResponse.class);
         } catch (Exception e) {
@@ -68,16 +81,81 @@ public final class HttpHelper {
         }
     }
 
-    public EdgesResponse networkEdgesWithRepeat(IPAndPort ipAndPort) {
+    public IPAndPortAndUUIDResponse basicInfo(IPAndPort ipAndPort) {
+        try {
+            HttpRequest httpRequest = getRequestFactory().buildGetRequest(
+                    new GenericUrl("http://" + ipAndPort.toString() + "/api/basic/info")
+            );
+            return httpRequest.execute().parseAs(IPAndPortAndUUIDResponse.class);
+        } catch (Exception e) {
+            log.error("basicInfo failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public EdgesResponse networkEdgesWithRetry(IPAndPort ipAndPort) {
         EdgesResponse response;
         do {
             try {
-                HttpRequest httpRequest = HttpHelper.getInstance().getRequestFactory().buildGetRequest(
-                        new GenericUrl(ipAndPort.getIp() + ":" + ipAndPort.getPort() + "/api/network/edges")
+                HttpRequest httpRequest = getRequestFactory().buildGetRequest(
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/network/edges")
                 );
                 response = httpRequest.execute().parseAs(EdgesResponse.class);
             } catch (Exception e) {
-                log.error("networkEdgesWithRepeat failed: " + e.getMessage());
+                log.error("networkEdgesWithRetry failed: " + e.getMessage());
+                return null;
+            }
+        } while (response.getStatus() == Status.WAIT);
+        return response;
+    }
+
+    public EdgeResponse networkGetEdgeWithRetry(IPAndPort ipAndPort, EdgeTypeRequest request) {
+        EdgeResponse response;
+        do {
+            try {
+                HttpRequest httpRequest = getRequestFactory().buildPostRequest(
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/network/get_edge"),
+                        new JsonHttpContent(JSON_FACTORY, request)
+
+                );
+                response = httpRequest.execute().parseAs(EdgeResponse.class);
+            } catch (Exception e) {
+                log.error("networkGetEdgeWithRetry failed: " + e.getMessage());
+                return null;
+            }
+        } while (response.getStatus() == Status.WAIT);
+        return response;
+    }
+
+    public OldEdgeResponse networkSetEdgeWithRetry(IPAndPort ipAndPort, EdgeRequest request) {
+        OldEdgeResponse response;
+        do {
+            try {
+                HttpRequest httpRequest = getRequestFactory().buildPostRequest(
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/network/set_edge"),
+                        new JsonHttpContent(JSON_FACTORY, request)
+                );
+                response = httpRequest.execute().parseAs(OldEdgeResponse.class);
+            } catch (Exception e) {
+                log.error("networkSetEdgeWithRetry failed: " + e.getMessage());
+                return null;
+            }
+        } while (response.getStatus() == Status.WAIT);
+        return response;
+    }
+
+    public AdoptResponse networkAdoptWithRetry(IPAndPort ipAndPort, AdoptRequest request) {
+        AdoptResponse response;
+        do {
+            try {
+                HttpRequest httpRequest = getRequestFactory().buildPostRequest(
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/network/adopt"),
+                        new JsonHttpContent(JSON_FACTORY, request)
+
+                );
+                response = httpRequest.execute().parseAs(AdoptResponse.class);
+            } catch (Exception e) {
+                log.error("networkAdoptWithRetry failed: " + e.getMessage());
                 return null;
             }
         } while (response.getStatus() == Status.WAIT);

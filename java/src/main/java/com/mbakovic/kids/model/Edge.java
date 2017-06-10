@@ -1,6 +1,7 @@
 package com.mbakovic.kids.model;
 
 import com.google.api.client.util.Key;
+import com.mbakovic.kids.core.Node;
 
 public class Edge extends IPAndPort {
 
@@ -9,6 +10,9 @@ public class Edge extends IPAndPort {
 
     @Key
     private EdgeType type;
+
+    public Edge() {
+    }
 
     public Edge(String ip, String port, String uuid, EdgeType type) {
         super(ip, port);
@@ -34,5 +38,23 @@ public class Edge extends IPAndPort {
 
     public int uuid() {
         return Integer.parseInt(uuid);
+    }
+
+    public static Edge meAs(EdgeType type) {
+        return new Edge(
+                Node.getInstance().getMyself().getIp(),
+                Node.getInstance().getMyself().getPort(),
+                Node.getInstance().getMyself().getUuid(),
+                type
+        );
+    }
+
+    @Override
+    public String toString() {
+        return "Edge{" +
+                "uuid='" + uuid + '\'' +
+                ", type=" + type +
+                ", IpAndPort=" + super.toString() +
+                '}';
     }
 }

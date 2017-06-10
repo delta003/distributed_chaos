@@ -18,6 +18,9 @@ public class Job {
     @Key
     private List<Point> points;
 
+    public Job() {
+    }
+
     public Job(String width, String height, String p, List<Point> points) {
         this.width = width;
         this.height = height;
@@ -67,5 +70,15 @@ public class Job {
 
     public int height() {
         return Integer.parseInt(height);
+    }
+
+    @Override
+    public String toString() {
+        return "Job{" +
+                "width='" + width + '\'' +
+                ", height='" + height + '\'' +
+                ", p='" + p + '\'' +
+                ", points=" + points +
+                '}';
     }
 }

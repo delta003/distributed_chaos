@@ -72,12 +72,12 @@ public class NetworkResource implements NetworkService {
         if (!Node.getInstance().lock()) {
             return StatusResponse.ofWait();
         }
-        if (Node.getInstance().getEdges().size() < 2 || Node.getInstance().getEdges().size() == 3) {
+        if (Node.getInstance().getChildrenCount() < 2 || Node.getInstance().getChildrenCount() == 3) {
             Node.getInstance().getEdges().add(request.getEdge());
             Node.getInstance().release();
             return AdoptResponse.adopted();
         }
-        if (Node.getInstance().getEdges().size() == 2) {
+        if (Node.getInstance().getChildrenCount() == 2) {
             if (request.getCanRedirect().toBoolean()) {
                 Edge next = Node.getInstance().getEdgeByType(EdgeType.NEXT);
                 AdoptResponse response = AdoptResponse.redirect(next);
@@ -89,7 +89,7 @@ public class NetworkResource implements NetworkService {
                 return AdoptResponse.adopted();
             }
         }
-        if (Node.getInstance().getEdges().size() == 4) {
+        if (Node.getInstance().getChildrenCount() == 4) {
             Node.getInstance().getEdges().add(request.getEdge());
             List<Edge> edges = Node.getInstance().getEdgesAndClear();
             AdoptResponse response = AdoptResponse.adoptedWithCreateLevel(edges);
@@ -128,15 +128,17 @@ public class NetworkResource implements NetworkService {
                     e.getUuid(),
                     e.getType()
             ));
-            bfsMap.put(e.getUuid(), Boolean.TRUE);
-            bfsQueue.add(e);
+            if (!bfsMap.containsKey(e.getUuid())) {
+                bfsMap.put(e.getUuid(), Boolean.TRUE);
+                bfsQueue.add(e);
+            }
         }
 
         while (!bfsQueue.isEmpty()) {
             Edge e = bfsQueue.remove();
             nodes.add(new IPAndPortAndUUID(e.getIp(), e.getPort(), e.getUuid()));
 
-            EdgesResponse nextEdgesResponse = HttpHelper.getInstance().networkEdgesWithRepeat(
+            EdgesResponse nextEdgesResponse = HttpHelper.getInstance().networkEdgesWithRetry(
                     new IPAndPort(e.getIp(), e.getPort()));
             if (nextEdgesResponse == null) {
                 String msg = String.format("Failed to fetch edges from %s:%s (%s}",

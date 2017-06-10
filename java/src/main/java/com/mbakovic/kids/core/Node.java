@@ -6,8 +6,10 @@ import com.mbakovic.kids.model.EdgeType;
 import com.mbakovic.kids.model.IPAndPort;
 import com.mbakovic.kids.model.IPAndPortAndUUID;
 
+import java.nio.channels.SeekableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public final class Node extends Server {
 
@@ -81,12 +83,31 @@ public final class Node extends Server {
     public List<Edge> getEdgesAndClear() {
         List<Edge> ret = new ArrayList<>();
         ret.addAll(edges);
-        edges.subList(2, 5).clear();
+        for (int i = 0; i < 3; i++) {
+            removeChild();
+        }
         return ret;
+    }
+
+    private void removeChild() {
+        int id = -1;
+        for (int i = edges.size() - 1; i >= 0; i--) {
+            if (edges.get(i).getType() == EdgeType.CHILD) {
+                id = i;
+                break;
+            }
+        }
+        if (id != -1) {
+            edges.remove(id);
+        }
     }
 
     public void joinNetwork() {
         edges = new ArrayList<>();
         new Thread(new NetworkJoiner()).start();
+    }
+
+    public long getChildrenCount() {
+        return edges.stream().filter(x -> x.getType() == EdgeType.CHILD).count();
     }
 }
