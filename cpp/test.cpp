@@ -380,27 +380,21 @@ void run(function<void()> const& test, string test_name) {
   }
 }
 
-void tt() {
-      string ip = "localhost";
-      string port_1 = "2000";
-      string port_2 = "2001";
-      string port_3 = "2002";
-      start_node(port_1, bootstrap_skip);
-      start_node(port_2, bootstrap_skip);
-      start_node(port_3, bootstrap_skip);
-      this_thread::sleep_for(chrono::seconds(1));
-      requests::set_edge(ip, port_1, edge(1, ip, port_2, "parent"));
-      requests::set_edge(ip, port_2, edge(2, ip, port_3, "next"));
-      requests::set_edge(ip, port_3, edge(0, ip, port_1, "prev"));
-      while (1) {}
-      auto r = requests::visualize(ip, port_1);
-      ASSERT_EQ(r.second.code, "ok");
-      ASSERT_EQ(r.first.nodes.size(), 3);
-      ASSERT_EQ(r.first.vedges.size(), 2);
-      stop_node(port_1);
-      stop_node(port_2);
-      stop_node(port_3);
-    }
+void start_network() {
+  clean_up();
+  string ip = "localhost";
+  string port_1 = "2000";
+  string port_2 = "2001";
+  string port_3 = "2002";
+  start_node(port_1, bootstrap_skip);
+  start_node(port_2, bootstrap_skip);
+  start_node(port_3, bootstrap_skip);
+  this_thread::sleep_for(chrono::seconds(1));
+  requests::set_edge(ip, port_1, edge(1, ip, port_2, "parent"));
+  requests::set_edge(ip, port_2, edge(2, ip, port_3, "next"));
+  requests::set_edge(ip, port_3, edge(0, ip, port_1, "prev"));
+  while (1) {}
+}
 
 int main(int argc, char *argv[]) {
 
@@ -420,8 +414,7 @@ int main(int argc, char *argv[]) {
   // RUN_TEST(Node::network::test_adopt); // node/api/network/adopt
   // RUN_TEST(Node::network::test_visualize); // node/api/network/visualize
 
-  clean_up();
-  tt();
+  // start_network()
 
   output_results();
   return 0;
