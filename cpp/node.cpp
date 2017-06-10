@@ -287,7 +287,7 @@ namespace Handlers {
 } // Handlers
 
 namespace network {
-  void join() {
+  void join(bool first_join) {
     try {
 
     } catch (exception& e) {
@@ -307,7 +307,7 @@ void worker() {
     WAIT = 0;
     return;
   }
-  network::join();
+  network::join(true);
   WAIT = 0;
 }
 

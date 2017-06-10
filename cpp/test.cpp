@@ -95,8 +95,8 @@ namespace Bootstrap {
     ASSERT_EQ(response.first.ip, old_ip);
     ASSERT_EQ(response.first.port, old_port);
 
-    status reset_response = requests::reset("localhost", port);
-    ASSERT_EQ(reset_response.code, "ok");
+    auto reset_response = requests::reset("localhost", port);
+    ASSERT_EQ(reset_response.second.code, "ok");
 
     old_ip = node_ip;
     old_port = node_port;
@@ -124,9 +124,20 @@ namespace Bootstrap {
   void test_reset() {
     string port = "2000";
     start_bootstrap(port);
-    status response = requests::reset("localhost", port);
-    ASSERT_EQ(response.code, "ok");
-    stop_bootstrap(port);
+    pair<bool, status> response = requests::reset("localhost", port);
+    ASSERT_EQ(response.second.code, "ok");
+    ASSERT_EQ(response.first, true);
+    response = requests::reset("localhost", port);
+    ASSERT_EQ(response.second.code, "ok");
+    ASSERT_EQ(response.first, false);
+    response = requests::reset("localhost", port);
+    ASSERT_EQ(response.second.code, "ok");
+    ASSERT_EQ(response.first, false);
+    auto r2 = requests::reset_done("localhost", port);
+    ASSERT_EQ(r2.code, "ok");
+    response = requests::reset("localhost", port);
+    ASSERT_EQ(response.second.code, "ok");
+    ASSERT_EQ(response.first, true);
   }
 
   void test_logz() {
@@ -400,7 +411,7 @@ int main(int argc, char *argv[]) {
 
   DBG = print_response;
 
-  // RUN_TEST(Bootstrap::test_reset); // boostrap/api/reset
+  RUN_TEST(Bootstrap::test_reset); // boostrap/api/reset
   // RUN_TEST(Bootstrap::test_hello); // boostrap/api/hello
 
   // RUN_TEST(Node::basic::test_ok); // node/api/basic/ok

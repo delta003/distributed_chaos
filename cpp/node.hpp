@@ -119,6 +119,17 @@ namespace network {
     }
   }
 
+  inline vector<edge> get_all_edges() {
+    vector<edge> result;
+    if (e_prev.exists()) result.push_back(e_prev);
+    if (e_next.exists()) result.push_back(e_next);
+    if (e_parent.exists()) result.push_back(e_parent);
+    for (auto& it: e_children) {
+      if (it.exists()) result.push_back(it);
+    }
+    return result;
+  }
+
   inline edge get_edge(const vector<edge>& edges, string type) {
     for (auto& it: edges) {
       if (it.type == type) {
@@ -294,11 +305,20 @@ namespace requests { //wrapperi za request (treba ga surround sa try/catch)
     } while (out.get<string>("status") == "wait");
     return make_pair(node(out), status(out));
   }
-  status reset(string ip, string port) {
+  pair<bool, status> reset(string ip, string port) {
     HttpClient client(make_addr(ip, port));
     ptree out;
     do {
       read_json(client.request("GET", "/api/reset")->content, out);  
+      if (DBG) cout << json_to_string(out);
+    } while (out.get<string>("status") == "wait");
+    return make_pair(out.get<bool>("can_reset"), status(out));
+  }
+  status reset_done(string ip, string port) {
+    HttpClient client(make_addr(ip, port));
+    ptree out;
+    do {
+      read_json(client.request("GET", "/api/reset_done")->content, out);  
       if (DBG) cout << json_to_string(out);
     } while (out.get<string>("status") == "wait");
     return status(out);
@@ -415,7 +435,7 @@ namespace requests { //wrapperi za request (treba ga surround sa try/catch)
     } while (out.get<string>("status") == "wait");
     vector<vedge> vedges;
     vector<node> nodes;
-    if (key_exists(out, "vedges")) {
+    if (key_exists(out, "edges")) {
       json_to_vedges(out.get_child("edges"), vedges);
     } 
     if (key_exists(out, "nodes")) {

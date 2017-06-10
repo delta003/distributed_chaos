@@ -20,6 +20,7 @@ typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 stringstream logstream;
 
 int uuid = 0;
+bool can_reset = true;
 string last_ip;
 string last_port;
 
@@ -29,12 +30,27 @@ namespace Handlers {
     try {
         log(logstream, "reset_request", request->content.string());
         ptree out;
-        uuid = 0;
-        last_ip = "";
-        last_port = "";
+        out.put("can_reset", can_reset);
+        if (can_reset) {
+          last_ip = "";
+          last_port = "";
+          can_reset = false;
+        }
         send_ok(response, out);
       } catch (exception& e) {
         log(logstream, "reset_error", e.what());
+        send_error(response, e.what());
+      }
+    };
+  }
+  server.resource["/api/reset_done"]["GET"]=[](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    try {
+        log(logstream, "reset_done_request", request->content.string());
+        ptree out;
+        can_reset = true;
+        send_ok(response, out);
+      } catch (exception& e) {
+        log(logstream, "reset_done_error", e.what());
         send_error(response, e.what());
       }
     };
