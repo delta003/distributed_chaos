@@ -1,0 +1,26 @@
+Procedure PING: // Na svakih 1s zvati ovo
+  int failures = 0;
+  try {
+    Posalji this->next("/api/basic/ok");
+  } catch { 
+    failures += 1;
+    if (failures == 5) { // 5s prošlo
+      try {
+        this->prev("/api/basic/check", this->next) // proveri da li je tvoj NEXT ziv preko tvog PREV cvora
+      } catch {
+        // next cvor nije ziv :(
+        call RECONFIGURE; 
+      }
+    }
+  }
+END
+
+Procedure RECONFIGURE:
+  response = bootstrap/reset
+  
+  if (response.can_reset == false) RETURN; // rekonfiguracija je u toku
+  
+  BFS Broadcast /api/network/reset na svaki cvor u mrezi
+  
+  Pozovi bootstrap/reset_done
+END
