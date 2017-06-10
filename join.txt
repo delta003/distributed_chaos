@@ -47,9 +47,11 @@ join():
 		thisPrev2 = edges.child[2]  // First node in new level
 		thisPrev3 = edges.child[3] // This should be x, you can assert
 		// Exclude thisPrev2 and thisPrev3 from layer
-		newPrev1Next = x.get_edge(next)
-		thisPrev1.set_edge(next, newPrev1Next) // This should return thisPrev2, you can assert
-		newPrev1Next.set_edge(prev, thisPrev1) // This should return x, you can assert
+		newNext = x.get_edge(next)
+		newPrev = thisPrev2.get_edge(prev)
+		// Previous level linking
+		newNext.set_edge(prev, newPrev)
+		newPrev.set_edge(next, newNext)
 		// Change parents
 		thisPrev0.adopt(thisPrev2) // this will succeed, you can assert
 		thisPrev2.set_edge(parent, thisPrev0)
