@@ -6,15 +6,15 @@
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ $1 = "bs" ]; then
-  killall -9 bs_$2 > /dev/null 2>&1
-  if rm $CWD/bin/bs_$2 > /dev/null 2>&1; then
-      echo "Zaustavljen boostrap na portu:" $2
+  if killall -9 bs_$2 > /dev/null 2>&1; then
+    echo "Zaustavljen boostrap na portu:" $2
   fi
+  rm $CWD/bin/bs_$2 > /dev/null 2>&1
 fi
 
 if [ $1 = "node" ]; then
-  killall -9 node_$2 > /dev/null 2>&1
-  if rm $CWD/bin/node_$2 > /dev/null 2>&1; then
+  if killall -9 node_$2 > /dev/null 2>&1; then
     echo "Zaustavljen node na portu:" $2
   fi
+  rm $CWD/bin/node_$2 > /dev/null 2>&1
 fi

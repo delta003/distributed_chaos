@@ -3,7 +3,8 @@
 
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if g++ -O2 -std=c++11 $CWD/test.cpp -I/usr/local/include/boost -o $CWD/bin/test -lboost_system -lboost_filesystem; then
-  $CWD/bin/test
-  rm $CWD/bin/test
+if ! $CWD/build; then
+  exit 0
 fi
+
+$CWD/bin/test

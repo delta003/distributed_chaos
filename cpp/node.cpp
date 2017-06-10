@@ -291,10 +291,10 @@ void visualize(HttpServer& server) {
 }  // Handlers
 
 namespace network {
-void join(bool first_join) {
+void join() {
   try {
     node bs_node = requests::hello(bootstrap_ip, bootstrap_port, node_info.ip, node_info.port).first;
-    if (first_join) {
+    if (node_info.uuid == -1) {
       node_info.uuid = bs_node.uuid;
     }
     e_next = node_to_edge(node_info, "next");
@@ -385,7 +385,7 @@ void worker() {
     WAIT = 0;
     return;
   }
-  network::join(true);
+  network::join();
   WAIT = 0;
 }
 

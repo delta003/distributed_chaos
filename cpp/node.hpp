@@ -25,7 +25,7 @@ struct node {
   int uuid;
   string ip;
   string port;
-  node() {}
+  node() { uuid = -1; }
   node(int _uuid, string _ip, string _port) : uuid(_uuid), ip(_ip), port(_port) {}
   node(const ptree& json) {
     uuid = json.get<int>("uuid");

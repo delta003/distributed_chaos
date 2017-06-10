@@ -99,6 +99,7 @@ void test_hello() {
 
   auto reset_response = requests::reset("localhost", port);
   ASSERT_EQ(reset_response.second.code, "ok");
+  ASSERT_EQ(reset_response.first, true);
 
   old_ip = node_ip;
   old_port = node_port;
@@ -106,7 +107,7 @@ void test_hello() {
   node_port = "5554";
   response = requests::hello("localhost", port, node_ip, node_port);
   ASSERT_EQ(response.second.code, "ok");
-  ASSERT_EQ(response.first.uuid, 0);
+  ASSERT_EQ(response.first.uuid, 3);
   ASSERT_EQ(response.first.ip, "");
   ASSERT_EQ(response.first.port, "");
 
@@ -116,7 +117,7 @@ void test_hello() {
   node_port = "3004";
   response = requests::hello("localhost", port, node_ip, node_port);
   ASSERT_EQ(response.second.code, "ok");
-  ASSERT_EQ(response.first.uuid, 1);
+  ASSERT_EQ(response.first.uuid, 4);
   ASSERT_EQ(response.first.ip, old_ip);
   ASSERT_EQ(response.first.port, old_port);
 
@@ -172,7 +173,7 @@ void test_info() {
   start_node(port, bootstrap_skip);
   this_thread::sleep_for(chrono::seconds(1));
   pair<node, status> response = requests::info("localhost", port);
-  ASSERT_EQ(response.first.uuid, 0);
+  ASSERT_EQ(response.first.uuid, -1);
   ASSERT_EQ(response.first.ip, "localhost");
   ASSERT_EQ(response.first.port, port);
   ASSERT_EQ(response.second.code, "ok");
@@ -334,25 +335,6 @@ void test_adopt() {
 
   stop_node(port);
 }
-void test_visualize() {
-  string ip = "localhost";
-  string port_1 = "2000";
-  string port_2 = "2001";
-  string port_3 = "2002";
-  start_node(port_1, bootstrap_skip);
-  start_node(port_2, bootstrap_skip);
-  start_node(port_3, bootstrap_skip);
-  this_thread::sleep_for(chrono::seconds(1));
-  requests::set_edge(ip, port_1, edge(1, ip, port_2, "parent"));
-  requests::set_edge(ip, port_2, edge(2, ip, port_3, "next"));
-  auto r = requests::visualize(ip, port_1);
-  ASSERT_EQ(r.second.code, "ok");
-  ASSERT_EQ(r.first.nodes.size(), 3);
-  ASSERT_EQ(r.first.vedges.size(), 2);
-  stop_node(port_1);
-  stop_node(port_2);
-  stop_node(port_3);
-}
 }  // network
 };
 
@@ -386,26 +368,25 @@ void run(function<void()> const& test, string test_name) {
     cout << test_name << ": FAIL\n";
     ++failures;
     failed_tests.push_back(test_name);
-    clean_up();
   }
+  clean_up();
 }
 
 int main(int argc, char* argv[]) {
   DBG = print_response;
 
-  // RUN_TEST(Bootstrap::test_reset);  // boostrap/api/reset
-  // RUN_TEST(Bootstrap::test_hello); // boostrap/api/hello
+  RUN_TEST(Bootstrap::test_reset);  // boostrap/api/reset
+  RUN_TEST(Bootstrap::test_hello);  // boostrap/api/hello
 
-  // RUN_TEST(Node::basic::test_ok); // node/api/basic/ok
-  // RUN_TEST(Node::basic::test_info); // node/api/basic/info
-  // RUN_TEST(Node::basic::test_check); // node/api/basic/check
+  RUN_TEST(Node::basic::test_ok);     // node/api/basic/ok
+  RUN_TEST(Node::basic::test_info);   // node/api/basic/info
+  RUN_TEST(Node::basic::test_check);  // node/api/basic/check
 
-  // RUN_TEST(Node::network::test_edges); // node/api/network/edges
-  // RUN_TEST(Node::network::test_get_edge); // node/api/network/get_edge
-  // RUN_TEST(Node::network::test_set_edge); // node/api/network/set_edge
-  // RUN_TEST(Node::network::test_get_set_edges); // get_edge + set_edge + edges
-  RUN_TEST(Node::network::test_adopt);  // node/api/network/adopt
-  // RUN_TEST(Node::network::test_visualize); // node/api/network/visualize
+  RUN_TEST(Node::network::test_edges);          // node/api/network/edges
+  RUN_TEST(Node::network::test_get_edge);       // node/api/network/get_edge
+  RUN_TEST(Node::network::test_set_edge);       // node/api/network/set_edge
+  RUN_TEST(Node::network::test_get_set_edges);  // get_edge + set_edge + edges
+  RUN_TEST(Node::network::test_adopt);          // node/api/network/adopt
 
   if (oks + failures > 0) {
     output_results();

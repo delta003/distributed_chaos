@@ -5,17 +5,20 @@
 
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-if [ $1 = "bs" ]; then
+if ! $CWD/build; then
+  exit 0
+fi
+
+if [ $1 = "bs" ] || [ $1 = "bootstrap" ]; then
   
   if pgrep -x bs_$2 > /dev/null || pgrep -x node_$2 > /dev/null; then
     echo "Port zauzet."
     exit 0
   fi
 
-  if g++ -O2 -std=c++11 $CWD/bootstrap.cpp -I/usr/local/include/boost -o $CWD/bin/bs_$2 -lboost_system -lboost_filesystem; then
-    if $CWD/bin/bs_$2 $2 & then
+  cp $CWD/bin/bs $CWD/bin/bs_$2
+  if $CWD/bin/bs_$2 $2 & then
       echo "Boostrap startovan na portu:" $2
-    fi
   fi
 fi
 
@@ -26,9 +29,8 @@ if [ $1 = "node" ]; then
     exit 0
   fi
 
-  if g++ -O2 -std=c++11 $CWD/node.cpp -I/usr/local/include/boost -o $CWD/bin/node_$3 -lboost_system -lboost_filesystem; then
-    if $CWD/bin/node_$3 $2 $3 $4 $5 & then
-      echo "Node startovan na portu:" $3
-    fi
+  cp $CWD/bin/node $CWD/bin/node_$3
+  if $CWD/bin/node_$3 $2 $3 $4 $5 & then
+    echo "Node startovan na portu:" $3
   fi
 fi
