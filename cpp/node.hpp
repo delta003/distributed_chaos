@@ -88,6 +88,11 @@ std::ostream& operator<<(std::ostream& stream, const node& rhs) {
   return stream;
 }
 
+std::ostream& operator<<(std::ostream& stream, const adopt_response& rhs) {
+  stream << rhs.redirect << " " << rhs.create_level << " " << rhs.edges << " " << rhs.next;
+  return stream;
+}
+
 template <typename T>
 string to_str(T object) {
   ostringstream oss;
@@ -109,6 +114,8 @@ inline void json_to_edges(ptree& json, vector<edge>& edges) {
   }
 }
 
+inline bool edge_equals_ignore_type(edge e1, edge e2) { return e1.ip == e2.ip && e1.port == e2.port; }
+
 inline vector<edge> get_all_edges() {
   vector<edge> result;
   if (e_prev.exists()) result.push_back(e_prev);
@@ -122,10 +129,12 @@ inline vector<edge> get_all_edges() {
 
 inline edge get_edge(const vector<edge>& edges, string type, int idx = 0) {
   for (auto it : edges) {
-    if (it.type == type && idx == 0) {
-      return it;
-    } else {
-      idx--;
+    if (it.type == type) {
+      if (idx == 0) {
+        return it;
+      } else {
+        --idx;
+      }
     }
   }
   return edge();

@@ -14,6 +14,19 @@ using namespace boost::property_tree;
 
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 
+template <class T>
+std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
+  os << "[";
+  for (typename std::vector<T>::const_iterator ii = v.begin(); ii != v.end(); ++ii) {
+    if (ii != v.begin()) {
+      os << " | ";
+    }
+    os << *ii;
+  }
+  os << "]";
+  return os;
+}
+
 void json_to_string(const ptree& json, string& out);
 
 inline bool key_exists(const ptree& json, const string& key) {
@@ -57,7 +70,14 @@ inline string make_addr(const ptree& json) { return json.get<string>("ip") + ":"
 
 inline string make_addr(const string& ip, const string& port) { return ip + ":" + port; }
 
-inline void log(stringstream& logz, const string& handler, const string& error_msg) { logz << handler << " : " << error_msg << "\n"; }
+template <typename T>
+inline void log(stringstream& logz, const string& handler, T object) {
+  ostringstream oss;
+  oss << object;
+  if (!oss.str().empty()) {
+    logz << handler << " : " << oss.str() << "\n";
+  }
+}
 
 void send(shared_ptr<HttpServer::Response> response, const string& body) {
   *response << "HTTP/1.1 200 OK\r\nContent-Length: " << body.size() << "\r\n\r\n" << body;
