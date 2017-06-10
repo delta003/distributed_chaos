@@ -18,7 +18,9 @@
 #include <cstring>
 #include <chrono>
 #include <thread>
+#include <mutex>
 #include <stdexcept>
+#include <thread>
 
 using namespace std;
 
@@ -389,20 +391,42 @@ void run(function<void()> const& test, string test_name) {
   }
 }
 
-// Pokrenuti / (vizualizaciju) posle svakog startovanja/pada noda.
+std::mutex mtx;
+int port = 2000;
+
+// interaktivni end to end test
 void end_to_end_test() {
   clean_up();
+  string ip = "localhost";
   string bs_port = "2099";
   start_bootstrap(bs_port);
 
-  char c;
-  for (int i = 0; i < 10; i++) {
-    string ip = "localhost";
-    string port = to_string(2000 + i);
-    start_node(port, bs_port);
-    this_thread::sleep_for(chrono::seconds(1));
-    cout << "Node " << i << " started {ip = " << ip << ", port = " << port << "}\n";
-    c = getchar();
+  cout << "Koriscenje:\n"
+       << "  1) up n - spawnuje n novih nodova.\n  2) k|kill n - ubija cvor sa uuid-om n.\n"
+       << "  3) k2|kill2 n m - ubija dva cvora istovremeno.\n  4) q|quit - napusta program i stopira mrezu.\n\n";
+
+  string cmd;
+  while (1) {
+    cin >> cmd;
+    if (cmd == "up") {
+      int broj;
+      cin >> broj;
+      vector<thread> pool;
+      ostringstream oss;
+      for (int i = 0; i < broj; i++) {
+        oss << "Node " << i << " started {ip = " << ip << ", port = " << port << "}\n";
+        pool.push_back(thread(start_node, to_string(port), bs_port));
+        ++port;
+      }
+      for (int i = 0; i < broj; i++) {
+        pool[i].join();
+      }
+      cout << oss.str();
+    } else if (cmd == "kill" || cmd == "k") {
+    } else if (cmd == "kill2" || cmd == "k2") {
+    } else if (cmd == "q" || cmd == "quit") {
+      break;
+    }
   }
   clean_up();
 }

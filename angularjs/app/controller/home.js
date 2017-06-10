@@ -54,7 +54,7 @@
         case "next":
           return {color: 'green'};
         case "child":
-          return {color: 'yellow'};
+          return {color: '#CCCC00'};
         default:
           return {color: 'gray'};
       }

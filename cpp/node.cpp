@@ -15,6 +15,7 @@
 #include <map>
 #include <algorithm>
 #include <cstdlib>
+#include <thread>
 
 using namespace std;
 using namespace boost::property_tree;
@@ -259,12 +260,14 @@ void visualize(HttpServer& server) {
       while (!Q.empty()) {
         node curr = Q.front();
         Q.pop();
-        log(logstream, "visualize_bfs_curr_node", to_str(curr));
+        if (visited[curr.uuid]) continue;
         visited[curr.uuid] = true;
+        log(logstream, "visualize_bfs_curr_node", to_str(curr));
         nodes.push_back(make_pair("", node_to_json(curr)));
         vector<edge> neighbors;
         try {
           neighbors = requests::edges(curr.ip, curr.port).first;
+          log(logstream, "visualize_bfs_neighbors", neighbors);
         } catch (exception& e) {
           log(logstream, "visualize_error", e.what());
         }
@@ -299,35 +302,51 @@ void join(bool first_join) {
     if (!bs_node.exists()) {
       return;
     }
-    return;
-    vector<edge> edges = requests::edges(bs_node.ip, bs_node.port).first;
+    node x = requests::info(bs_node.ip, bs_node.port).first;
+    vector<edge> edges = requests::edges(x.ip, x.port).first;
+    log(logstream, "join-bootstrap-edges", edges);
     if (!get_edge(edges, "parent").exists()) {
-      if (get_edge(edges, "prev") == get_edge(edges, "next")) {  // 1 ili 2 u top levelu
-        edge xNext = requests::set_edge(bs_node.ip, bs_node.port, node_to_edge(node_info, "next")).first;
-        requests::set_edge(xNext.ip, xNext.port, node_to_edge(node_info, "prev"));
-        e_prev = node_to_edge(bs_node, "prev");
-        e_next = xNext;
+      log(logstream, "join-line", __LINE__);
+      log(logstream, "join-edges-next", get_edge(edges, "next"));
+      log(logstream, "join-edges-prev", get_edge(edges, "prev"));
+      if (edge_equals_ignore_type(get_edge(edges, "prev"), get_edge(edges, "next"))) {  // 1 ili 2 u top levelu
+        log(logstream, "join-line", __LINE__);
+        edge x_next = requests::set_edge(x.ip, x.port, node_to_edge(node_info, "next")).first;
+        log(logstream, "join-x_next", x_next);
+        requests::set_edge(x_next.ip, x_next.port, node_to_edge(node_info, "prev"));
+        e_prev = node_to_edge(x, "prev");
+        e_next = x_next;
       } else {  // prvi u drugom levelu
-        requests::adopt(bs_node.ip, bs_node.port, node_to_edge(node_info, "child"), false);
+        log(logstream, "join-line", __LINE__);
+        requests::adopt(x.ip, x.port, node_to_edge(node_info, "child"), false);
+        e_parent = node_to_edge(x, "parent");
       }
     } else {
+      log(logstream, "join-line", __LINE__);
       edge parent = get_edge(edges, "parent");
       adopt_response response = requests::adopt(parent.ip, parent.port, node_to_edge(node_info, "child"), true).first;
+      log(logstream, "join-adopt_response", response);
       if (response.redirect == true) {
+        log(logstream, "join-line", __LINE__);
         e_parent = response.next;
         response = requests::adopt(response.next.ip, response.next.port, node_to_edge(node_info, "child"), false).first;
+        log(logstream, "join-adopt_response", response);
       }
       if (response.create_level == false) {
-        edge xNext = requests::set_edge(bs_node.ip, bs_node.port, node_to_edge(node_info, "next")).first;
-        requests::set_edge(xNext.ip, xNext.port, node_to_edge(node_info, "prev"));
-        e_prev = node_to_edge(bs_node, "prev");
-        e_next = xNext;
+        e_parent = parent;
+        log(logstream, "join-line", __LINE__);
+        edge x_next = requests::set_edge(x.ip, x.port, node_to_edge(node_info, "next")).first;
+        requests::set_edge(x_next.ip, x_next.port, node_to_edge(node_info, "prev"));
+        e_prev = node_to_edge(x, "prev");
+        e_next = x_next;
       } else {  // T.T
+        log(logstream, "join-line", __LINE__);
+        log(logstream, "join-new-level-edges", edges);
         edge this_prev_0 = get_edge(response.edges, "child", 0);
         edge this_prev_1 = get_edge(response.edges, "child", 1);
         edge this_prev_2 = get_edge(response.edges, "child", 2);
         edge this_prev_3 = get_edge(response.edges, "child", 3);
-        edge new_prev_1_next = requests::get_edge(bs_node.ip, bs_node.port, "next").first;
+        edge new_prev_1_next = requests::get_edge(x.ip, x.port, "next").first;
         requests::set_edge(this_prev_1.ip, this_prev_1.port, new_prev_1_next, "next");
         requests::set_edge(new_prev_1_next.ip, new_prev_1_next.port, this_prev_1, "prev");
         requests::adopt(this_prev_0.ip, this_prev_0.port, this_prev_2, false);
