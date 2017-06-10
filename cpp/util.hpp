@@ -63,7 +63,7 @@ inline string make_addr(const string& ip, const string& port) {
 
 
 inline void log(stringstream& logz, const string& handler, const string& error_msg) {
-  logz << "@" << handler << " : " << error_msg << "\n"; 
+  logz << handler << " : " << error_msg << "\n"; 
 }
 
 void send(shared_ptr<HttpServer::Response> response, const string& body) {
@@ -100,6 +100,24 @@ void send_error(shared_ptr<HttpServer::Response> response, ptree& json, const st
   string json_str;
   json_to_string(json, json_str);
   send(response, json_str);
+}
+
+void default_resource_send(const HttpServer &server, const shared_ptr<HttpServer::Response> &response,
+                           const shared_ptr<ifstream> &ifs) {
+    //read and send 128 KB at a time
+    static vector<char> buffer(131072); // Safe when server is running on one thread :(
+    streamsize read_length;
+    if ((read_length=ifs->read(&buffer[0], buffer.size()).gcount())>0) {
+        response->write(&buffer[0], read_length);
+        if(read_length==static_cast<streamsize>(buffer.size())) {
+            server.send(response, [&server, response, ifs](const boost::system::error_code &ec) {
+                if(!ec)
+                    default_resource_send(server, response, ifs);
+                else
+                    cerr << "Connection interrupted" << endl;
+            });
+        }
+    }
 }
 
 #endif 

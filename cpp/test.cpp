@@ -27,6 +27,7 @@ using config::Node::stop_node;
 using config::Bootstrap::start_bootstrap;
 using config::Bootstrap::stop_bootstrap;
 using config::print_response;
+using config::bootstrap_skip;
 using requests::status;
 
 typedef SimpleWeb::Client<SimpleWeb::HTTP> HttpClient;
@@ -145,7 +146,7 @@ namespace Node {
   namespace basic {
     void test_ok() {
       string port = "2000";
-      start_node(port, "300");
+      start_node(port, bootstrap_skip);
       this_thread::sleep_for(chrono::seconds(1));
       status response = requests::ok("localhost", port);
       ASSERT_EQ(response.code, "ok");
@@ -153,7 +154,7 @@ namespace Node {
     }
     void test_info() {
       string port = "2000";
-      start_node(port, "300");
+      start_node(port, bootstrap_skip);
       this_thread::sleep_for(chrono::seconds(1));
       pair<node, status> response = requests::info("localhost", port);
       ASSERT_EQ(response.first.uuid, 0);
@@ -165,8 +166,8 @@ namespace Node {
     void test_check() {
       string port_1 = "2001";
       string port_2 = "2002";
-      start_node(port_1, "300");
-      start_node(port_2, "300");
+      start_node(port_1, bootstrap_skip);
+      start_node(port_2, bootstrap_skip);
       this_thread::sleep_for(chrono::seconds(1));
       pair<bool, status> response;
 
@@ -186,7 +187,7 @@ namespace Node {
     using namespace ::network;
     void test_edges() {
       string port = "2000";
-      start_node(port, "300");
+      start_node(port, bootstrap_skip);
       this_thread::sleep_for(chrono::seconds(1));
       pair<vector<edge>, status> response = requests::edges("localhost", port);
       ASSERT_EQ(response.second.code, "ok");
@@ -196,7 +197,7 @@ namespace Node {
     void test_get_edge() {
       pair<edge, status> response;
       string port = "2000";
-      start_node(port, "300");
+      start_node(port, bootstrap_skip);
       this_thread::sleep_for(chrono::seconds(1));
 
       response = requests::get_edge("localhost", port, "prev");
@@ -227,7 +228,7 @@ namespace Node {
     }
     void test_set_edge() {
       string port = "2000";
-      start_node(port, "300");
+      start_node(port, bootstrap_skip);
       this_thread::sleep_for(chrono::seconds(1));
       __test_set_edge_t1(port, "parent");
       __test_set_edge_t1(port, "prev");
@@ -236,7 +237,7 @@ namespace Node {
     }
     void test_get_set_edges() {
       string port = "2000";
-      start_node(port, "300");
+      start_node(port, bootstrap_skip);
       this_thread::sleep_for(chrono::seconds(1));
 
       edge edge_1(1, "1.1.2.4", "80", "parent");
@@ -266,6 +267,81 @@ namespace Node {
       ASSERT_EQ(r2.first[2], edge_3);
 
       stop_node(port);
+    }
+
+    void test_adopt() {
+      string ip = "localhost";
+      string port = "2000";
+      start_node(port, bootstrap_skip);
+      this_thread::sleep_for(chrono::seconds(1));
+
+      edge e_next = edge(100, "1.1.1.2", "2001", "next");
+      requests::set_edge(ip, port, e_next);
+
+      vector<edge> children {
+        edge(1, "0.0.0.1", "2002", "child"), 
+        edge(2, "5.0.0.1", "2003", "child"), 
+        edge(3, "6.0.0.1", "2004", "child"), 
+        edge(4, "22.0.0.1", "2005", "child"),  
+        edge(5, "66.0.0.1", "2006", "child")
+      };
+
+      auto r = requests::adopt(ip, port, children[0], true).first;
+      ASSERT_EQ(r.redirect, false);
+      ASSERT_EQ(r.create_level, false);
+
+      r = requests::adopt(ip, port, children[1], true).first;
+      ASSERT_EQ(r.redirect, false);
+      ASSERT_EQ(r.create_level, false);
+
+      r = requests::adopt(ip, port, children[2], true).first;
+      ASSERT_EQ(r.redirect, true);
+      ASSERT_EQ(r.next, e_next);
+
+      r = requests::adopt(ip, port, children[2], false).first;
+      ASSERT_EQ(r.redirect, false);
+      ASSERT_EQ(r.create_level, false);
+
+      r = requests::adopt(ip, port, children[3], true).first;
+      ASSERT_EQ(r.redirect, false);
+      ASSERT_EQ(r.create_level, false);
+
+      r = requests::adopt(ip, port, children[4], true).first;
+      ASSERT_EQ(r.redirect, false);
+      ASSERT_EQ(r.create_level, true);
+
+      auto r2 = requests::edges(ip, port).first;
+      sort(r2.begin(), r2.end()); // sort by uuid
+      ASSERT_EQ(r2[0], children[0]);
+      ASSERT_EQ(r2[1], children[1]);
+      ASSERT_EQ(r2[2], children[2]);
+      ASSERT_EQ(r2[3], children[3]);
+
+      r2 = requests::edges(ip, port).first;
+      sort(r2.begin(), r2.end());
+      ASSERT_EQ(r2[0], children[0]);
+      ASSERT_EQ(r2[1], children[1]);
+
+      stop_node(port);
+    }
+    void test_visualize() {
+      string ip = "localhost";
+      string port_1 = "2000";
+      string port_2 = "2001";
+      string port_3 = "2002";
+      start_node(port_1, bootstrap_skip);
+      start_node(port_2, bootstrap_skip);
+      start_node(port_3, bootstrap_skip);
+      this_thread::sleep_for(chrono::seconds(1));
+      requests::set_edge(ip, port_1, edge(1, ip, port_2, "parent"));
+      requests::set_edge(ip, port_2, edge(2, ip, port_3, "next"));
+      auto r = requests::visualize(ip, port_1);
+      ASSERT_EQ(r.second.code, "ok");
+      ASSERT_EQ(r.first.nodes.size(), 3);
+      ASSERT_EQ(r.first.vedges.size(), 2);
+      stop_node(port_1);
+      stop_node(port_2);
+      stop_node(port_3);
     }
   } // network
 };
@@ -304,23 +380,48 @@ void run(function<void()> const& test, string test_name) {
   }
 }
 
+void tt() {
+      string ip = "localhost";
+      string port_1 = "2000";
+      string port_2 = "2001";
+      string port_3 = "2002";
+      start_node(port_1, bootstrap_skip);
+      start_node(port_2, bootstrap_skip);
+      start_node(port_3, bootstrap_skip);
+      this_thread::sleep_for(chrono::seconds(1));
+      requests::set_edge(ip, port_1, edge(1, ip, port_2, "parent"));
+      requests::set_edge(ip, port_2, edge(2, ip, port_3, "next"));
+      requests::set_edge(ip, port_3, edge(0, ip, port_1, "prev"));
+      while (1) {}
+      auto r = requests::visualize(ip, port_1);
+      ASSERT_EQ(r.second.code, "ok");
+      ASSERT_EQ(r.first.nodes.size(), 3);
+      ASSERT_EQ(r.first.vedges.size(), 2);
+      stop_node(port_1);
+      stop_node(port_2);
+      stop_node(port_3);
+    }
+
 int main(int argc, char *argv[]) {
 
   DBG = print_response;
 
-  RUN_TEST(Bootstrap::test_reset); // boostrap/api/reset
-  RUN_TEST(Bootstrap::test_hello); // boostrap/api/hello
+  // RUN_TEST(Bootstrap::test_reset); // boostrap/api/reset
+  // RUN_TEST(Bootstrap::test_hello); // boostrap/api/hello
 
-  RUN_TEST(Node::basic::test_ok); // node/api/basic/ok
-  RUN_TEST(Node::basic::test_info); // node/api/basic/info
-  RUN_TEST(Node::basic::test_check); // node/api/basic/check
+  // RUN_TEST(Node::basic::test_ok); // node/api/basic/ok
+  // RUN_TEST(Node::basic::test_info); // node/api/basic/info
+  // RUN_TEST(Node::basic::test_check); // node/api/basic/check
 
-  RUN_TEST(Node::network::test_edges); // node/api/network/edges
-  RUN_TEST(Node::network::test_get_edge); // node/api/network/get_edge
-  RUN_TEST(Node::network::test_set_edge); // node/api/network/set_edge
-  RUN_TEST(Node::network::test_get_set_edges); // get_edge + set_edge + edges
-  
-  clean_up(); // za svaki slucaj
+  // RUN_TEST(Node::network::test_edges); // node/api/network/edges
+  // RUN_TEST(Node::network::test_get_edge); // node/api/network/get_edge
+  // RUN_TEST(Node::network::test_set_edge); // node/api/network/set_edge
+  // RUN_TEST(Node::network::test_get_set_edges); // get_edge + set_edge + edges
+  // RUN_TEST(Node::network::test_adopt); // node/api/network/adopt
+  // RUN_TEST(Node::network::test_visualize); // node/api/network/visualize
+
+  clean_up();
+  tt();
 
   output_results();
   return 0;
