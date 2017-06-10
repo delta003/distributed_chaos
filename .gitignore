@@ -100,7 +100,6 @@ CTestTestfile.cmake
 ### Eclipse template
 
 .metadata
-bin/
 tmp/
 *.tmp
 *.bak
