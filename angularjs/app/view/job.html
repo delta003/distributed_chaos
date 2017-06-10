@@ -1,1 +1,17 @@
+<div class=col-md-8>
 <h1>Job {{ vm.jobid }}</h1>
+<ul>
+    <li><a href="/">Back</a></li>
+    <li><a ng-click="vm.killJob()">[!] Kill</a> {{ vm.killresponse }}</li>
+</ul>
+<canvas id="canvas" width="640" height="480">
+</div>
+
+<div class=col-md-4>
+<ul>
+    <h1>Node colors</h1>
+    <li ng-repeat="x in vm.colors">
+        Node {{ x.node }} - <span style="color: {{ x.color }};">{{ x.color}}</span>
+    </li>
+</ul>
+</div>
