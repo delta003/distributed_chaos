@@ -29,20 +29,6 @@
         var edges = response.edges;
         showNetwork(nodes, edges);
       });
-      // var nodes = [
-      //     { uuid: "1", ip: "0.0.0.1", port: "8001" },
-      //     { uuid: "2", ip: "0.0.0.2", port: "8002" },
-      //     { uuid: "3", ip: "0.0.0.3", port: "8003" }
-      // ];
-      // var edges = [
-      //     { start_uuid: "1", end_uuid: "2", type: "next" },
-      //     { start_uuid: "1", end_uuid: "3", type: "prev" },
-      //     { start_uuid: "2", end_uuid: "3", type: "next" },
-      //     { start_uuid: "2", end_uuid: "1", type: "prev" },
-      //     { start_uuid: "3", end_uuid: "1", type: "next" },
-      //     { start_uuid: "3", end_uuid: "2", type: "prev" }
-      // ];
-      // showNetwork(nodes, edges);
     }
 
     function getColor(type) {
