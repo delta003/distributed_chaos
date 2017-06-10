@@ -222,45 +222,63 @@ public class NetworkJoiner implements Runnable {
         Edge thisPrev3 = childEdges.get(3);  // This is mainContact
 
         // Exclude thisPrev2 and thisPrev3 from layer
-        EdgeResponse newPrev1NextResponse = HttpHelper.getInstance().networkGetEdgeWithRetry(
-                new IPAndPort(thisPrev3.getIp(), thisPrev3.getPort()),
+        EdgeResponse newNextResponse = HttpHelper.getInstance().networkGetEdgeWithRetry(
+                new IPAndPort(mainContact.getIp(), mainContact.getPort()),
                 new EdgeTypeRequest(EdgeType.NEXT));
-        if (newPrev1NextResponse == null) {
+        if (newNextResponse == null) {
             log.error("Main contact unreachable for get next.");
             return;
         }
-        if (newPrev1NextResponse.getStatus() == Status.ERROR) {
-            log.error("Main contact get next failed for: " + newPrev1NextResponse.getMessage());
+        if (newNextResponse.getStatus() == Status.ERROR) {
+            log.error("Main contact get next failed for: " + newNextResponse.getMessage());
             return;
         }
-        if (newPrev1NextResponse.getEdge() == null) {
+        if (newNextResponse.getEdge() == null) {
             log.error(String.format("Main contact responded on get next without next - %s:%s",
                     mainContact.getIp(), mainContact.getPort()));
             return;
         }
-        Edge newPrev1Next = newPrev1NextResponse.getEdge();
+        Edge newNext = newNextResponse.getEdge();
 
-        OldEdgeResponse prev1NextResponse = HttpHelper.getInstance().networkSetEdgeWithRetry(
-                new IPAndPort(thisPrev1.getIp(), thisPrev1.getPort()), new EdgeRequest(new Edge(
-                        newPrev1Next.getIp(), newPrev1Next.getPort(), newPrev1Next.getUuid(), EdgeType.NEXT)));
-        if (prev1NextResponse == null) {
-            log.error("Prev1 unreachable for set next.");
+        EdgeResponse newPrevResponse = HttpHelper.getInstance().networkGetEdgeWithRetry(
+                new IPAndPort(thisPrev2.getIp(), thisPrev2.getPort()),
+                new EdgeTypeRequest(EdgeType.PREV));
+        if (newPrevResponse == null) {
+            log.error("thisPrev2 unreachable for get prev.");
             return;
         }
-        if (prev1NextResponse.getStatus() == Status.ERROR) {
-            log.error("Prev1 failed to set next for: " + prev1NextResponse.getMessage());
+        if (newPrevResponse.getStatus() == Status.ERROR) {
+            log.error("thisPrev2 get prev failed for: " + newPrevResponse.getMessage());
+            return;
+        }
+        if (newPrevResponse.getEdge() == null) {
+            log.error(String.format("thisPrev2 responded on get next without next - %s:%s",
+                    thisPrev2.getIp(), thisPrev2.getPort()));
+            return;
+        }
+        Edge newPrev = newPrevResponse.getEdge();
+
+        OldEdgeResponse newNextPrevResponse = HttpHelper.getInstance().networkSetEdgeWithRetry(
+                new IPAndPort(newNext.getIp(), newNext.getPort()), new EdgeRequest(new Edge(
+                        newPrev.getIp(), newPrev.getPort(), newPrev.getUuid(), EdgeType.PREV)));
+        if (newNextPrevResponse == null) {
+            log.error("newNextPrevResponse unreachable for set prev.");
+            return;
+        }
+        if (newNextPrevResponse.getStatus() == Status.ERROR) {
+            log.error("newNextPrevResponse failed to set prev for: " + newNextPrevResponse.getMessage());
             return;
         }
 
-        OldEdgeResponse newPrev1NextPrevResponse = HttpHelper.getInstance().networkSetEdgeWithRetry(
-                new IPAndPort(newPrev1Next.getIp(), newPrev1Next.getPort()), new EdgeRequest(new Edge(
-                        thisPrev1.getIp(), thisPrev1.getPort(), thisPrev1.getUuid(), EdgeType.PREV)));
-        if (newPrev1NextPrevResponse == null) {
-            log.error("newPrev1Next unreachable for set next.");
+        OldEdgeResponse newPrevNextResponse = HttpHelper.getInstance().networkSetEdgeWithRetry(
+                new IPAndPort(newPrev.getIp(), newPrev.getPort()), new EdgeRequest(new Edge(
+                        newNext.getIp(), newNext.getPort(), newNext.getUuid(), EdgeType.NEXT)));
+        if (newPrevNextResponse == null) {
+            log.error("newPrevNextResponse unreachable for set next.");
             return;
         }
-        if (newPrev1NextPrevResponse.getStatus() == Status.ERROR) {
-            log.error("newPrev1Next failed to set next for: " + newPrev1NextPrevResponse.getMessage());
+        if (newPrevNextResponse.getStatus() == Status.ERROR) {
+            log.error("newPrevNextResponse failed to set next for: " + newPrevNextResponse.getMessage());
             return;
         }
 
