@@ -1,7 +1,7 @@
 // Unit tests.
 // Pokrenuti pomocu test makefajla.
 // Videti test_config.hpp pre pokretanja.
-// Potrebno je da portovi 2000-2009 budu slobodni.
+// Potrebno je da portovi 2000-2099 budu slobodni.
 
 #include "http/client_http.hpp"
 
@@ -45,14 +45,14 @@ void assert_eq(A a, B b, int line) {
   }
   std::ostringstream oss;
   oss << "Mismatch @ line " << line << " got " << a << " expected " << b << "\n";
-  throw std::runtime_error(oss.str());  
+  throw std::runtime_error(oss.str());
 }
 
 void assert_true(bool expression, int line) {
   if (!expression) {
     std::ostringstream oss;
     oss << "Mismatch @ line " << line << " epxression is false\n";
-    throw std::runtime_error(oss.str());  
+    throw std::runtime_error(oss.str());
   }
 }
 
@@ -61,305 +61,303 @@ void assert_true(bool expression, int line) {
 #define RUN_TEST(f) run(f, #f)
 
 namespace Bootstrap {
-  void test_hello() {
-    string port = "2000";
-    start_bootstrap(port);
-    pair<node, status> response; 
-    string node_ip, node_port, old_ip, old_port;
+void test_hello() {
+  string port = "2000";
+  start_bootstrap(port);
+  this_thread::sleep_for(chrono::seconds(1));
+  pair<node, status> response;
+  string node_ip, node_port, old_ip, old_port;
 
-    node_ip = "192.220.100.50";
-    node_port = "30000";
-    response = requests::hello("localhost", port, node_ip, node_port);
-    ASSERT_EQ(response.second.code, "ok");
-    ASSERT_EQ(response.first.uuid, 0);
-    ASSERT_EQ(response.first.ip, "");
-    ASSERT_EQ(response.first.port, "");
-    
-    old_ip = node_ip;
-    old_port = node_port;
-    node_ip = "100.220.100.50";
-    node_port = "224";
-    response = requests::hello("localhost", port, node_ip, node_port);
-    ASSERT_EQ(response.second.code, "ok");
-    ASSERT_EQ(response.first.uuid, 1);
-    ASSERT_EQ(response.first.ip, old_ip);
-    ASSERT_EQ(response.first.port, old_port);
+  node_ip = "192.220.100.50";
+  node_port = "30000";
+  response = requests::hello("localhost", port, node_ip, node_port);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_EQ(response.first.uuid, 0);
+  ASSERT_EQ(response.first.ip, "");
+  ASSERT_EQ(response.first.port, "");
 
-    old_ip = node_ip;
-    old_port = node_port;
-    node_ip = "200.220.100.50";
-    node_port = "324";
-    response = requests::hello("localhost", port, node_ip, node_port);
-    ASSERT_EQ(response.second.code, "ok");
-    ASSERT_EQ(response.first.uuid, 2);
-    ASSERT_EQ(response.first.ip, old_ip);
-    ASSERT_EQ(response.first.port, old_port);
+  old_ip = node_ip;
+  old_port = node_port;
+  node_ip = "100.220.100.50";
+  node_port = "224";
+  response = requests::hello("localhost", port, node_ip, node_port);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_EQ(response.first.uuid, 1);
+  ASSERT_EQ(response.first.ip, old_ip);
+  ASSERT_EQ(response.first.port, old_port);
 
-    auto reset_response = requests::reset("localhost", port);
-    ASSERT_EQ(reset_response.second.code, "ok");
+  old_ip = node_ip;
+  old_port = node_port;
+  node_ip = "200.220.100.50";
+  node_port = "324";
+  response = requests::hello("localhost", port, node_ip, node_port);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_EQ(response.first.uuid, 2);
+  ASSERT_EQ(response.first.ip, old_ip);
+  ASSERT_EQ(response.first.port, old_port);
 
-    old_ip = node_ip;
-    old_port = node_port;
-    node_ip = "288.255.100.50";
-    node_port = "5554";
-    response = requests::hello("localhost", port, node_ip, node_port);
-    ASSERT_EQ(response.second.code, "ok");
-    ASSERT_EQ(response.first.uuid, 0);
-    ASSERT_EQ(response.first.ip, "");
-    ASSERT_EQ(response.first.port, "");
+  auto reset_response = requests::reset("localhost", port);
+  ASSERT_EQ(reset_response.second.code, "ok");
 
-    old_ip = node_ip;
-    old_port = node_port;
-    node_ip = "123.255.101.50";
-    node_port = "3004";
-    response = requests::hello("localhost", port, node_ip, node_port);
-    ASSERT_EQ(response.second.code, "ok");
-    ASSERT_EQ(response.first.uuid, 1);
-    ASSERT_EQ(response.first.ip, old_ip);
-    ASSERT_EQ(response.first.port, old_port);
+  old_ip = node_ip;
+  old_port = node_port;
+  node_ip = "288.255.100.50";
+  node_port = "5554";
+  response = requests::hello("localhost", port, node_ip, node_port);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_EQ(response.first.uuid, 0);
+  ASSERT_EQ(response.first.ip, "");
+  ASSERT_EQ(response.first.port, "");
 
-    stop_bootstrap(port);
-  }
+  old_ip = node_ip;
+  old_port = node_port;
+  node_ip = "123.255.101.50";
+  node_port = "3004";
+  response = requests::hello("localhost", port, node_ip, node_port);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_EQ(response.first.uuid, 1);
+  ASSERT_EQ(response.first.ip, old_ip);
+  ASSERT_EQ(response.first.port, old_port);
 
-  void test_reset() {
-    string port = "2000";
-    start_bootstrap(port);
-    pair<bool, status> response = requests::reset("localhost", port);
-    ASSERT_EQ(response.second.code, "ok");
-    ASSERT_EQ(response.first, true);
-    response = requests::reset("localhost", port);
-    ASSERT_EQ(response.second.code, "ok");
-    ASSERT_EQ(response.first, false);
-    response = requests::reset("localhost", port);
-    ASSERT_EQ(response.second.code, "ok");
-    ASSERT_EQ(response.first, false);
-    auto r2 = requests::reset_done("localhost", port);
-    ASSERT_EQ(r2.code, "ok");
-    response = requests::reset("localhost", port);
-    ASSERT_EQ(response.second.code, "ok");
-    ASSERT_EQ(response.first, true);
-  }
+  stop_bootstrap(port);
+}
 
-  void test_logz() {
-    string port = "2000";
-    start_bootstrap(port);
-    HttpClient client("localhost:" + port);
-    client.request("POST", "/api/hello", "error");
-    client.request("POST", "/api/hello", "not a json");
-    client.request("GET", "/api/reset", "resetuj se!!!");
-    auto response = client.request("GET", "/logz");
-    cout << response->content.rdbuf();
-    stop_bootstrap(port);
-  }
-} // Bootstrap
+void test_reset() {
+  string port = "2000";
+  start_bootstrap(port);
+  this_thread::sleep_for(chrono::seconds(1));
+  pair<bool, status> response = requests::reset("localhost", port);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_EQ(response.first, true);
+  response = requests::reset("localhost", port);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_EQ(response.first, false);
+  response = requests::reset("localhost", port);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_EQ(response.first, false);
+  auto r2 = requests::reset_done("localhost", port);
+  ASSERT_EQ(r2.code, "ok");
+  response = requests::reset("localhost", port);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_EQ(response.first, true);
+}
+
+void test_logz() {
+  string port = "2000";
+  start_bootstrap(port);
+  this_thread::sleep_for(chrono::seconds(1));
+  HttpClient client("localhost:" + port);
+  client.request("POST", "/api/hello", "error");
+  client.request("POST", "/api/hello", "not a json");
+  client.request("GET", "/api/reset", "resetuj se!!!");
+  auto response = client.request("GET", "/logz");
+  cout << response->content.rdbuf();
+  stop_bootstrap(port);
+}
+}  // Bootstrap
 
 namespace Node {
-  namespace basic {
-    void test_ok() {
-      string port = "2000";
-      start_node(port, bootstrap_skip);
-      this_thread::sleep_for(chrono::seconds(1));
-      status response = requests::ok("localhost", port);
-      ASSERT_EQ(response.code, "ok");
-      stop_node(port);
-    }
-    void test_info() {
-      string port = "2000";
-      start_node(port, bootstrap_skip);
-      this_thread::sleep_for(chrono::seconds(1));
-      pair<node, status> response = requests::info("localhost", port);
-      ASSERT_EQ(response.first.uuid, 0);
-      ASSERT_EQ(response.first.ip, "localhost");
-      ASSERT_EQ(response.first.port, port);
-      ASSERT_EQ(response.second.code, "ok");
-      stop_node(port);
-    }
-    void test_check() {
-      string port_1 = "2001";
-      string port_2 = "2002";
-      start_node(port_1, bootstrap_skip);
-      start_node(port_2, bootstrap_skip);
-      this_thread::sleep_for(chrono::seconds(1));
-      pair<bool, status> response;
+namespace basic {
+void test_ok() {
+  string port = "2000";
+  start_node(port, bootstrap_skip);
+  this_thread::sleep_for(chrono::seconds(1));
+  status response = requests::ok("localhost", port);
+  ASSERT_EQ(response.code, "ok");
+  stop_node(port);
+}
+void test_info() {
+  string port = "2000";
+  start_node(port, bootstrap_skip);
+  this_thread::sleep_for(chrono::seconds(1));
+  pair<node, status> response = requests::info("localhost", port);
+  ASSERT_EQ(response.first.uuid, 0);
+  ASSERT_EQ(response.first.ip, "localhost");
+  ASSERT_EQ(response.first.port, port);
+  ASSERT_EQ(response.second.code, "ok");
+  stop_node(port);
+}
+void test_check() {
+  string port_1 = "2001";
+  string port_2 = "2002";
+  start_node(port_1, bootstrap_skip);
+  start_node(port_2, bootstrap_skip);
+  this_thread::sleep_for(chrono::seconds(1));
+  pair<bool, status> response;
 
-      response = requests::check("localhost", port_1, "localhost", port_2);
-      ASSERT_EQ(response.first, true);
-      ASSERT_EQ(response.second.code, "ok");
+  response = requests::check("localhost", port_1, "localhost", port_2);
+  ASSERT_EQ(response.first, true);
+  ASSERT_EQ(response.second.code, "ok");
 
-      stop_node(port_2);
-      response = requests::check("localhost", port_1, "localhost", port_2);
-      ASSERT_EQ(response.first, false);
-      ASSERT_EQ(response.second.code, "ok");
+  stop_node(port_2);
+  response = requests::check("localhost", port_1, "localhost", port_2);
+  ASSERT_EQ(response.first, false);
+  ASSERT_EQ(response.second.code, "ok");
 
-      stop_node(port_1);
-    }
-  } // basic
-  namespace network {
-    using namespace ::network;
-    void test_edges() {
-      string port = "2000";
-      start_node(port, bootstrap_skip);
-      this_thread::sleep_for(chrono::seconds(1));
-      pair<vector<edge>, status> response = requests::edges("localhost", port);
-      ASSERT_EQ(response.second.code, "ok");
-      ASSERT_EQ(response.first.size(), 0);
-      stop_node(port);
-    }
-    void test_get_edge() {
-      pair<edge, status> response;
-      string port = "2000";
-      start_node(port, bootstrap_skip);
-      this_thread::sleep_for(chrono::seconds(1));
+  stop_node(port_1);
+}
+}  // basic
+namespace network {
+using namespace ::network;
+void test_edges() {
+  string port = "2000";
+  start_node(port, bootstrap_skip);
+  this_thread::sleep_for(chrono::seconds(1));
+  pair<vector<edge>, status> response = requests::edges("localhost", port);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_EQ(response.first.size(), 0);
+  stop_node(port);
+}
+void test_get_edge() {
+  pair<edge, status> response;
+  string port = "2000";
+  start_node(port, bootstrap_skip);
+  this_thread::sleep_for(chrono::seconds(1));
 
-      response = requests::get_edge("localhost", port, "prev");
-      ASSERT_EQ(response.second.code, "ok");
-      ASSERT_TRUE(!response.first.exists());
+  response = requests::get_edge("localhost", port, "prev");
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_TRUE(!response.first.exists());
 
-      response = requests::get_edge("localhost", port, "next");
-      ASSERT_EQ(response.second.code, "ok");
-      ASSERT_TRUE(!response.first.exists());
+  response = requests::get_edge("localhost", port, "next");
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_TRUE(!response.first.exists());
 
-      response = requests::get_edge("localhost", port, "parent");
-      ASSERT_EQ(response.second.code, "ok");
-      ASSERT_TRUE(!response.first.exists());
-      stop_node(port);
-    }
-    void __test_set_edge_t1(string port, string type) {
-      pair<edge, status> response;
+  response = requests::get_edge("localhost", port, "parent");
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_TRUE(!response.first.exists());
+  stop_node(port);
+}
+void __test_set_edge_t1(string port, string type) {
+  pair<edge, status> response;
 
-      edge new_edge = edge(224, "1.1.1.5", "2013", type);
-      response = requests::set_edge("localhost", port, new_edge);
-      ASSERT_EQ(response.second.code, "ok");
-      ASSERT_TRUE(!response.first.exists());
+  edge new_edge = edge(224, "1.1.1.5", "2013", type);
+  response = requests::set_edge("localhost", port, new_edge);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_TRUE(!response.first.exists());
 
-      response = requests::set_edge("localhost", port, new_edge);
-      ASSERT_EQ(response.second.code, "ok");
-      ASSERT_TRUE(response.first.exists());
-      ASSERT_EQ(response.first, new_edge); // oldedge == new_edge
-    }
-    void test_set_edge() {
-      string port = "2000";
-      start_node(port, bootstrap_skip);
-      this_thread::sleep_for(chrono::seconds(1));
-      __test_set_edge_t1(port, "parent");
-      __test_set_edge_t1(port, "prev");
-      __test_set_edge_t1(port, "next");
-      stop_node(port);
-    }
-    void test_get_set_edges() {
-      string port = "2000";
-      start_node(port, bootstrap_skip);
-      this_thread::sleep_for(chrono::seconds(1));
+  response = requests::set_edge("localhost", port, new_edge);
+  ASSERT_EQ(response.second.code, "ok");
+  ASSERT_TRUE(response.first.exists());
+  ASSERT_EQ(response.first, new_edge);  // oldedge == new_edge
+}
+void test_set_edge() {
+  string port = "2000";
+  start_node(port, bootstrap_skip);
+  this_thread::sleep_for(chrono::seconds(1));
+  __test_set_edge_t1(port, "parent");
+  __test_set_edge_t1(port, "prev");
+  __test_set_edge_t1(port, "next");
+  stop_node(port);
+}
+void test_get_set_edges() {
+  string port = "2000";
+  start_node(port, bootstrap_skip);
+  this_thread::sleep_for(chrono::seconds(1));
 
-      edge edge_1(1, "1.1.2.4", "80", "parent");
-      edge edge_2(2, "1.5.2.1", "69", "next");
-      edge edge_3(3, "100.55.2.4", "777", "prev");
-      requests::set_edge("localhost", port, edge_1);
-      requests::set_edge("localhost", port, edge_2);
-      requests::set_edge("localhost", port, edge_3);
+  edge edge_1(1, "1.1.2.4", "80", "parent");
+  edge edge_2(2, "1.5.2.1", "69", "next");
+  edge edge_3(3, "100.55.2.4", "777", "prev");
+  requests::set_edge("localhost", port, edge_1);
+  requests::set_edge("localhost", port, edge_2);
+  requests::set_edge("localhost", port, edge_3);
 
-      pair<edge, status> r1 = requests::get_edge("localhost", port, edge_1.type);
-      ASSERT_EQ(r1.second.code, "ok");
-      ASSERT_EQ(r1.first, edge_1);
-      r1 = requests::get_edge("localhost", port, edge_2.type);
-      ASSERT_EQ(r1.second.code, "ok");
-      ASSERT_EQ(r1.first, edge_2);
-      r1 = requests::get_edge("localhost", port, edge_3.type);
-      ASSERT_EQ(r1.second.code, "ok");
-      ASSERT_EQ(r1.first, edge_3);
+  pair<edge, status> r1 = requests::get_edge("localhost", port, edge_1.type);
+  ASSERT_EQ(r1.second.code, "ok");
+  ASSERT_EQ(r1.first, edge_1);
+  r1 = requests::get_edge("localhost", port, edge_2.type);
+  ASSERT_EQ(r1.second.code, "ok");
+  ASSERT_EQ(r1.first, edge_2);
+  r1 = requests::get_edge("localhost", port, edge_3.type);
+  ASSERT_EQ(r1.second.code, "ok");
+  ASSERT_EQ(r1.first, edge_3);
 
-      pair<vector<edge>, status> r2 = requests::edges("localhost", port);
-      ASSERT_EQ(r2.second.code, "ok");
-      ASSERT_EQ(r2.first.size(), 3);
+  pair<vector<edge>, status> r2 = requests::edges("localhost", port);
+  ASSERT_EQ(r2.second.code, "ok");
+  ASSERT_EQ(r2.first.size(), 3);
 
-      sort(r2.first.begin(), r2.first.end());
-      ASSERT_EQ(r2.first[0], edge_1);
-      ASSERT_EQ(r2.first[1], edge_2);
-      ASSERT_EQ(r2.first[2], edge_3);
+  sort(r2.first.begin(), r2.first.end());
+  ASSERT_EQ(r2.first[0], edge_1);
+  ASSERT_EQ(r2.first[1], edge_2);
+  ASSERT_EQ(r2.first[2], edge_3);
 
-      stop_node(port);
-    }
+  stop_node(port);
+}
 
-    void test_adopt() {
-      string ip = "localhost";
-      string port = "2000";
-      start_node(port, bootstrap_skip);
-      this_thread::sleep_for(chrono::seconds(1));
+void test_adopt() {
+  string ip = "localhost";
+  string port = "2000";
+  start_node(port, bootstrap_skip);
+  this_thread::sleep_for(chrono::seconds(1));
 
-      edge e_next = edge(100, "1.1.1.2", "2001", "next");
-      requests::set_edge(ip, port, e_next);
+  edge e_next = edge(100, "1.1.1.2", "2001", "next");
+  requests::set_edge(ip, port, e_next);
 
-      vector<edge> children {
-        edge(1, "0.0.0.1", "2002", "child"), 
-        edge(2, "5.0.0.1", "2003", "child"), 
-        edge(3, "6.0.0.1", "2004", "child"), 
-        edge(4, "22.0.0.1", "2005", "child"),  
-        edge(5, "66.0.0.1", "2006", "child")
-      };
+  vector<edge> children{edge(1, "0.0.0.1", "2002", "child"), edge(2, "5.0.0.1", "2003", "child"), edge(3, "6.0.0.1", "2004", "child"),
+                        edge(4, "22.0.0.1", "2005", "child"), edge(5, "66.0.0.1", "2006", "child")};
 
-      auto r = requests::adopt(ip, port, children[0], true).first;
-      ASSERT_EQ(r.redirect, false);
-      ASSERT_EQ(r.create_level, false);
+  auto r = requests::adopt(ip, port, children[0], true).first;
+  ASSERT_EQ(r.redirect, false);
+  ASSERT_EQ(r.create_level, false);
 
-      r = requests::adopt(ip, port, children[1], true).first;
-      ASSERT_EQ(r.redirect, false);
-      ASSERT_EQ(r.create_level, false);
+  r = requests::adopt(ip, port, children[1], true).first;
+  ASSERT_EQ(r.redirect, false);
+  ASSERT_EQ(r.create_level, false);
 
-      r = requests::adopt(ip, port, children[2], true).first;
-      ASSERT_EQ(r.redirect, true);
-      ASSERT_EQ(r.next, e_next);
+  r = requests::adopt(ip, port, children[2], true).first;
+  ASSERT_EQ(r.redirect, true);
+  ASSERT_EQ(r.next, e_next);
 
-      r = requests::adopt(ip, port, children[2], false).first;
-      ASSERT_EQ(r.redirect, false);
-      ASSERT_EQ(r.create_level, false);
+  r = requests::adopt(ip, port, children[2], false).first;
+  ASSERT_EQ(r.redirect, false);
+  ASSERT_EQ(r.create_level, false);
 
-      r = requests::adopt(ip, port, children[3], true).first;
-      ASSERT_EQ(r.redirect, false);
-      ASSERT_EQ(r.create_level, false);
+  r = requests::adopt(ip, port, children[3], true).first;
+  ASSERT_EQ(r.redirect, false);
+  ASSERT_EQ(r.create_level, false);
 
-      r = requests::adopt(ip, port, children[4], true).first;
-      ASSERT_EQ(r.redirect, false);
-      ASSERT_EQ(r.create_level, true);
+  r = requests::adopt(ip, port, children[4], true).first;
+  ASSERT_EQ(r.redirect, false);
+  ASSERT_EQ(r.create_level, true);
 
-      auto r2 = requests::edges(ip, port).first;
-      sort(r2.begin(), r2.end()); // sort by uuid
-      ASSERT_EQ(r2[0], children[0]);
-      ASSERT_EQ(r2[1], children[1]);
-      ASSERT_EQ(r2[2], children[2]);
-      ASSERT_EQ(r2[3], children[3]);
+  auto r2 = requests::edges(ip, port).first;
+  sort(r2.begin(), r2.end());  // sort by uuid
+  ASSERT_EQ(r2[0], children[0]);
+  ASSERT_EQ(r2[1], children[1]);
+  ASSERT_EQ(r2[2], children[2]);
+  ASSERT_EQ(r2[3], children[3]);
 
-      r2 = requests::edges(ip, port).first;
-      sort(r2.begin(), r2.end());
-      ASSERT_EQ(r2[0], children[0]);
-      ASSERT_EQ(r2[1], children[1]);
+  r2 = requests::edges(ip, port).first;
+  sort(r2.begin(), r2.end());
+  ASSERT_EQ(r2[0], children[0]);
+  ASSERT_EQ(r2[1], children[1]);
 
-      stop_node(port);
-    }
-    void test_visualize() {
-      string ip = "localhost";
-      string port_1 = "2000";
-      string port_2 = "2001";
-      string port_3 = "2002";
-      start_node(port_1, bootstrap_skip);
-      start_node(port_2, bootstrap_skip);
-      start_node(port_3, bootstrap_skip);
-      this_thread::sleep_for(chrono::seconds(1));
-      requests::set_edge(ip, port_1, edge(1, ip, port_2, "parent"));
-      requests::set_edge(ip, port_2, edge(2, ip, port_3, "next"));
-      auto r = requests::visualize(ip, port_1);
-      ASSERT_EQ(r.second.code, "ok");
-      ASSERT_EQ(r.first.nodes.size(), 3);
-      ASSERT_EQ(r.first.vedges.size(), 2);
-      stop_node(port_1);
-      stop_node(port_2);
-      stop_node(port_3);
-    }
-  } // network
+  stop_node(port);
+}
+void test_visualize() {
+  string ip = "localhost";
+  string port_1 = "2000";
+  string port_2 = "2001";
+  string port_3 = "2002";
+  start_node(port_1, bootstrap_skip);
+  start_node(port_2, bootstrap_skip);
+  start_node(port_3, bootstrap_skip);
+  this_thread::sleep_for(chrono::seconds(1));
+  requests::set_edge(ip, port_1, edge(1, ip, port_2, "parent"));
+  requests::set_edge(ip, port_2, edge(2, ip, port_3, "next"));
+  auto r = requests::visualize(ip, port_1);
+  ASSERT_EQ(r.second.code, "ok");
+  ASSERT_EQ(r.first.nodes.size(), 3);
+  ASSERT_EQ(r.first.vedges.size(), 2);
+  stop_node(port_1);
+  stop_node(port_2);
+  stop_node(port_3);
+}
+}  // network
 };
 
 void clean_up() {
-  for (int i = 0; i < 10; i++) {
-    string port = "200" + to_string(i);
+  for (int i = 0; i < 100; i++) {
+    string port = to_string(2000 + i);
     stop_bootstrap(port);
     stop_node(port);
   }
@@ -391,27 +389,28 @@ void run(function<void()> const& test, string test_name) {
   }
 }
 
-void start_network() {
+// Pokrenuti / (vizualizaciju) posle svakog startovanja/pada noda.
+void end_to_end_test() {
   clean_up();
-  string ip = "localhost";
-  string port_1 = "2000";
-  string port_2 = "2001";
-  string port_3 = "2002";
-  start_node(port_1, bootstrap_skip);
-  start_node(port_2, bootstrap_skip);
-  start_node(port_3, bootstrap_skip);
-  this_thread::sleep_for(chrono::seconds(1));
-  requests::set_edge(ip, port_1, edge(1, ip, port_2, "parent"));
-  requests::set_edge(ip, port_2, edge(2, ip, port_3, "next"));
-  requests::set_edge(ip, port_3, edge(0, ip, port_1, "prev"));
-  while (1) {}
+  string bs_port = "2099";
+  start_bootstrap(bs_port);
+
+  char c;
+  for (int i = 0; i < 10; i++) {
+    string ip = "localhost";
+    string port = to_string(2000 + i);
+    start_node(port, bs_port);
+    this_thread::sleep_for(chrono::seconds(1));
+    cout << "Node " << i << " started {ip = " << ip << ", port = " << port << "}\n";
+    c = getchar();
+  }
+  clean_up();
 }
 
-int main(int argc, char *argv[]) {
-
+int main(int argc, char* argv[]) {
   DBG = print_response;
 
-  RUN_TEST(Bootstrap::test_reset); // boostrap/api/reset
+  // RUN_TEST(Bootstrap::test_reset);  // boostrap/api/reset
   // RUN_TEST(Bootstrap::test_hello); // boostrap/api/hello
 
   // RUN_TEST(Node::basic::test_ok); // node/api/basic/ok
@@ -425,8 +424,10 @@ int main(int argc, char *argv[]) {
   // RUN_TEST(Node::network::test_adopt); // node/api/network/adopt
   // RUN_TEST(Node::network::test_visualize); // node/api/network/visualize
 
-  // start_network()
+  end_to_end_test();
 
-  output_results();
+  if (oks + failures > 0) {
+    output_results();
+  }
   return 0;
 }
