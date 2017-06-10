@@ -80,7 +80,7 @@ inline void log(stringstream& logz, const string& handler, T object) {
 }
 
 void send(shared_ptr<HttpServer::Response> response, const string& body) {
-  *response << "HTTP/1.1 200 OK\r\nContent-Length: " << body.size() << "\r\n\r\n" << body;
+  *response << "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: " << body.size() << "\r\n\r\n" << body;
 }
 
 void send_ok(shared_ptr<HttpServer::Response> response, ptree& json) {

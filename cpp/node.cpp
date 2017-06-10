@@ -106,7 +106,7 @@ void info(HttpServer& server) {
 void check(HttpServer& server) {
   server.resource["/api/basic/check"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      if (WAIT) send_wait(response);
+      // if (WAIT) send_wait(response);
       string req_str = request->content.string();
       log(logstream, "check_request", req_str);
       ptree in;
