@@ -6,6 +6,11 @@ CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 md5=$(echo $(md5 -q $CWD/*.cpp $CWD/*.hpp) | tr -d '\040\011\012\015')
 omd5="$(cat $CWD/bin/md5)"
 
+if [ -n "$1" ]; then
+  g++ -O2 -std=c++11 $CWD/$1.cpp -I/usr/local/include/boost -o $CWD/bin/$1 -lboost_system -lboost_filesystem
+  exit 0
+fi
+
 name="bs"
 if [ ! -f "$CWD/bin/$name" ] || [ ! -f "$CWD/bin/md5" ] || [ "$md5" != "$omd5" ]; then
   if ! g++ -O2 -std=c++11 $CWD/$name.cpp -I/usr/local/include/boost -o $CWD/bin/$name -lboost_system -lboost_filesystem; then
