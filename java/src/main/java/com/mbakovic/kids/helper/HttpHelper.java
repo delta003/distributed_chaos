@@ -15,9 +15,8 @@ import com.mbakovic.kids.request.IPAndPortRequest;
 import com.mbakovic.kids.response.*;
 import org.apache.log4j.Logger;
 
-import java.io.*;
-
 public final class HttpHelper {
+    private static final long RETRY_DELAY = 1000;
     private static Logger log = Logger.getLogger(HttpHelper.class);
 
     private static final HttpTransport HTTP_TRANSPORT = new NetHttpTransport();
@@ -26,6 +25,7 @@ public final class HttpHelper {
     private static HttpHelper ourInstance = new HttpHelper();
 
     public static HttpHelper getInstance() {
+        //return new HttpHelper();
         return ourInstance;
     }
 
@@ -42,29 +42,48 @@ public final class HttpHelper {
 
     // API wrappers
 
-    public IPAndPortAndUUIDResponse bootstrapHello(IPAndPort ipAndPort, IPAndPortRequest request) {
-        try {
-//            java.io.OutputStream os = new FileOutputStream(new File("/Users/mbakovic/Desktop/log.json"));
-//            new JsonHttpContent(JSON_FACTORY, request).writeTo(os);
-            HttpRequest httpRequest = getRequestFactory().buildPostRequest(
-                    new GenericUrl("http://" + ipAndPort.toString() + "/api/hello"),
-                    new JsonHttpContent(JSON_FACTORY, request)
-            );
-            return httpRequest.execute().parseAs(IPAndPortAndUUIDResponse.class);
-        } catch (Exception e) {
-            log.error("bootstrapHello failed: " + e.getMessage());
-            return null;
-        }
+    public IPAndPortAndUUIDResponse bootstrapHelloWithRetry(IPAndPort ipAndPort, IPAndPortRequest request) {
+        IPAndPortAndUUIDResponse response;
+//      java.io.OutputStream os = new FileOutputStream(new File("/Users/mbakovic/Desktop/log.json"));
+//      new JsonHttpContent(JSON_FACTORY, request).writeTo(os);
+        do {
+            try {
+                HttpRequest httpRequest = getRequestFactory().buildPostRequest(
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/hello"),
+                        new JsonHttpContent(JSON_FACTORY, request)
+                );
+                response = httpRequest.execute().parseAs(IPAndPortAndUUIDResponse.class);
+            } catch (Exception e) {
+                log.error("bootstrapHello failed: " + e.getMessage());
+                return null;
+            }
+            if (response.getStatus() == Status.WAIT) {
+                sleep(RETRY_DELAY);
+            }
+        } while (response.getStatus() == Status.WAIT);
+        return response;
     }
 
-    public StatusResponse bootstrapReset(IPAndPort ipAndPort) {
+    public BootstrapResetResponse bootstrapReset(IPAndPort ipAndPort) {
         try {
             HttpRequest httpRequest = getRequestFactory().buildGetRequest(
                     new GenericUrl("http://" + ipAndPort.toString() + "/api/reset")
             );
-            return httpRequest.execute().parseAs(StatusResponse.class);
+            return httpRequest.execute().parseAs(BootstrapResetResponse.class);
         } catch (Exception e) {
             log.error("bootstrapReset failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    public StatusResponse bootstrapResetDone(IPAndPort ipAndPort) {
+        try {
+            HttpRequest httpRequest = getRequestFactory().buildGetRequest(
+                    new GenericUrl("http://" + ipAndPort.toString() + "/api/reset_done")
+            );
+            return httpRequest.execute().parseAs(StatusResponse.class);
+        } catch (Exception e) {
+            log.error("bootstrapResetDone failed: " + e.getMessage());
             return null;
         }
     }
@@ -93,6 +112,18 @@ public final class HttpHelper {
         }
     }
 
+    public CheckResponse basicCheck(IPAndPort ipAndPort) {
+        try {
+            HttpRequest httpRequest = getRequestFactory().buildGetRequest(
+                    new GenericUrl("http://" + ipAndPort.toString() + "/api/basic/check")
+            );
+            return httpRequest.execute().parseAs(CheckResponse.class);
+        } catch (Exception e) {
+            log.error("basicCheck failed: " + e.getMessage());
+            return null;
+        }
+    }
+
     public EdgesResponse networkEdgesWithRetry(IPAndPort ipAndPort) {
         EdgesResponse response;
         do {
@@ -104,6 +135,9 @@ public final class HttpHelper {
             } catch (Exception e) {
                 log.error("networkEdgesWithRetry failed: " + e.getMessage());
                 return null;
+            }
+            if (response.getStatus() == Status.WAIT) {
+                sleep(RETRY_DELAY);
             }
         } while (response.getStatus() == Status.WAIT);
         return response;
@@ -123,6 +157,9 @@ public final class HttpHelper {
                 log.error("networkGetEdgeWithRetry failed: " + e.getMessage());
                 return null;
             }
+            if (response.getStatus() == Status.WAIT) {
+                sleep(RETRY_DELAY);
+            }
         } while (response.getStatus() == Status.WAIT);
         return response;
     }
@@ -139,6 +176,9 @@ public final class HttpHelper {
             } catch (Exception e) {
                 log.error("networkSetEdgeWithRetry failed: " + e.getMessage());
                 return null;
+            }
+            if (response.getStatus() == Status.WAIT) {
+                sleep(RETRY_DELAY);
             }
         } while (response.getStatus() == Status.WAIT);
         return response;
@@ -158,7 +198,37 @@ public final class HttpHelper {
                 log.error("networkAdoptWithRetry failed: " + e.getMessage());
                 return null;
             }
+            if (response.getStatus() == Status.WAIT) {
+                sleep(RETRY_DELAY);
+            }
         } while (response.getStatus() == Status.WAIT);
         return response;
+    }
+
+    public EdgesResponse networkResetWithRetry(IPAndPort ipAndPort) {
+        EdgesResponse response;
+        do {
+            try {
+                HttpRequest httpRequest = getRequestFactory().buildGetRequest(
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/network/reset")
+                );
+                response = httpRequest.execute().parseAs(EdgesResponse.class);
+            } catch (Exception e) {
+                log.error("networkResetWithRetry failed: " + e.getMessage());
+                return null;
+            }
+            if (response.getStatus() == Status.WAIT) {
+                sleep(RETRY_DELAY);
+            }
+        } while (response.getStatus() == Status.WAIT);
+        return response;
+    }
+
+    private void sleep(long duration) {
+        try {
+            Thread.sleep(duration);
+        } catch (InterruptedException e) {
+            log.warn("NodeHealthcheck sleep interrupted.");
+        }
     }
 }

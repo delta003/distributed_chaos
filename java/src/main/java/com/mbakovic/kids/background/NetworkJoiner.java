@@ -31,7 +31,7 @@ public class NetworkJoiner implements Runnable {
 
     private void join() {
         // Contact bootstrap
-        IPAndPortAndUUIDResponse bootstrapResponse = HttpHelper.getInstance().bootstrapHello(
+        IPAndPortAndUUIDResponse bootstrapResponse = HttpHelper.getInstance().bootstrapHelloWithRetry(
                 Node.getInstance().getBootstrap(), new IPAndPortRequest(
                         Node.getInstance().getMyself().getIp(), Node.getInstance().getMyself().getPort()));
         if (bootstrapResponse == null) {

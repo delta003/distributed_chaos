@@ -5,7 +5,7 @@ Procedure PING: // Na svakih 1s zvati ovo
     if (response.status == "ok")  {
       failures = 0;
     }
-  } catch { 
+  } catch {
     failures += 1;
     if (failures == 5) { // 5s prošlo
       try {
@@ -13,7 +13,7 @@ Procedure PING: // Na svakih 1s zvati ovo
         failures = 0;
       } catch {
         // next ili prev cvor nije ziv :(
-        call RECONFIGURE; 
+        call RECONFIGURE;
       }
     }
   }
@@ -21,10 +21,10 @@ END
 
 Procedure RECONFIGURE:
   response = bootstrap/reset
-  
+
   if (response.can_reset == false) RETURN; // rekonfiguracija je u toku
-  
-  BFS Broadcast /api/network/reset na svaki cvor u mrezi
-  
-  Pozovi bootstrap/reset_done
+
+  BFS Broadcast /api/network/reset na svaki cvor u mrezi (i sebe!)
+
+  this.reset  // resetuj sebe
 END

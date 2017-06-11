@@ -141,21 +141,21 @@ public class NetworkResource implements NetworkService {
             EdgesResponse nextEdgesResponse = HttpHelper.getInstance().networkEdgesWithRetry(
                     new IPAndPort(e.getIp(), e.getPort()));
             if (nextEdgesResponse == null) {
-                String msg = String.format("Failed to fetch edges from %s:%s (%s}",
+                String msg = String.format("Failed to fetch edges from %s:%s (%s)",
                         e.getIp(), e.getPort(), e.getUuid());
                 log.error(msg);
                 continue;
                 //return StatusResponse.ofError(msg);
             }
             if (nextEdgesResponse.getStatus() == Status.ERROR) {
-                String msg = String.format("Failed to fetch edges from %s:%s (%s} with error %s",
+                String msg = String.format("Failed to fetch edges from %s:%s (%s) with error %s",
                         e.getIp(), e.getPort(), e.getUuid(), nextEdgesResponse.getMessage());
                 log.error(msg);
                 continue;
                 //return StatusResponse.ofError(msg);
             }
             if (nextEdgesResponse.getEdges() == null) {
-                String msg = String.format("Fetched null edges from %s:%s (%s}",
+                String msg = String.format("Fetched null edges from %s:%s (%s)",
                         e.getIp(), e.getPort(), e.getUuid());
                 log.error(msg);
                 continue;
