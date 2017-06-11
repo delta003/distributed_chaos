@@ -18,7 +18,7 @@ public abstract class Server {
         return false;
     }
 
-    public void release() {
+    public void lockRelease() {
         status = ServerStatus.OK;
     }
 }

@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 public class NetworkJoiner implements Runnable {
     private static Logger log = Logger.getLogger(NetworkJoiner.class);
 
-    // This must finish and release Node lock
+    // This must finish and lockRelease Node lock
     @Override
     public void run() {
         // Join network
@@ -26,7 +26,7 @@ public class NetworkJoiner implements Runnable {
         fetchJobs();
 
         // Release lock
-        Node.getInstance().release();
+        Node.getInstance().lockRelease();
     }
 
     private void join() {

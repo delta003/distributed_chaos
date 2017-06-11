@@ -1,5 +1,6 @@
 package com.mbakovic.kids.api;
 
+import com.mbakovic.kids.request.JobBackUpRequest;
 import com.mbakovic.kids.request.JobRequest;
 import com.mbakovic.kids.response.StatusResponse;
 
@@ -11,17 +12,21 @@ import javax.ws.rs.core.MediaType;
 @Consumes(MediaType.APPLICATION_JSON)
 public interface JobsService {
 
+    @POST
+    @Path("/add/{jobid}")
+    StatusResponse add(@PathParam("jobid") String jobid, JobRequest request);
+
+    @POST
+    @Path("/new")
+    StatusResponse newJob(JobRequest request);
+
     @GET
     @Path("/all")
     StatusResponse all();
 
     @POST
-    @Path("/create/{jobid}")
-    StatusResponse create(@PathParam("jobid") String jobid, JobRequest request);
-
-    @POST
-    @Path("/new")
-    StatusResponse newJob(JobRequest request);
+    @Path("/backup/{jobid}")
+    StatusResponse backup(@PathParam("jobid") String jobid, JobBackUpRequest request);
 
     @GET
     @Path("/remove/{jobid}")

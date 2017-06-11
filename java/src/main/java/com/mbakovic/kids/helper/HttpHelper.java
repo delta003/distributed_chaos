@@ -8,10 +8,7 @@ import com.google.api.client.json.JsonObjectParser;
 import com.google.api.client.json.jackson.JacksonFactory;
 import com.mbakovic.kids.model.IPAndPort;
 import com.mbakovic.kids.model.Status;
-import com.mbakovic.kids.request.AdoptRequest;
-import com.mbakovic.kids.request.EdgeRequest;
-import com.mbakovic.kids.request.EdgeTypeRequest;
-import com.mbakovic.kids.request.IPAndPortRequest;
+import com.mbakovic.kids.request.*;
 import com.mbakovic.kids.response.*;
 import org.apache.log4j.Logger;
 
@@ -215,6 +212,46 @@ public final class HttpHelper {
                 response = httpRequest.execute().parseAs(EdgesResponse.class);
             } catch (Exception e) {
                 log.error("networkResetWithRetry failed: " + e.getMessage());
+                return null;
+            }
+            if (response.getStatus() == Status.WAIT) {
+                sleep(RETRY_DELAY);
+            }
+        } while (response.getStatus() == Status.WAIT);
+        return response;
+    }
+
+    public EdgesResponse jobsCreateWithRetry(IPAndPort ipAndPort, String uuid, JobRequest request) {
+        EdgesResponse response;
+        do {
+            try {
+                HttpRequest httpRequest = getRequestFactory().buildPostRequest(
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/jobs/create/" + uuid),
+                        new JsonHttpContent(JSON_FACTORY, request)
+
+                );
+                response = httpRequest.execute().parseAs(EdgesResponse.class);
+            } catch (Exception e) {
+                log.error("jobsCreateWithRetry failed: " + e.getMessage());
+                return null;
+            }
+            if (response.getStatus() == Status.WAIT) {
+                sleep(RETRY_DELAY);
+            }
+        } while (response.getStatus() == Status.WAIT);
+        return response;
+    }
+
+    public EdgesResponse jobsRemoveWithRetry(IPAndPort ipAndPort, String uuid) {
+        EdgesResponse response;
+        do {
+            try {
+                HttpRequest httpRequest = getRequestFactory().buildGetRequest(
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/jobs/remove/" + uuid)
+                );
+                response = httpRequest.execute().parseAs(EdgesResponse.class);
+            } catch (Exception e) {
+                log.error("jobsRemoveWithRetry failed: " + e.getMessage());
                 return null;
             }
             if (response.getStatus() == Status.WAIT) {

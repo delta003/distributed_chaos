@@ -1,5 +1,6 @@
 package com.mbakovic.kids.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.api.client.util.Key;
 import com.mbakovic.kids.model.DirectedEdge;
 import com.mbakovic.kids.model.IPAndPortAndUUID;
@@ -7,6 +8,7 @@ import com.mbakovic.kids.model.Status;
 
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class NetworkVisualizeResponse extends StatusResponse {
 
     @Key

@@ -24,7 +24,7 @@ public class NetworkResource implements NetworkService {
             return StatusResponse.ofWait();
         }
         EdgesResponse response = new EdgesResponse(Node.getInstance().getEdges());
-        Node.getInstance().release();
+        Node.getInstance().lockRelease();
         return response;
     }
 
@@ -40,7 +40,7 @@ public class NetworkResource implements NetworkService {
             return StatusResponse.ofWait();
         }
         EdgeResponse response = new EdgeResponse(Node.getInstance().getEdgeByType(request.getType()));
-        Node.getInstance().release();
+        Node.getInstance().lockRelease();
         return response;
     }
 
@@ -57,7 +57,7 @@ public class NetworkResource implements NetworkService {
         }
         Edge oldedge = Node.getInstance().replaceEdge(request.getEdge());
         OldEdgeResponse response = new OldEdgeResponse(oldedge);
-        Node.getInstance().release();
+        Node.getInstance().lockRelease();
         return response;
     }
 
@@ -74,18 +74,18 @@ public class NetworkResource implements NetworkService {
         }
         if (Node.getInstance().getChildrenCount() < 2 || Node.getInstance().getChildrenCount() == 3) {
             Node.getInstance().getEdges().add(request.getEdge());
-            Node.getInstance().release();
+            Node.getInstance().lockRelease();
             return AdoptResponse.adopted();
         }
         if (Node.getInstance().getChildrenCount() == 2) {
             if (request.getCanRedirect().toBoolean()) {
                 Edge next = Node.getInstance().getEdgeByType(EdgeType.NEXT);
                 AdoptResponse response = AdoptResponse.redirect(next);
-                Node.getInstance().release();
+                Node.getInstance().lockRelease();
                 return response;
             } else {
                 Node.getInstance().getEdges().add(request.getEdge());
-                Node.getInstance().release();
+                Node.getInstance().lockRelease();
                 return AdoptResponse.adopted();
             }
         }
@@ -93,7 +93,7 @@ public class NetworkResource implements NetworkService {
             Node.getInstance().getEdges().add(request.getEdge());
             List<Edge> edges = Node.getInstance().getEdgesAndClear();
             AdoptResponse response = AdoptResponse.adoptedWithCreateLevel(edges);
-            Node.getInstance().release();
+            Node.getInstance().lockRelease();
             return response;
         }
         return StatusResponse.ofError("Something is wrong. Invalid number of edges " +
@@ -107,8 +107,8 @@ public class NetworkResource implements NetworkService {
             return StatusResponse.ofWait();
         }
         log.info("Node reset initiated!");
-        // This do not release, NetworkJoiner will release the lock
-        // Node.getInstance().release();
+        // This do not lockRelease, NetworkJoiner will lockRelease the lock
+        // Node.getInstance().lockRelease();
         return new EdgesResponse(Node.getInstance().reset());
     }
 

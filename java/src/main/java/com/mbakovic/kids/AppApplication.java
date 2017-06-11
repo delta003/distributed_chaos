@@ -5,10 +5,7 @@ import com.mbakovic.kids.background.NodeHealthcheck;
 import com.mbakovic.kids.core.Node;
 import com.mbakovic.kids.model.IPAndPort;
 import com.mbakovic.kids.model.IPAndPortAndUUID;
-import com.mbakovic.kids.resources.BasicResource;
-import com.mbakovic.kids.resources.BootstrapResource;
-import com.mbakovic.kids.resources.NetworkResource;
-import com.mbakovic.kids.resources.PingResource;
+import com.mbakovic.kids.resources.*;
 import io.dropwizard.Application;
 import io.dropwizard.bundles.assets.ConfiguredAssetsBundle;
 import io.dropwizard.setup.Bootstrap;
@@ -72,6 +69,8 @@ public final class AppApplication extends Application<AppConfiguration> {
             environment.jersey().register(basicResource);
             final NetworkResource networkResource = new NetworkResource();
             environment.jersey().register(networkResource);
+            final JobsResource jobsResource = new JobsResource();
+            environment.jersey().register(jobsResource);
         }
     }
 

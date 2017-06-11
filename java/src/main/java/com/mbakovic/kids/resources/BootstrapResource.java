@@ -28,7 +28,7 @@ public final class BootstrapResource implements BootstrapService {
                 new IPAndPortAndUUIDResponse(lastNode.getIp(), lastNode.getPort(), newNode.getUuid()) :
                 new IPAndPortAndUUIDResponse(null, null, newNode.getUuid());
         Bootstrap.getInstance().setLastNode(newNode);
-        Bootstrap.getInstance().release();
+        Bootstrap.getInstance().lockRelease();
         log.info(String.format("New node %s:%s joined with UUID %s",
                 newNode.getIp(), newNode.getPort(), newNode.getUuid()));
         return response;
@@ -41,12 +41,12 @@ public final class BootstrapResource implements BootstrapService {
             return StatusResponse.ofWait();
         }
         if (!Bootstrap.getInstance().getCanReset().toBoolean()) {
-            Bootstrap.getInstance().release();
+            Bootstrap.getInstance().lockRelease();
             log.warn("Bootstrap reset denied.");
             return BootstrapResetResponse.denied();
         }
         Bootstrap.getInstance().reset();
-        Bootstrap.getInstance().release();
+        Bootstrap.getInstance().lockRelease();
         log.info("Bootstrap reset approved.");
         return BootstrapResetResponse.approved();
     }

@@ -157,7 +157,7 @@ public class NodeHealthcheck implements Runnable {
             });
         }
 
-        // This will release lock on this node and rejoin node to new network
+        // This will lockRelease lock on this node and rejoin node to new network
         Node.getInstance().joinNetwork();
         log.info("Broadcast reset completed.");
     }

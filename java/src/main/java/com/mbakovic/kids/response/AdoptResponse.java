@@ -1,5 +1,6 @@
 package com.mbakovic.kids.response;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.api.client.util.Key;
 import com.mbakovic.kids.model.Bool;
@@ -8,6 +9,7 @@ import com.mbakovic.kids.model.Status;
 
 import java.util.List;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AdoptResponse extends StatusResponse {
 
     @Key

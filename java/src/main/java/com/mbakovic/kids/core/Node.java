@@ -1,13 +1,11 @@
 package com.mbakovic.kids.core;
 
 import com.mbakovic.kids.background.NetworkJoiner;
-import com.mbakovic.kids.model.Edge;
-import com.mbakovic.kids.model.EdgeType;
-import com.mbakovic.kids.model.IPAndPort;
-import com.mbakovic.kids.model.IPAndPortAndUUID;
+import com.mbakovic.kids.model.*;
+import com.mbakovic.kids.response.JobDataResponse;
 
-import java.nio.channels.SeekableByteChannel;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +14,9 @@ public final class Node extends Server {
     private IPAndPortAndUUID myself;
     private IPAndPort bootstrap;
     private List<Edge> edges;
+    private List<JobExecution> jobs;
+
+    private ServerStatus jobServerStatus;
 
     private static Node ourInstance = new Node();
 
@@ -28,6 +29,7 @@ public final class Node extends Server {
         myself = null;
         bootstrap = null;
         edges = new ArrayList<>();
+        jobServerStatus = ServerStatus.OK;
     }
 
     public IPAndPortAndUUID getMyself() {
@@ -52,6 +54,14 @@ public final class Node extends Server {
 
     public void setEdges(List<Edge> edges) {
         this.edges = edges;
+    }
+
+    public List<JobExecution> getJobs() {
+        return jobs;
+    }
+
+    public void setJobs(List<JobExecution> jobs) {
+        this.jobs = jobs;
     }
 
     public Edge getEdgeByType(EdgeType type) {
@@ -109,5 +119,56 @@ public final class Node extends Server {
 
     public long getChildrenCount() {
         return edges.stream().filter(x -> x.getType() == EdgeType.CHILD).count();
+    }
+
+    public synchronized boolean jobLock() {
+        if (jobServerStatus == ServerStatus.OK) {
+            jobServerStatus = ServerStatus.BLOCKED;
+            return true;
+        }
+        return false;
+    }
+
+    public void jobLockRelease() {
+        jobServerStatus = ServerStatus.OK;
+    }
+
+    public void addJob(JobExecution newJob) {
+        jobs.add(newJob);
+        Collections.sort(jobs);
+    }
+
+    public List<JobWithUUID> getJobsWithUUID() {
+        return jobs.stream().map(JobExecution::getJob).collect(Collectors.toList());
+    }
+
+    public List<String> getJobIds() {
+        return jobs.stream().map(JobExecution::getJobUuid).collect(Collectors.toList());
+    }
+
+    public JobExecution jobWithId(String jobid) {
+        for (JobExecution e : jobs) {
+            if (e.getJob().getUuid().equals(jobid)) {
+                return e;
+            }
+        }
+        return null;
+    }
+
+    public void backUpPoint(String jobid, String uuid, Point point) {
+        JobExecution e = jobWithId(jobid);
+        if (e == null) {
+            return;  // This should never happen
+        }
+        e.backUpPoint(uuid, point);
+    }
+
+    public boolean checkJobId(String jobid) {
+        return jobWithId(jobid) != null;
+    }
+
+    public void removeJobWithId(String jobid) {
+        JobExecution e = jobWithId(jobid);
+        jobs.remove(e);
     }
 }
