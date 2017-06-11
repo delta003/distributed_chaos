@@ -24,7 +24,7 @@ using config::Bootstrap::start_bootstrap;
 using config::Bootstrap::stop_bootstrap;
 
 namespace config {
-int port_base = 2000;  // treba imati slobodno sledecih 100 portova
+int port_base = 2000;  // portovi u opsegu [port_base, port_base + 100) ne smeju biti zauzeti
 
 string bs_port = "9080";  // bootstrap port
 
