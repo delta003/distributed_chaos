@@ -17,6 +17,10 @@
 typedef SimpleWeb::Client<SimpleWeb::HTTP> HttpClient;
 
 bool DBG = false;
+const double eps = 1e-4;  // double comparison
+const int WAIT_DELAY = 1000;
+
+std::mutex mtx;
 
 string bootstrap_ip;
 string bootstrap_port;
@@ -36,6 +40,7 @@ struct node {
       port = json.get<string>("port");
     }
   }
+  void clear() { ip = port = ""; }
   bool exists() const { return !ip.empty() && !port.empty(); }
   bool operator<(const node& other) const { return uuid < other.uuid; }
 } node_info;
@@ -53,6 +58,7 @@ struct edge {
   string type;
   string ip;
   string port;
+  void clear() { ip = port = ""; }
   bool exists() const { return !ip.empty() && !port.empty(); }
   bool operator==(edge other) const {
     if (other.uuid == uuid && other.type == type && other.ip == ip && other.port == port) {
@@ -118,6 +124,166 @@ edge e_parent("parent");
 edge e_prev("prev");
 edge e_next("next");
 vector<edge> e_children;
+
+struct point {
+  double x, y;
+  point() {}
+  point(double _x, double _y) : x(_x), y(_y) {}
+  bool operator==(point other) const { return abs(x - other.x) < eps && abs(y - other.y) < eps; }
+  bool operator<(const point& other) const {
+    if (abs(x - other.x) > eps) {
+      return x < other.x;
+    }
+    return y < other.y;
+  }
+};
+
+struct job_request {
+  int width, height;
+  double p;
+  vector<point> points;
+  job_request() {}
+};
+
+struct backup_request {
+  int uuid;  // uid cvora koji salje backup_request
+  string jobid;
+  point point;
+};
+
+struct job {
+  string id;                       // uuid joba
+  vector<point> starting_points;   // zahtev
+  map<int, vector<point>> backup;  // backup
+  vector<point> points;            // izracunate tacke
+  bool operator==(job other) const { return id == other.id; }
+  bool operator<(const job& other) const { return id < other.id; }
+  job_request request;
+};
+
+map<string, double> p;
+vector<job> node_jobs;
+
+namespace jobs {
+// json
+inline ptree point_to_json(point& p) {
+  ptree res;
+  res.put("x", p.x);
+  res.put("y", p.y);
+  return res;
+}
+inline point json_to_point(ptree json) { return point(json.get<double>("x"), json.get<double>("y")); }
+inline vector<point> json_to_points(ptree& json) {
+  vector<point> res;
+  BOOST_FOREACH (ptree::value_type& it, json) { res.push_back(json_to_point(it.second)); }
+  return res;
+}
+inline backup_request json_to_backup_request(ptree& json) {
+  backup_request res;
+  res.uuid = json.get<int>("uuid");
+  res.jobid = json.get<string>("jobid");
+  res.point = json_to_point(json.get_child("point"));
+  return res;
+}
+inline ptree backup_request_to_json(backup_request& bak) {
+  ptree res;
+  res.put("uuid", bak.uuid);
+  res.put("jobid", bak.jobid);
+  res.add_child("point", point_to_json(bak.point));
+  return res;
+}
+inline ptree points_to_json(vector<point>& points) {
+  ptree res;
+  for (auto& it : points) {
+    res.push_back(make_pair("", point_to_json(it)));
+  }
+  return res;
+}
+inline ptree job_request_to_json(job_request& request) {
+  ptree out;
+  out.put("width", request.width);
+  out.put("height", request.width);
+  out.put("p", request.width);
+  out.add_child("points", points_to_json(request.points));
+  return out;
+}
+inline job_request json_to_job_request(ptree& json) {
+  job_request res;
+  res.width = json.get<int>("width");
+  res.height = json.get<int>("height");
+  res.p = json.get<double>("p");
+  res.points = jobs::json_to_points(json.get_child("points"));
+  return res;
+}
+inline vector<job_request> json_to_job_requests(ptree& json) {
+  vector<job_request> res;
+  BOOST_FOREACH (ptree::value_type& it, json) { res.push_back(json_to_job_request(it.second)); }
+  return res;
+}
+inline ptree job_requests_to_json(vector<job_request>& requests) {
+  ptree res;
+  for (auto& it : requests) {
+    res.push_back(make_pair("", job_request_to_json(it)));
+  }
+  return res;
+}
+void merge(const vector<point>& in, vector<point>& out) {
+  for (auto it : in) {
+    out.push_back(it);
+  }
+  sort(out.begin(), out.end());
+  auto last = std::unique(out.begin(), out.end());
+  out.erase(last, out.end());
+}
+inline point rand_point(int w, int h) { return point(abs(rand() % w), abs(rand() % h)); }
+// job logic
+void new_job(string jobid, job_request request) {
+  mtx.lock();
+  if (p.count(jobid)) {
+    return;  // posao vec postoji
+  }
+  p.insert(make_pair(jobid, request.p));
+  job new_job;
+  new_job.request = request;
+  new_job.id = jobid;
+  new_job.starting_points = request.points;
+  new_job.points.push_back(rand_point(request.width, request.height));
+  sort(node_jobs.begin(), node_jobs.end());
+  mtx.unlock();
+}
+void backup(backup_request request) {
+  mtx.lock();
+  for (int i = 0; i < node_jobs.size(); i++) {
+    if (node_jobs[i].id == request.jobid) {
+      node_jobs[i].backup[request.uuid].push_back(request.point);
+      break;
+    }
+  }
+  mtx.unlock();
+}
+void remove_job(string jobid) {
+  mtx.lock();
+  for (auto it = node_jobs.begin(); it != node_jobs.end(); it++) {
+    if (it->id == jobid) {
+      node_jobs.erase(it);
+      break;
+    }
+  }
+  p.erase(jobid);
+  mtx.unlock();
+}
+void work() {  // generise sledecu tacku
+  mtx.lock();
+  int idx = node_info.uuid % node_jobs.size();
+  double _p = p[node_jobs[idx].id];
+  point X = node_jobs[idx].starting_points[rand() % node_jobs[idx].starting_points.size()];
+  point P = node_jobs[idx].points.back();
+  P.x = P.x + (X.x - P.x) * _p;
+  P.y = P.y + (X.y - P.y) * _p;
+  node_jobs[idx].points.push_back(P);
+  mtx.unlock();
+}
+}  // jobs
 
 namespace network {
 void add_edge(const edge& edge, ptree& out);
@@ -273,16 +439,21 @@ inline void add_edges(const vector<edge>& edges, ptree& out) {
     add_edge(edge, out);
   }
 }
-inline void add_all_edges(ptree& edges) {
+inline void add_all_edges(ptree& out) {
+  ptree edges;
   add_edges(e_children, edges);
   add_edge(e_parent, edges);
   add_edge(e_next, edges);
   add_edge(e_prev, edges);
+  if (!edges.empty()) {
+    out.add_child("edges", edges);
+  }
 }
 }  // network helpers
 
 namespace requests {  // wrapperi za request (treba ga surround sa try/catch)
 using namespace ::network;
+using namespace ::jobs;
 struct status {
   string msg;
   string code;
@@ -303,6 +474,7 @@ pair<node, status> hello(string ip, string port, string node_ip, string node_por
   do {
     read_json(client.request("POST", "/api/hello", make_json(in))->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   return make_pair(node(out), status(out));
 }
@@ -312,6 +484,7 @@ pair<bool, status> reset(string ip, string port) {
   do {
     read_json(client.request("GET", "/api/reset")->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   return make_pair(out.get<bool>("can_reset"), status(out));
 }
@@ -321,6 +494,7 @@ status reset_done(string ip, string port) {
   do {
     read_json(client.request("GET", "/api/reset_done")->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   return status(out);
 }
@@ -330,6 +504,7 @@ status ok(string ip, string port) {
   do {
     read_json(client.request("GET", "/api/basic/ok")->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   return status(out);
 }
@@ -339,6 +514,7 @@ pair<node, status> info(string ip, string port) {
   do {
     read_json(client.request("GET", "/api/basic/info")->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   return make_pair(node(out), status(out));
 }
@@ -350,6 +526,7 @@ pair<bool, status> check(string ip, string port, string check_ip, string check_p
   do {
     read_json(client.request("POST", "/api/basic/check", make_json(in))->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   return make_pair(out.get<bool>("alive"), status(out));
 }
@@ -360,6 +537,7 @@ pair<edge, status> get_edge(string ip, string port, string type) {
   do {
     read_json(client.request("POST", "/api/network/get_edge", make_json(in))->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   edge res;
   if (key_exists(out, "edge")) {
@@ -377,6 +555,7 @@ pair<edge, status> set_edge(string ip, string port, edge new_edge, string type =
   do {
     read_json(client.request("POST", "/api/network/set_edge", make_json(in))->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   edge res;
   if (key_exists(out, "oldedge")) {
@@ -390,6 +569,7 @@ pair<vector<edge>, status> edges(string ip, string port) {
   do {
     read_json(client.request("GET", "/api/network/edges")->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   vector<edge> edges;
   if (key_exists(out, "edges")) {
@@ -405,6 +585,7 @@ pair<adopt_response, status> adopt(string ip, string port, edge new_edge, bool c
   do {
     read_json(client.request("POST", "/api/network/adopt", make_json(in))->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   adopt_response res;
   if (key_exists(out, "redirect")) {
@@ -421,14 +602,19 @@ pair<adopt_response, status> adopt(string ip, string port, edge new_edge, bool c
   }
   return make_pair(res, status(out));
 }
-status node_reset(string ip, string port) {
+pair<vector<edge>, status> node_reset(string ip, string port) {
   HttpClient client(make_addr(ip, port));
   ptree out;
   do {
     read_json(client.request("GET", "/api/network/reset")->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
-  return status(out);
+  vector<edge> edges;
+  if (key_exists(out, "edges")) {
+    json_to_edges(out.get_child("edges"), edges);
+  }
+  return make_pair(edges, status(out));
 }
 pair<visualize_response, status> visualize(string ip, string port) {
   HttpClient client(make_addr(ip, port));
@@ -436,6 +622,7 @@ pair<visualize_response, status> visualize(string ip, string port) {
   do {
     read_json(client.request("GET", "/api/network/visualize")->content, out);
     if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   vector<vedge> vedges;
   vector<node> nodes;
@@ -449,6 +636,92 @@ pair<visualize_response, status> visualize(string ip, string port) {
   resp.vedges = vedges;
   resp.nodes = nodes;
   return make_pair(resp, status(out));
+}
+pair<vector<edge>, status> jobs_add(string ip, string port, string jobid, job_request request) {
+  HttpClient client(make_addr(ip, port));
+  ptree out;
+  ptree in = job_request_to_json(request);
+  do {
+    read_json(client.request("POST", "/api/jobs/add/" + jobid, make_json(in))->content, out);
+    if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
+  } while (out.get<string>("status") == "wait");
+  vector<edge> edges;
+  if (key_exists(out, "edges")) {
+    json_to_edges(out.get_child("edges"), edges);
+  }
+  return make_pair(edges, status(out));
+}
+pair<string, status> jobs_new(string ip, string port, job_request request) {
+  HttpClient client(make_addr(ip, port));
+  ptree out;
+  ptree in = job_request_to_json(request);
+  do {
+    read_json(client.request("POST", "/api/jobs/new", make_json(in))->content, out);
+    if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
+  } while (out.get<string>("status") == "wait");
+  return make_pair(out.get<string>("jobid"), status(out));
+}
+pair<vector<job_request>, vector<string>> jobs_all(string ip, string port) {
+  HttpClient client(make_addr(ip, port));
+  ptree out;
+  do {
+    read_json(client.request("GET", "/api/jobs/all")->content, out);
+    if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
+  } while (out.get<string>("status") == "wait");
+  vector<job_request> requests = json_to_job_requests(out.get_child("jobs"));
+  vector<string> ids;
+  BOOST_FOREACH (ptree::value_type& it, out.get_child("jobs")) { ids.push_back(it.second.get<string>("jobid")); }
+  return make_pair(requests, ids);
+}
+status jobs_backup(string ip, string port, backup_request request) {
+  HttpClient client(make_addr(ip, port));
+  ptree out, in;
+  in = backup_request_to_json(request);
+  do {
+    read_json(client.request("POST", "/api/jobs/backup")->content, out);
+    if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
+  } while (out.get<string>("status") == "wait");
+  return status(out);
+}
+pair<vector<edge>, status> jobs_remove(string ip, string port, string jobid) {
+  HttpClient client(make_addr(ip, port));
+  ptree out;
+  do {
+    read_json(client.request("GET", "/api/jobs/remove/" + jobid)->content, out);
+    if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
+  } while (out.get<string>("status") == "wait");
+  vector<edge> edges;
+  if (key_exists(out, "edges")) {
+    json_to_edges(out.get_child("edges"), edges);
+  }
+  return make_pair(edges, status(out));
+}
+status jobs_kill(string ip, string port, string jobid) {
+  HttpClient client(make_addr(ip, port));
+  ptree out;
+  do {
+    read_json(client.request("GET", "/api/jobs/kill/" + jobid)->content, out);
+    if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
+  } while (out.get<string>("status") == "wait");
+  return status(out);
+}
+pair<vector<string>, status> jobs_ids(string ip, string port) {
+  HttpClient client(make_addr(ip, port));
+  ptree out;
+  do {
+    read_json(client.request("GET", "/api/jobs/ids")->content, out);
+    if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
+  } while (out.get<string>("status") == "wait");
+  vector<string> ids;
+  BOOST_FOREACH (ptree::value_type& it, out.get_child("jobids")) { ids.push_back(it.second.get<string>("")); }
+  return make_pair(ids, status(out));
 }
 }  // requests
 

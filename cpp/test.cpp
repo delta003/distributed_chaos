@@ -375,18 +375,18 @@ void run(function<void()> const& test, string test_name) {
 int main(int argc, char* argv[]) {
   DBG = print_response;
 
-  RUN_TEST(Bootstrap::test_reset);  // boostrap/api/reset
-  RUN_TEST(Bootstrap::test_hello);  // boostrap/api/hello
+  // RUN_TEST(Bootstrap::test_reset);  // boostrap/api/reset
+  // RUN_TEST(Bootstrap::test_hello);  // boostrap/api/hello
 
-  RUN_TEST(Node::basic::test_ok);     // node/api/basic/ok
-  RUN_TEST(Node::basic::test_info);   // node/api/basic/info
-  RUN_TEST(Node::basic::test_check);  // node/api/basic/check
+  // RUN_TEST(Node::basic::test_ok);     // node/api/basic/ok
+  // RUN_TEST(Node::basic::test_info);   // node/api/basic/info
+  // RUN_TEST(Node::basic::test_check);  // node/api/basic/check
 
-  RUN_TEST(Node::network::test_edges);          // node/api/network/edges
-  RUN_TEST(Node::network::test_get_edge);       // node/api/network/get_edge
-  RUN_TEST(Node::network::test_set_edge);       // node/api/network/set_edge
-  RUN_TEST(Node::network::test_get_set_edges);  // get_edge + set_edge + edges
-  RUN_TEST(Node::network::test_adopt);          // node/api/network/adopt
+  // RUN_TEST(Node::network::test_edges);          // node/api/network/edges
+  // RUN_TEST(Node::network::test_get_edge);       // node/api/network/get_edge
+  // RUN_TEST(Node::network::test_set_edge);       // node/api/network/set_edge
+  // RUN_TEST(Node::network::test_get_set_edges);  // get_edge + set_edge + edges
+  // RUN_TEST(Node::network::test_adopt);          // node/api/network/adopt
 
   if (oks + failures > 0) {
     output_results();

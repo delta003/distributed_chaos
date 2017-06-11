@@ -8,6 +8,10 @@
 #define BOOST_SPIRIT_THREADSAFE
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/uuid/uuid.hpp>
+#include <boost/uuid/uuid_io.hpp>
+#include <boost/uuid/uuid_generators.hpp>
 
 using namespace std;
 using namespace boost::property_tree;
@@ -25,6 +29,17 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
   }
   os << "]";
   return os;
+}
+
+inline string request_param(string path) {
+  string res = path.substr(path.rfind("/") + 1);
+  boost::trim(res);
+  return res;
+}
+
+string uuid4() {
+  boost::uuids::uuid _uuid = boost::uuids::random_generator()();
+  return boost::uuids::to_string(_uuid);
 }
 
 void json_to_string(const ptree& json, string& out);

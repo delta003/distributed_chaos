@@ -24,7 +24,7 @@ using config::Bootstrap::start_bootstrap;
 using config::Bootstrap::stop_bootstrap;
 
 namespace config {
-int port_base = 2000;  // portovi u opsegu [port_base, port_base + 100) ne smeju biti zauzeti
+int port_base = 4000;  // portovi u opsegu [port_base, port_base + 100) ne smeju biti zauzeti
 
 string bs_port = "9080";  // bootstrap port, ne sme biti zauzet
 
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
   cout << "Bootstrap startovan na portu: " << config::bs_port << "\n\n";
 
   cout << "Koriscenje:\n"
-       << "  1) up <n> - spawnuje n novih nodova.\n  2) k|kill n - ubija cvor sa uuid-om n.\n"
+       << "  1) up <n> - spawnuje n novih nodova.\n  2) k|kill n - ubija cvor na portu n.\n"
        << "  3) k2|kill2 <n> <m> - ubija dva cvora istovremeno.\n  4) q|quit - napusta program i stopira mrezu.\n\n";
 
   string cmd;
@@ -61,7 +61,7 @@ int main(int argc, char* argv[]) {
       vector<thread> pool;
       ostringstream oss;
       for (int i = 0; i < broj; i++) {
-        oss << "Node " << i << " started {ip = " << config::ip << ", port = " << port << "}\n";
+        oss << "Node started {ip = " << config::ip << ", port = " << port << "}\n";
         start_node_public(config::ip, to_string(port), config::ip, config::bs_port);
         ++port;
       }
@@ -70,7 +70,17 @@ int main(int argc, char* argv[]) {
       }
       cout << oss.str();
     } else if (cmd == "kill" || cmd == "k") {
+      string n;
+      cin >> n;
+      stop_node(n);
+      cout << "Node stopped {ip = " << config::ip << ", port = " << n << "}\n";
     } else if (cmd == "kill2" || cmd == "k2") {
+      string n, m;
+      cin >> n >> m;
+      stop_node(n);
+      stop_node(m);
+      cout << "Node stopped {ip = " << config::ip << ", port = " << n << "}\n";
+      cout << "Node stopped {ip = " << config::ip << ", port = " << m << "}\n";
     } else if (cmd == "q" || cmd == "quit") {
       break;
     }

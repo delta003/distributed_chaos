@@ -25,7 +25,6 @@ typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 typedef SimpleWeb::Client<SimpleWeb::HTTP> HttpClient;
 
 int WAIT = 1;
-int RESET = 0;
 
 stringstream logstream;
 
@@ -76,7 +75,7 @@ namespace basic {
 void ok(HttpServer& server) {
   server.resource["/api/basic/ok"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      // if (WAIT) send_wait(response);
+      // if (WAIT) { send_wait(response); return; }
       log(logstream, "ok_request", request->content.string());
       ptree out;
       send_ok(response, out);
@@ -89,7 +88,7 @@ void ok(HttpServer& server) {
 void info(HttpServer& server) {
   server.resource["/api/basic/info"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      // if (WAIT) send_wait(response);
+      // if (WAIT) { send_wait(response); return; }
       log(logstream, "info_request", request->content.string());
       ptree out;
       out.put("uuid", node_info.uuid);
@@ -106,7 +105,7 @@ void info(HttpServer& server) {
 void check(HttpServer& server) {
   server.resource["/api/basic/check"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      // if (WAIT) send_wait(response);
+      // if (WAIT) { send_wait(response); return; }
       string req_str = request->content.string();
       log(logstream, "check_request", req_str);
       ptree in;
@@ -136,14 +135,13 @@ using namespace ::network;
 void edges(HttpServer& server) {
   server.resource["/api/network/edges"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      if (WAIT) send_wait(response);
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
       log(logstream, "edges_request", request->content.string());
       ptree out;
-      ptree edges;
-      add_all_edges(edges);
-      if (!edges.empty()) {
-        out.add_child("edges", edges);
-      }
+      add_all_edges(out);
       send_ok(response, out);
     } catch (exception& e) {
       log(logstream, "edges_error", e.what());
@@ -154,7 +152,10 @@ void edges(HttpServer& server) {
 void get_edge(HttpServer& server) {
   server.resource["/api/network/get_edge"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      if (WAIT) send_wait(response);
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
       string req_str = request->content.string();
       log(logstream, "get_edge_request", req_str);
       ptree in;
@@ -171,7 +172,10 @@ void get_edge(HttpServer& server) {
 void set_edge(HttpServer& server) {
   server.resource["/api/network/set_edge"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      if (WAIT) send_wait(response);
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
       string req_str = request->content.string();
       log(logstream, "set_edge_request", req_str);
       ptree in;
@@ -191,7 +195,10 @@ void set_edge(HttpServer& server) {
 void adopt(HttpServer& server) {
   server.resource["/api/network/adopt"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      if (WAIT) send_wait(response);
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
       string req_str = request->content.string();
       log(logstream, "set_adopt_request", req_str);
       ptree in;
@@ -220,9 +227,7 @@ void adopt(HttpServer& server) {
       if (size == 4) {
         out.put("redirect", "false");
         out.put("create_level", "true");
-        ptree edges;
-        add_all_edges(edges);
-        out.add_child("edges", edges);
+        add_all_edges(out);
         e_children.resize(2);
       }
       send_ok(response, out);
@@ -235,12 +240,14 @@ void adopt(HttpServer& server) {
 void reset(HttpServer& server) {
   server.resource["/api/network/reset"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      if (WAIT) send_wait(response);
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
+      WAIT = 1;
       log(logstream, "reset_request", request->content.string());
-      RESET = WAIT = 1;
-      ptree out, edges;
-      add_all_edges(edges);
-      out.add_child("edges", edges);
+      ptree out;
+      add_all_edges(out);
       send_ok(response, out);
     } catch (exception& e) {
       log(logstream, "reset_error", e.what());
@@ -251,7 +258,10 @@ void reset(HttpServer& server) {
 void visualize(HttpServer& server) {
   server.resource["/api/network/visualize"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      if (WAIT) send_wait(response);
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
       log(logstream, "visualize_request", request->content.string());
       ptree out, edges, nodes;
       map<int, bool> visited;
@@ -288,11 +298,208 @@ void visualize(HttpServer& server) {
   };
 }
 }  // network
+namespace jobs {
+using namespace ::jobs;
+using namespace ::network;
+void jobs_add(HttpServer& server) {
+  server.resource["/api/jobs/add/*"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    string jobid = request_param(request->path);
+    try {
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
+      string req_str = request->content.string();
+      log(logstream, "jobs_add_request_" + jobid, req_str);
+      ptree in, out;
+      string_to_json(req_str, in);
+      new_job(jobid, json_to_job_request(in));
+      add_all_edges(out);
+      send_ok(response, out);
+    } catch (exception& e) {
+      log(logstream, "jobs_add_error_" + jobid, e.what());
+      send_error(response, e.what());
+    }
+  };
+}
+void jobs_new(HttpServer& server) {
+  server.resource["/api/jobs/new"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    try {
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
+      string req_str = request->content.string();
+      log(logstream, "jobs_new_request", req_str);
+      ptree in, out;
+      string_to_json(req_str, in);
+      string jobid = uuid4();
+      job_request request = json_to_job_request(in);
+      map<int, bool> visited;
+      queue<node> Q;
+      Q.push(node_info);
+      while (!Q.empty()) {
+        node curr = Q.front();
+        Q.pop();
+        if (visited[curr.uuid]) continue;
+        visited[curr.uuid] = true;
+        vector<edge> neighbors;
+        try {
+          neighbors = requests::jobs_add(curr.ip, curr.port, jobid, request).first;
+        } catch (exception& e) {
+          log(logstream, "bfs_error", e.what());
+        }
+        for (edge& it : neighbors) {
+          if (!visited[it.uuid]) {
+            Q.push(edge_to_node(it));
+          }
+        }
+      }
+      out.put("jobid", jobid);
+      send_ok(response, out);
+    } catch (exception& e) {
+      log(logstream, "jobs_new_error", e.what());
+      send_error(response, e.what());
+    }
+  };
+}
+void jobs_all(HttpServer& server) {
+  server.resource["/api/jobs/all"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    mtx.lock();
+    try {
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
+      string req_str = request->content.string();
+      log(logstream, "jobs_all_request", req_str);
+      ptree out, job_requests;
+      for (auto& it : node_jobs) {
+        ptree json = job_request_to_json(it.request);
+        json.put("jobid", it.id);
+        job_requests.push_back(make_pair("", json));
+      }
+      out.put_child("jobs", job_requests);
+      send_ok(response, out);
+    } catch (exception& e) {
+      log(logstream, "jobs_all_error", e.what());
+      send_error(response, e.what());
+    }
+    mtx.unlock();
+  };
+}
+void jobs_backup(HttpServer& server) {
+  server.resource["/api/jobs/backup"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    try {
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
+      string req_str = request->content.string();
+      log(logstream, "jobs_backup_request", req_str);
+      ptree in, out;
+      string_to_json(req_str, in);
+      backup(json_to_backup_request(in));
+      send_ok(response, out);
+    } catch (exception& e) {
+      log(logstream, "jobs_backup_error", e.what());
+      send_error(response, e.what());
+    }
+  };
+}
+void jobs_remove(HttpServer& server) {
+  server.resource["/api/jobs/remove/*"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    string jobid = request_param(request->path);
+    try {
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
+      string req_str = request->content.string();
+      log(logstream, "jobs_remove_request_" + jobid, req_str);
+      ptree out;
+      remove_job(jobid);
+      add_all_edges(out);
+      send_ok(response, out);
+    } catch (exception& e) {
+      log(logstream, "jobs_remove_error_" + jobid, e.what());
+      send_error(response, e.what());
+    }
+  };
+}
+void jobs_kill(HttpServer& server) {
+  server.resource["/api/jobs/kill/*"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    string jobid = request_param(request->path);
+    try {
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
+      string req_str = request->content.string();
+      log(logstream, "jobs_kill_request_" + jobid, req_str);
+      ptree out;
+      map<int, bool> visited;
+      queue<node> Q;
+      Q.push(node_info);
+      while (!Q.empty()) {
+        node curr = Q.front();
+        Q.pop();
+        if (visited[curr.uuid]) continue;
+        visited[curr.uuid] = true;
+        vector<edge> neighbors;
+        try {
+          neighbors = requests::jobs_remove(curr.ip, curr.port, jobid).first;
+        } catch (exception& e) {
+          log(logstream, "bfs_error", e.what());
+        }
+        for (edge& it : neighbors) {
+          if (!visited[it.uuid]) {
+            Q.push(edge_to_node(it));
+          }
+        }
+      }
+      send_ok(response, out);
+    } catch (exception& e) {
+      log(logstream, "jobs_kill_error_" + jobid, e.what());
+      send_error(response, e.what());
+    }
+  };
+}
+void jobs_ids(HttpServer& server) {
+  server.resource["/api/jobs/ids"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    mtx.lock();
+    try {
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
+      string req_str = request->content.string();
+      log(logstream, "jobs_ids_request", req_str);
+      ptree out, ids;
+      for (auto& it : node_jobs) {
+        ptree json;
+        json.put("", it.id);
+        ids.push_back(make_pair("", json));
+      }
+      out.put_child("jobids", ids);
+      send_ok(response, out);
+    } catch (exception& e) {
+      log(logstream, "jobs_ids_error", e.what());
+      send_error(response, e.what());
+    }
+    mtx.unlock();
+  };
+}
+}  // jobs
 }  // Handlers
 
 namespace network {
 void join() {
   try {
+    e_parent.clear();
+    e_next.clear();
+    e_prev.clear();
+    e_children.clear();
     node bs_node = requests::hello(bootstrap_ip, bootstrap_port, node_info.ip, node_info.port).first;
     if (node_info.uuid == -1) {
       node_info.uuid = bs_node.uuid;
@@ -376,7 +583,49 @@ void join() {
     log(logstream, "JOIN NETWORK FAILED", e.what());
   }
 }
-void recover() {}
+int fail_cnt = 0;
+void failover() {
+  try {
+    requests::ok(e_next.ip, e_next.port);
+    fail_cnt = 0;
+  } catch (exception& e) {
+    fail_cnt++;
+    log(logstream, "ping failed", e.what());
+  }
+  if (fail_cnt == 5) {  // 5s proslo
+    try {
+      requests::check(e_prev.ip, e_prev.ip, e_next.ip, e_next.port);
+    } catch (exception& e) {  // cvor pao rekonfiguracija mreze
+      auto can_reset = requests::reset(bootstrap_ip, bootstrap_port).first;
+      if (!can_reset) return;  // reset je u toku
+      map<int, bool> visited;
+      queue<node> Q;
+      Q.push(node_info);
+      while (!Q.empty()) {
+        node curr = Q.front();
+        Q.pop();
+        if (visited[curr.uuid]) continue;
+        visited[curr.uuid] = true;
+        log(logstream, "recover_bfs_curr_node", to_str(curr));
+        vector<edge> neighbors;
+        try {
+          neighbors = requests::node_reset(curr.ip, curr.port).first;
+          log(logstream, "recover_bfs_neighbors", neighbors);
+        } catch (exception& e) {
+          log(logstream, "recover_error", e.what());
+        }
+        for (edge& it : neighbors) {
+          if (!visited[it.uuid]) {
+            Q.push(edge_to_node(it));
+          }
+        }
+      }
+      this_thread::sleep_for(chrono::seconds(5));  // for small number of nodes
+      requests::reset_done(bootstrap_ip, bootstrap_port);
+    }
+    fail_cnt = 0;
+  }
+}
 }  // network
 
 void worker() {
@@ -384,9 +633,19 @@ void worker() {
     this_thread::sleep_for(chrono::milliseconds(100));
     WAIT = 0;
     return;
+  } else {
+    network::join();
   }
-  network::join();
   WAIT = 0;
+
+  while (1) {
+    network::failover();
+    if (WAIT) {  // re-join
+      network::join();
+      WAIT = 0;
+    }
+    this_thread::sleep_for(chrono::seconds(1));
+  }
 }
 
 int main(int argc, char* argv[]) {
@@ -394,6 +653,7 @@ int main(int argc, char* argv[]) {
     cout << "Pogresan broj parametra!\n";
     return 1;
   }
+  srand(time(NULL));
   node_info.ip = argv[1];
   node_info.port = argv[2];
   bootstrap_ip = argv[3];
@@ -417,6 +677,14 @@ int main(int argc, char* argv[]) {
   Handlers::network::adopt(server);
   Handlers::network::reset(server);
   Handlers::network::visualize(server);
+  // Jobs
+  Handlers::jobs::jobs_add(server);
+  Handlers::jobs::jobs_new(server);
+  Handlers::jobs::jobs_all(server);
+  Handlers::jobs::jobs_backup(server);
+  Handlers::jobs::jobs_remove(server);
+  Handlers::jobs::jobs_kill(server);
+  Handlers::jobs::jobs_ids(server);
 
   thread server_thread([&server]() { server.start(); });
 

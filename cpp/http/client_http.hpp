@@ -14,7 +14,7 @@
 
 #ifndef CASE_INSENSITIVE_EQUALS_AND_HASH
 #define CASE_INSENSITIVE_EQUALS_AND_HASH
-// Based on http://www.boost.org/doc/libs/1_60_0/doc/html/unordered/hash_equality.html
+
 class case_insensitive_equals {
  public:
   bool operator()(const std::string& key1, const std::string& key2) const { return boost::algorithm::iequals(key1, key2); }
