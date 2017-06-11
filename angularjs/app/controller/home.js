@@ -27,7 +27,12 @@
       NodeService.NetworkVisualize().then(function(response) {
         var nodes = response.nodes;
         var edges = response.edges;
-        showNetwork(nodes, edges);
+        if (response.status == "wait") {
+          alert("Rekonstrukcija u toku!");
+          document.getElementById('mynetwork').innerHTML = "Rekonstrukcija u toku!";
+        } else {
+          showNetwork(nodes, edges);
+        }
       });
     }
 
