@@ -23,8 +23,10 @@ Procedure RECONFIGURE:
   response = bootstrap/reset
 
   if (response.can_reset == false) RETURN; // rekonfiguracija je u toku
-
-  BFS Broadcast /api/network/reset na svaki cvor u mrezi (i sebe!)
-
-  this.reset  // resetuj sebe
+  
+  BFS Broadcast /api/network/reset na svaki cvor u mrezi
+  this.reset // resetuj sebe na kraju
+  
+  sleep(5s) // za mali broj cvorova
+  Pozovi bootstrap/reset_done
 END
