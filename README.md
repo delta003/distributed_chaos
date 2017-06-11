@@ -20,6 +20,7 @@ KIDS projekat
 brew install cmake openssl boost gcc
 ```
 - Use cpp/start and cpp/stop to create or destroy nodes and bootstrap servers.
+- Alternatively use cpp/client for interactive client.
 
 ## Unit Tests
 
