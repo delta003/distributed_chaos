@@ -1,14 +1,17 @@
 Procedure PING: // Na svakih 1s zvati ovo
-  int failures = 0;
+  int failures = 0; // Broj uzastopnih neuspeha
   try {
-    Posalji this->next("/api/basic/ok");
+    response = this->next("/api/basic/ok"); // pozovi /api/basic/ok na NEXT cvoru
+    if (response.status == "ok")  {
+      failures = 0;
+    }
   } catch { 
     failures += 1;
     if (failures == 5) { // 5s prošlo
       try {
         this->prev("/api/basic/check", this->next) // proveri da li je tvoj NEXT ziv preko tvog PREV cvora
       } catch {
-        // next cvor nije ziv :(
+        // next ili prev cvor nije ziv :(
         call RECONFIGURE; 
       }
     }
