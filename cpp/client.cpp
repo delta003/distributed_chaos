@@ -26,7 +26,7 @@ using config::Bootstrap::stop_bootstrap;
 namespace config {
 int port_base = 2000;  // treba imati slobodno sledecih 100 portova
 
-string bs_port = "9080";
+string bs_port = "9080";  // bootstrap port
 
 string ip = "localhost";  // ip masine
 
@@ -46,6 +46,7 @@ void clean_up() {
 int main(int argc, char* argv[]) {
   clean_up();
   start_bootstrap(config::bs_port);
+  cout << "Bootstrap startovan na portu: " << config::bs_port << "\n\n";
 
   cout << "Koriscenje:\n"
        << "  1) up <n> - spawnuje n novih nodova.\n  2) k|kill n - ubija cvor sa uuid-om n.\n"
