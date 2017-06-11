@@ -6,7 +6,6 @@
 #include "util.hpp"
 #include "node.hpp"
 #include "test_config.hpp"
-#include "client_config.hpp"
 
 #define BOOST_SPIRIT_THREADSAFE
 #include <boost/property_tree/ptree.hpp>
@@ -24,24 +23,33 @@ using config::Node::stop_node;
 using config::Bootstrap::start_bootstrap;
 using config::Bootstrap::stop_bootstrap;
 
-int port = client_config::port_base;
+namespace config {
+int port_base = 2000;  // treba imati slobodno sledecih 100 portova
+
+string bs_port = "9080";
+
+string ip = "localhost";  // ip masine
+
+}  // config
+
+int port = config::port_base;  // port poslednjeg noda
 
 void clean_up() {
   for (int i = 0; i < 100; i++) {
-    string port = to_string(client_config::port_base + i);
+    string port = to_string(config::port_base + i);
     stop_bootstrap(port);
     stop_node(port);
   }
-  stop_bootstrap(client_config::bootstrap_port);
+  stop_bootstrap(config::bs_port);
 }
 
 int main(int argc, char* argv[]) {
   clean_up();
-  start_bootstrap(client_config::bootstrap_port);
+  start_bootstrap(config::bs_port);
 
   cout << "Koriscenje:\n"
-       << "  1) up n - spawnuje n novih nodova.\n  2) k|kill n - ubija cvor sa uuid-om n.\n"
-       << "  3) k2|kill2 n m - ubija dva cvora istovremeno.\n  4) q|quit - napusta program i stopira mrezu.\n\n";
+       << "  1) up <n> - spawnuje n novih nodova.\n  2) k|kill n - ubija cvor sa uuid-om n.\n"
+       << "  3) k2|kill2 <n> <m> - ubija dva cvora istovremeno.\n  4) q|quit - napusta program i stopira mrezu.\n\n";
 
   string cmd;
   while (1) {
@@ -52,8 +60,8 @@ int main(int argc, char* argv[]) {
       vector<thread> pool;
       ostringstream oss;
       for (int i = 0; i < broj; i++) {
-        oss << "Node " << i << " started {ip = " << client_config::ip << ", port = " << port << "}\n";
-        start_node_public(client_config::ip, to_string(port), client_config::ip, client_config::bootstrap_port);
+        oss << "Node " << i << " started {ip = " << config::ip << ", port = " << port << "}\n";
+        start_node_public(config::ip, to_string(port), config::ip, config::bs_port);
         ++port;
       }
       for (auto& t : pool) {
