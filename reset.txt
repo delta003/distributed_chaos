@@ -26,5 +26,6 @@ Procedure RECONFIGURE:
   
   BFS Broadcast /api/network/reset na svaki cvor u mrezi
   
+  sleep(5s) // za mali broj cvorova
   Pozovi bootstrap/reset_done
 END
