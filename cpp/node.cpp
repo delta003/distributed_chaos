@@ -748,6 +748,7 @@ void worker() {
     if (WAIT) {  // re-join
       network::join();
       WAIT = 0;
+      job_mutex.unlock();
     }
     {  // generisanje tacke
       job_mutex.lock();
@@ -772,7 +773,7 @@ int main(int argc, char* argv[]) {
 
   HttpServer server;
   server.config.port = atoi(argv[2]);
-  server.config.thread_pool_size = 2;
+  server.config.thread_pool_size = 5;
 
   // / i /logz
   Handlers::index(server);
