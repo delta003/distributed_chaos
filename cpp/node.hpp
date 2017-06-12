@@ -399,11 +399,15 @@ void send_backup() {
   request.jobid = node_jobs[idx].id;
   request.point = node_jobs[idx].points.back();
   try {
-    requests::jobs_backup(e_next.ip, e_next.port, request);
+    if (e_next.uuid != node_info.uuid) {
+      requests::jobs_backup(e_next.ip, e_next.port, request);
+    }
   } catch (exception& e) {
   }
   try {
-    requests::jobs_backup(e_prev.ip, e_prev.port, request);
+    if (e_prev.uuid != node_info.uuid) {
+      requests::jobs_backup(e_prev.ip, e_prev.port, request);
+    }
   } catch (exception& e) {
   }
 }
