@@ -17,7 +17,6 @@
 #include <chrono>
 #include <thread>
 
-using config::Node::start_node;
 using config::Node::start_node_public;
 using config::Node::stop_node;
 using config::Bootstrap::start_bootstrap;
