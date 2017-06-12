@@ -396,7 +396,9 @@ void jobs_all(HttpServer& server) {
 }
 void jobs_backup(HttpServer& server) {
   server.resource["/api/jobs/backup"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
-    job_mutex.lock();
+    if (!job_mutex.try_lock()) {
+      return;  // u fazi rekonstrukcije smo ili this.prev == this ili this.next = this?
+    }
     try {
       // if (WAIT) {
       //   send_wait(response);
