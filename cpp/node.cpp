@@ -306,6 +306,7 @@ void jobs_add(HttpServer& server) {
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
+        job_mutex.unlock();
         send_wait(response);
         return;
       }
@@ -370,6 +371,7 @@ void jobs_all(HttpServer& server) {
     job_mutex.lock();
     try {
       if (WAIT) {
+        job_mutex.unlock();
         send_wait(response);
         return;
       }
@@ -419,6 +421,7 @@ void jobs_remove(HttpServer& server) {
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
+        job_mutex.unlock();
         send_wait(response);
         return;
       }
@@ -479,6 +482,7 @@ void jobs_ids(HttpServer& server) {
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
+        job_mutex.unlock();
         send_wait(response);
         return;
       }
@@ -508,6 +512,7 @@ void jobs_data(HttpServer& server) {
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
+        job_mutex.unlock();
         send_wait(response);
         return;
       }
@@ -753,7 +758,7 @@ void worker() {
     {  // generisanje tacke
       job_mutex.lock();
       jobs::work();
-      jobs::send_backup();
+      // jobs::send_backup();
       job_mutex.unlock();
     }
     this_thread::sleep_for(chrono::seconds(1));
@@ -773,7 +778,7 @@ int main(int argc, char* argv[]) {
 
   HttpServer server;
   server.config.port = atoi(argv[2]);
-  server.config.thread_pool_size = 5;
+  server.config.thread_pool_size = 2;
 
   // / i /logz
   Handlers::index(server);
