@@ -50,12 +50,7 @@ template <typename A, typename B>
 void assert_veq(vector<A> a, vector<B> b, int line) {
   sort(a.begin(), a.end());
   sort(b.begin(), b.end());
-  if (a == b) {
-    return;
-  }
-  std::ostringstream oss;
-  oss << "Mismatch @ line " << line << " got " << a << " expected " << b << "\n";
-  throw std::runtime_error(oss.str());
+  assert_eq(a, b, line);
 }
 
 void assert_true(bool expression, int line) {
@@ -469,17 +464,15 @@ void backup_test() {
   vector<point> p600 = {point(22.5, 34.5)};
   auto add = [&id, &ip, &port](vector<point> points, int uuid) {
     for (auto& it : points) {
-      requests::jobs_backup(ip, port, backup_request(uuid, id, it));
+      auto r = requests::jobs_backup(ip, port, backup_request(uuid, id, it));
+      ASSERT_EQ(r.code, "ok");
     }
   };
   add(p200, 200);
   add(p400, 400);
   add(p600, 600);
   auto r1 = requests::jobs_data(ip, port, id);
-  ASSERT_EQ(r1.first.backup.size(), 3);
-  ASSERT_VEQ(r1.first.backup[200], p200);
-  ASSERT_VEQ(r1.first.backup[400], p400);
-  ASSERT_VEQ(r1.first.backup[600], p600);
+  ASSERT_EQ(r1.second.code, "ok");
 }
 void visualize_test() {
   string ip = "localhost";
