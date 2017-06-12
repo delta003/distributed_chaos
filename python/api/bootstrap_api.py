@@ -1,10 +1,6 @@
 from flask import Flask, jsonify, request
-from utils import error_response
-
-can_reset = True
-next_uuid = 0
-last_ip = None
-last_port = None
+from controllers.bootstrap_controller import *
+from api.api_responses import *
 
 app = Flask(__name__)
 
@@ -12,28 +8,46 @@ app = Flask(__name__)
 # defaults
 @app.route('/', methods=['POST', 'GET'])
 def default_response():
-    pass
+    ok_response({})
 
 
 # bootstrap API
 @app.route('/api/hello', methods=['POST'])
 def hello():
-    pass
+    try:
+        [ip, port] = extract_data(request, ['ip', 'port'])
+    except InvalidJsonRequest:
+        return error_response('Invalid JSON in request')
+    except:
+        return error_response('Unknown error')
+    try:
+        response = hello_controller(ip, port)
+    except:
+        pass
+    return ok_response(response)
 
 
 @app.route('/api/reset', methods=['GET'])
 def reset():
-    pass
+    try:
+        response = reset_controller()
+    except:
+        pass
+    return ok_response(response)
 
 
 @app.route('/api/reset_done', methods=['GET'])
 def reset_done():
-    pass
+    try:
+        response = reset_done_controller()
+    except:
+        pass
+    return ok_response(response)
 
 
 # testing routes
 @app.route('/test_receive', methods=['POST', 'GET'])
 def test_receive():
     print("DEbUG")
-    return jsonify({'status': 'ok', 'message': 'sve je laz'})
+    return ok_response({'message': 'sve je laz'})
     pass

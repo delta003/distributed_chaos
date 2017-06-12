@@ -1,14 +1,22 @@
 import unittest
+import requests
 
 
 class ApiTestCase(unittest.TestCase):
-    def test_json(self, json_data):
+    # TODO: read address and port from bootstrap config file
+    api_address = 'http://localhost:5000/api/'
+
+    def verify_json(self, json_data):
         self.assertIn('status', json_data)
-        self.assertIn('message', json_data)
         self.assertIn(json_data['status'], ['ok', 'error', 'wait'])
-        if json_data['status'] is 'error':
+        if json_data['status'] == 'error':
+            self.assertIn('message', json_data)
             self.assertNotEqual(len(json_data['message']), 0)
         pass
+
+    def check_fields(self, fields, json_data):
+        for field in fields:
+            self.assertIn(field, json_data)
 
 
 class BootstrapApiTest(ApiTestCase):
@@ -16,10 +24,41 @@ class BootstrapApiTest(ApiTestCase):
         pass
 
     def test_hello(self):
-        pass
+        endpoint = self.api_address + 'hello'
+        request_data = {"ip": "69.89.31.226", "port": "123"}
+
+        r1 = requests.post(endpoint, json=request_data)
+        json_data1 = r1.json()
+        self.check_fields(['uuid'], json_data1)
+        uuid1 = json_data1['uuid']
+        self.verify_json(json_data1)
+
+        r2 = requests.post(endpoint, json=request_data)
+        json_data2 = r2.json()
+        self.check_fields(['uuid'], json_data2)
+        uuid2 = json_data2['uuid']
+        self.verify_json(json_data2)
+
+        self.assertEqual(json_data2['ip'], request_data['ip'])
+        self.assertEqual(json_data2['port'], request_data['port'])
+        self.assertEqual(int(uuid1) + 1, int(uuid2))
 
     def test_reset(self):
-        pass
+        requests.get(self.api_address + 'reset_done')
+
+        r1 = requests.get(self.api_address + 'reset')
+        json_data = r1.json()
+        self.verify_json(json_data)
+        self.check_fields(['can_reset'], json_data)
+        self.assertEqual(json_data['can_reset'], 'true')
+
+        r2 = requests.get(self.api_address + 'reset')
+        json_data = r2.json()
+        self.verify_json(json_data)
+        self.check_fields(['can_reset'], json_data)
+        self.assertEqual(json_data['can_reset'], 'false')
+
+        requests.get(self.api_address + 'reset_done')
 
     def test_reset_done(self):
         pass
