@@ -2,7 +2,7 @@
 // Treba promeniti sledeće metode:
 //  Bootstrap::start_bootstrap() i Bootstrap::stop_bootstrap() - pokretanje i
 //  stopiranje bootstrap-a.
-//  Node::start_node() i Node::stop_node() - pokretanje i stopiranje noda.
+//  Node::start_node_public() i Node::stop_node() - pokretanje i stopiranje noda.
 //  print_response = true | false
 //  bootstrap_skip = <string>
 
