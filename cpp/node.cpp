@@ -396,9 +396,6 @@ void jobs_all(HttpServer& server) {
 }
 void jobs_backup(HttpServer& server) {
   server.resource["/api/jobs/backup"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
-    if (!job_mutex.try_lock()) {
-      return;  // u fazi rekonstrukcije smo ili this.prev == this ili this.next = this?
-    }
     try {
       // if (WAIT) {
       //   send_wait(response);
@@ -408,13 +405,12 @@ void jobs_backup(HttpServer& server) {
       log(logstream, "jobs_backup_request", req_str);
       ptree in, out;
       string_to_json(req_str, in);
-      backup(json_to_backup_request(in));
+      backup_queue.push(json_to_backup_request(in));
       send_ok(response, out);
     } catch (exception& e) {
       log(logstream, "jobs_backup_error", e.what());
       send_error(response, e.what());
     }
-    job_mutex.unlock();
   };
 }
 void jobs_remove(HttpServer& server) {
@@ -755,12 +751,12 @@ void worker() {
     if (WAIT) {  // re-join
       network::join();
       WAIT = 0;
-      job_mutex.unlock();
     }
     {  // generisanje tacke
       job_mutex.lock();
       jobs::work();
-      // jobs::send_backup();
+      jobs::send_backup();
+      jobs::consume_backup_queue();
       job_mutex.unlock();
     }
     this_thread::sleep_for(chrono::seconds(1));
@@ -780,7 +776,7 @@ int main(int argc, char* argv[]) {
 
   HttpServer server;
   server.config.port = atoi(argv[2]);
-  server.config.thread_pool_size = 2;
+  server.config.thread_pool_size = 5;
 
   // / i /logz
   Handlers::index(server);

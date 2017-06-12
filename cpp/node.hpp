@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+#include <queue>
 
 #include "util.hpp"
 
@@ -197,6 +198,7 @@ struct job {
 
 map<string, double> p;
 vector<job> node_jobs;
+queue<backup_request> backup_queue;  // producer consumer queue
 
 struct job_data {
   int uuid;
@@ -364,14 +366,6 @@ void new_job(string jobid, job_request request) {
   node_jobs.push_back(new_job);
   sort(node_jobs.begin(), node_jobs.end());
 }
-void backup(backup_request request) {
-  for (int i = 0; i < node_jobs.size(); i++) {
-    if (node_jobs[i].id == request.jobid) {
-      node_jobs[i].backup[request.uuid].push_back(request.point);
-      break;
-    }
-  }
-}
 void remove_job(string jobid) {
   for (auto it = node_jobs.begin(); it != node_jobs.end(); it++) {
     if (it->id == jobid) {
@@ -380,6 +374,19 @@ void remove_job(string jobid) {
     }
   }
   p.erase(jobid);
+}
+void consume_backup_queue() {
+  int backup_size = backup_queue.size();
+  while (backup_size--) {
+    backup_request request = backup_queue.front();
+    for (int i = 0; i < node_jobs.size(); i++) {
+      if (node_jobs[i].id == request.jobid) {
+        node_jobs[i].backup[request.uuid].push_back(request.point);
+        break;
+      }
+    }
+    backup_queue.pop();
+  }
 }
 void work() {
   if (node_jobs.size() == 0) return;  // no jobs
