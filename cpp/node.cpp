@@ -306,6 +306,7 @@ void jobs_add(HttpServer& server) {
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
+        job_mutex.unlock();
         send_wait(response);
         return;
       }
@@ -370,6 +371,7 @@ void jobs_all(HttpServer& server) {
     job_mutex.lock();
     try {
       if (WAIT) {
+        job_mutex.unlock();
         send_wait(response);
         return;
       }
@@ -394,7 +396,9 @@ void jobs_all(HttpServer& server) {
 }
 void jobs_backup(HttpServer& server) {
   server.resource["/api/jobs/backup"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
-    job_mutex.lock();
+    if (!job_mutex.try_lock()) {
+      return;  // u fazi rekonstrukcije smo ili this.prev == this ili this.next = this?
+    }
     try {
       // if (WAIT) {
       //   send_wait(response);
@@ -419,6 +423,7 @@ void jobs_remove(HttpServer& server) {
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
+        job_mutex.unlock();
         send_wait(response);
         return;
       }
@@ -479,6 +484,7 @@ void jobs_ids(HttpServer& server) {
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
+        job_mutex.unlock();
         send_wait(response);
         return;
       }
@@ -508,6 +514,7 @@ void jobs_data(HttpServer& server) {
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
+        job_mutex.unlock();
         send_wait(response);
         return;
       }
@@ -748,11 +755,12 @@ void worker() {
     if (WAIT) {  // re-join
       network::join();
       WAIT = 0;
+      job_mutex.unlock();
     }
     {  // generisanje tacke
       job_mutex.lock();
       jobs::work();
-      jobs::send_backup();
+      // jobs::send_backup();
       job_mutex.unlock();
     }
     this_thread::sleep_for(chrono::seconds(1));
