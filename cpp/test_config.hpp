@@ -2,7 +2,7 @@
 // Treba promeniti sledeće metode:
 //  Bootstrap::start_bootstrap() i Bootstrap::stop_bootstrap() - pokretanje i
 //  stopiranje bootstrap-a.
-//  Node::start_node() i Node::stop_node() - pokretanje i stopiranje noda.
+//  Node::start_node_public() i Node::stop_node() - pokretanje i stopiranje noda.
 //  print_response = true | false
 //  bootstrap_skip = <string>
 
@@ -21,9 +21,8 @@ bool print_response = true;
 
 // Ovo se salje nodu kao <bootstrap_port> argument
 // prilikom startovanja nekih testova.
-// Ako je node primio ovu treba SAMO da napravi api-e, umesto da radi
-// standardni proces startovanja cvora - pridruzivanje u mrezu, detekcija
-// failovanja itd.
+// Ako je node primio ovu vrednost <bootstrap_porta> treba SAMO da napravi api-e, umesto da radi
+// standardni proces startovanja cvora - pridruzivanje u mrezu, detekcija, failovanja suseda itd itd.
 string bootstrap_skip = "1";
 
 namespace Bootstrap {
