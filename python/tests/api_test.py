@@ -1,10 +1,12 @@
 import unittest
 import requests
+from config.bootstrap_config import ip as bootstrap_ip
+from config.bootstrap_config import port as bootstrap_port
 
 
 class ApiTestCase(unittest.TestCase):
-    # TODO: read address and port from bootstrap config file
-    api_address = 'http://localhost:5000/api/'
+    # TODO: put this inside __init__ method and create instance of bootstrap app
+    bootstrap_address = 'http://%s:%d/api/' % (bootstrap_ip, bootstrap_port)
 
     def verify_json(self, json_data):
         self.assertIn('status', json_data)
@@ -24,7 +26,7 @@ class BootstrapApiTest(ApiTestCase):
         pass
 
     def test_hello(self):
-        endpoint = self.api_address + 'hello'
+        endpoint = self.bootstrap_address + 'hello'
         request_data = {"ip": "69.89.31.226", "port": "123"}
 
         r1 = requests.post(endpoint, json=request_data)
@@ -44,21 +46,21 @@ class BootstrapApiTest(ApiTestCase):
         self.assertEqual(int(uuid1) + 1, int(uuid2))
 
     def test_reset(self):
-        requests.get(self.api_address + 'reset_done')
+        requests.get(self.bootstrap_address + 'reset_done')
 
-        r1 = requests.get(self.api_address + 'reset')
+        r1 = requests.get(self.bootstrap_address + 'reset')
         json_data = r1.json()
         self.verify_json(json_data)
         self.check_fields(['can_reset'], json_data)
         self.assertEqual(json_data['can_reset'], 'true')
 
-        r2 = requests.get(self.api_address + 'reset')
+        r2 = requests.get(self.bootstrap_address + 'reset')
         json_data = r2.json()
         self.verify_json(json_data)
         self.check_fields(['can_reset'], json_data)
         self.assertEqual(json_data['can_reset'], 'false')
 
-        requests.get(self.api_address + 'reset_done')
+        requests.get(self.bootstrap_address + 'reset_done')
 
     def test_reset_done(self):
         pass
@@ -68,14 +70,19 @@ class BootstrapApiTest(ApiTestCase):
 
 
 class NodeApiTest(ApiTestCase):
+
+    address = "http://127.0.0.1:8897/"
+
     def test_default(self):
         pass
 
     # Basic
     def test_basic_ok(self):
-        pass
+        r = requests.get(self.bootstrap_address + 'reset')
+        json_data = r.json()
+        self.verify_json(json_data)
 
-    def test_bsic_info(self):
+    def test_basic_info(self):
         pass
 
     def test_basic_check(self):

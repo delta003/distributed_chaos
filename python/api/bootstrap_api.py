@@ -2,7 +2,8 @@ from flask import Flask, jsonify, request
 from controllers.bootstrap_controller import *
 from api.api_responses import *
 
-app = Flask(__name__)
+app = Flask('bootstrap')
+app.debug = True
 
 
 # defaults

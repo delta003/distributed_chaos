@@ -1,6 +1,9 @@
 from flask import Flask, request
+from controllers.node_controller import *
+from api.api_responses import *
 
-app = Flask(__name__)
+app = Flask('node')
+app.debug = True
 
 
 # defaults
@@ -12,12 +15,12 @@ def default_response():
 # Node API
 @app.route('/api/basic/ok', methods=['GET'])
 def basic_ok():
-    pass
+    return ok_response(basic_ok_controller())
 
 
 @app.route('/api/basic/info', methods=['GET'])
 def basic_info():
-    pass
+    return ok_response(basic_info_controller())
 
 
 @app.route('/api/basic/check', methods=['POST'])
@@ -87,11 +90,6 @@ def jobs_kill(jobid):
     pass
 
 
-@app.route('/api/jobs/data/<int:jobid>', methods=['GET'])
-def jobs_new(jobid):
-    pass
-
-
 @app.route('/api/jobs/ids', methods=['GET'])
 def jobs_ids():
     pass
@@ -105,4 +103,3 @@ def jobs_data(jobid):
 @app.route('/api/jobs/visualize/<int:jobid>', methods=['GET'])
 def jobs_visualize():
     pass
-
