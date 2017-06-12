@@ -18,7 +18,7 @@
     function loadJobIds() {
       // NodeService.JobsIds()
       //     .then(function (response)) {
-      //         vm.jobids = response.jobids;
+      //         vm.jobids = response.jobids; // todo: handlovati slucaj kada ne postoji .jobids (nijedan job nije startovan)
       //     });
       vm.jobids = [1, 2, 3, 4];
     }
