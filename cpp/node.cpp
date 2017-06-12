@@ -19,7 +19,6 @@
 
 using namespace std;
 using namespace boost::property_tree;
-using requests::status;
 
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 typedef SimpleWeb::Client<SimpleWeb::HTTP> HttpClient;
@@ -303,6 +302,7 @@ using namespace ::jobs;
 using namespace ::network;
 void jobs_add(HttpServer& server) {
   server.resource["/api/jobs/add/(.+)"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    job_mutex.lock();
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
@@ -320,6 +320,7 @@ void jobs_add(HttpServer& server) {
       log(logstream, "jobs_add_error_" + jobid, e.what());
       send_error(response, e.what());
     }
+    job_mutex.unlock();
   };
 }
 void jobs_new(HttpServer& server) {
@@ -346,6 +347,7 @@ void jobs_new(HttpServer& server) {
         vector<edge> neighbors;
         try {
           neighbors = requests::jobs_add(curr.ip, curr.port, jobid, request).first;
+          log(logstream, "bfs_neighbors", neighbors);
         } catch (exception& e) {
           log(logstream, "bfs_error", e.what());
         }
@@ -365,7 +367,7 @@ void jobs_new(HttpServer& server) {
 }
 void jobs_all(HttpServer& server) {
   server.resource["/api/jobs/all"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
-    mtx.lock();
+    job_mutex.lock();
     try {
       if (WAIT) {
         send_wait(response);
@@ -379,22 +381,25 @@ void jobs_all(HttpServer& server) {
         json.put("jobid", it.id);
         job_requests.push_back(make_pair("", json));
       }
-      out.put_child("jobs", job_requests);
+      if (!job_requests.empty()) {
+        out.put_child("jobs", job_requests);
+      }
       send_ok(response, out);
     } catch (exception& e) {
       log(logstream, "jobs_all_error", e.what());
       send_error(response, e.what());
     }
-    mtx.unlock();
+    job_mutex.unlock();
   };
 }
 void jobs_backup(HttpServer& server) {
   server.resource["/api/jobs/backup"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    job_mutex.lock();
     try {
-      if (WAIT) {
-        send_wait(response);
-        return;
-      }
+      // if (WAIT) {
+      //   send_wait(response);
+      //   return;
+      // }
       string req_str = request->content.string();
       log(logstream, "jobs_backup_request", req_str);
       ptree in, out;
@@ -405,10 +410,12 @@ void jobs_backup(HttpServer& server) {
       log(logstream, "jobs_backup_error", e.what());
       send_error(response, e.what());
     }
+    job_mutex.unlock();
   };
 }
 void jobs_remove(HttpServer& server) {
   server.resource["/api/jobs/remove/(.+)"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    job_mutex.lock();
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
@@ -425,6 +432,7 @@ void jobs_remove(HttpServer& server) {
       log(logstream, "jobs_remove_error_" + jobid, e.what());
       send_error(response, e.what());
     }
+    job_mutex.unlock();
   };
 }
 void jobs_kill(HttpServer& server) {
@@ -467,7 +475,7 @@ void jobs_kill(HttpServer& server) {
 }
 void jobs_ids(HttpServer& server) {
   server.resource["/api/jobs/ids"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
-    mtx.lock();
+    job_mutex.lock();
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
@@ -476,24 +484,27 @@ void jobs_ids(HttpServer& server) {
       }
       string req_str = request->content.string();
       log(logstream, "jobs_ids_request", req_str);
+      log(logstream, "node_jobs_size", node_jobs.size());
       ptree out, ids;
       for (auto& it : node_jobs) {
         ptree json;
         json.put("", it.id);
         ids.push_back(make_pair("", json));
       }
-      out.put_child("jobids", ids);
+      if (!ids.empty()) {
+        out.put_child("jobids", ids);
+      }
       send_ok(response, out);
     } catch (exception& e) {
       log(logstream, "jobs_ids_error", e.what());
       send_error(response, e.what());
     }
-    mtx.unlock();
+    job_mutex.unlock();
   };
 }
 void jobs_data(HttpServer& server) {
   server.resource["/api/jobs/data/(.+)"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
-    mtx.lock();
+    job_mutex.lock();
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
@@ -508,7 +519,7 @@ void jobs_data(HttpServer& server) {
       log(logstream, "jobs_data_error_" + jobid, e.what());
       send_error(response, e.what());
     }
-    mtx.unlock();
+    job_mutex.unlock();
   };
 }
 void jobs_visualize(HttpServer& server) {
@@ -522,15 +533,16 @@ void jobs_visualize(HttpServer& server) {
       string req_str = request->content.string();
       log(logstream, "jobs_visualize_request_" + jobid, req_str);
       ptree out;
-      mtx.lock();
+      job_mutex.lock();
       for (auto& it : node_jobs) {
         if (it.id == jobid) {
           out.add_child("startingpoints", points_to_json(it.starting_points));
           break;
         }
       }
-      mtx.unlock();
-      map<int, vector<point>> point_map;
+      job_mutex.unlock();
+      map<int, vector<point>> points;
+      map<int, vector<point>> backup;
       map<int, bool> visited;
       queue<node> Q;
       Q.push(node_info);
@@ -547,9 +559,10 @@ void jobs_visualize(HttpServer& server) {
           log(logstream, "bfs_error", e.what());
         }
         try {
-          merge(data.points, point_map[data.uuid]);
+          log(logstream, "bfs_jobs_data_response", data);
+          merge(data.points, points[data.uuid]);  // merge points
           for (auto& it : data.backup) {
-            merge(it.second, point_map[it.first]);
+            merge(it.second, backup[it.first]);  // merge backup points
           }
         } catch (exception& e) {
           log(logstream, "visualize_point_data_merge_error", e.what());
@@ -560,7 +573,10 @@ void jobs_visualize(HttpServer& server) {
           }
         }
       }
-      out.add_child("points", point_map_to_json(point_map));
+      for (auto& it : backup) {  // merge backup points and points
+        merge(it.second, points[it.first]);
+      }
+      out.add_child("points", point_map_to_json(points));
       send_ok(response, out);
     } catch (exception& e) {
       log(logstream, "jobs_visualize_error_" + jobid, e.what());
@@ -668,7 +684,7 @@ void failover() {
     fail_cnt = 0;
   } catch (exception& e) {
     fail_cnt++;
-    log(logstream, "ping failed", e.what());
+    log(logstream, "ping next failed", e.what());
   }
   if (fail_cnt == 5) {  // 5s proslo
     try {
@@ -713,14 +729,29 @@ void worker() {
     return;
   } else {
     network::join();
+    try {
+      if (e_parent.exists()) {
+        auto response = requests::jobs_all(e_parent.ip, e_parent.port);
+        for (int i = 0; i < response.first.size(); i++) {
+          jobs::new_job(response.second[i], response.first[i]);
+        }
+      }
+    } catch (exception& e) {
+      log(logstream, "GETTING_JOB_DATA_FROM_PARENT_FAILED", e.what());
+    }
   }
   WAIT = 0;
-
   while (1) {
     network::failover();
     if (WAIT) {  // re-join
       network::join();
       WAIT = 0;
+    }
+    {  // generisanje tacke
+      job_mutex.lock();
+      jobs::work();
+      jobs::send_backup();
+      job_mutex.unlock();
     }
     this_thread::sleep_for(chrono::seconds(1));
   }

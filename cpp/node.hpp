@@ -20,10 +20,23 @@ bool DBG = false;
 const double eps = 1e-4;  // double comparison
 const int WAIT_DELAY = 1000;
 
-std::mutex mtx;
+std::mutex job_mutex;
 
 string bootstrap_ip;
 string bootstrap_port;
+
+struct status {
+  string msg;
+  string code;
+  status() { code = msg = ""; }
+  status(string _code, string _msg) : msg(_msg), code(_code) {}
+  status(const ptree& json) {
+    code = json.get<string>("status");
+    if (code == "error") {
+      msg = json.get<string>("message");
+    }
+  }
+};
 
 struct node {
   int uuid;
@@ -138,14 +151,35 @@ struct point {
   }
 };
 
+std::ostream& operator<<(std::ostream& stream, const point& rhs) {
+  stream << "(" << rhs.x << ", " << rhs.y << ")";
+  return stream;
+}
+
 struct job_request {
   int width, height;
   double p;
   vector<point> points;
   job_request() {}
+  bool operator==(job_request other) const {
+    return width == other.width && height == other.height && abs(p - other.p) < eps && points == other.points;
+  }
+  bool operator<(const job_request& other) const {
+    if (width != other.width) {
+      return width < other.width;
+    }
+    return height < other.height;  // good enough
+  }
 };
 
+std::ostream& operator<<(std::ostream& stream, const job_request& rhs) {
+  stream << rhs.width << " " << rhs.height << " " << rhs.p << " " << rhs.points;
+  return stream;
+}
+
 struct backup_request {
+  backup_request() {}
+  backup_request(int _uuid, string _jobid, point _point) : uuid(_uuid), jobid(_jobid), point(_point.x, _point.y) {}
   int uuid;  // uid cvora koji salje backup_request
   string jobid;
   point point;
@@ -169,12 +203,29 @@ struct job_data {
   vector<point> points;
   map<int, vector<point>> backup;
   vector<edge> edges;
+  bool empty() { return points.empty() && backup.empty(); }
 };
+
+std::ostream& operator<<(std::ostream& stream, const job_data& rhs) {
+  stream << rhs.uuid;
+  stream << " points = { " << rhs.points << "} ";
+  stream << "backup = {";
+  for (auto& it : rhs.backup) {
+    stream << it.first << " " << it.second << ", ";
+  }
+
+  stream << "}";
+  return stream;
+}
 
 namespace network {
 void add_all_edges(ptree& out);
 void json_to_edges(ptree& json, vector<edge>& edges);
 }  // network declarations
+
+namespace requests {
+status jobs_backup(string ip, string port, backup_request request);
+}  // requests declarations
 
 namespace jobs {
 // json
@@ -214,8 +265,8 @@ inline ptree points_to_json(vector<point>& points) {
 inline ptree job_request_to_json(job_request& request) {
   ptree out;
   out.put("width", request.width);
-  out.put("height", request.width);
-  out.put("p", request.width);
+  out.put("height", request.height);
+  out.put("p", request.p);
   out.add_child("points", points_to_json(request.points));
   return out;
 }
@@ -261,8 +312,12 @@ inline ptree job_data_to_json(const string& jobid) {
   out.put("uuid", node_info.uuid);
   for (int i = 0; i < node_jobs.size(); i++) {
     if (node_jobs[i].id == jobid) {
-      out.add_child("points", points_to_json(node_jobs[i].points));
-      out.add_child("backup", point_map_to_json(node_jobs[i].backup));
+      if (!node_jobs[i].points.empty()) {
+        out.add_child("points", points_to_json(node_jobs[i].points));
+      }
+      if (!node_jobs[i].backup.empty()) {
+        out.add_child("backup", point_map_to_json(node_jobs[i].backup));
+      }
       break;
     }
   }
@@ -270,11 +325,19 @@ inline ptree job_data_to_json(const string& jobid) {
 }
 inline job_data json_to_job_data(ptree& json) {
   job_data out;
-  out.uuid = json.get<int>("uuid");
-  network::json_to_edges(json.get_child("edges"), out.edges);
-  out.points = json_to_points(json.get_child("points"));
-  BOOST_FOREACH (ptree::value_type& it, json.get_child("backup")) {
-    out.backup[it.second.get<int>("uuid")] = json_to_points(it.second.get_child("points"));
+  if (key_exists(json, "uuid")) {
+    out.uuid = json.get<int>("uuid");
+  }
+  if (key_exists(json, "edges")) {
+    network::json_to_edges(json.get_child("edges"), out.edges);
+  }
+  if (key_exists(json, "points")) {
+    out.points = json_to_points(json.get_child("points"));
+  }
+  if (key_exists(json, "backup")) {
+    BOOST_FOREACH (ptree::value_type& it, json.get_child("backup")) {
+      out.backup[it.second.get<int>("uuid")] = json_to_points(it.second.get_child("points"));
+    }
   }
   return out;
 }
@@ -289,7 +352,6 @@ void merge(const vector<point>& in, vector<point>& out) {
 inline point rand_point(int w, int h) { return point(abs(rand() % w), abs(rand() % h)); }
 // job logic
 void new_job(string jobid, job_request request) {
-  mtx.lock();
   if (p.count(jobid)) {
     return;  // posao vec postoji
   }
@@ -299,21 +361,18 @@ void new_job(string jobid, job_request request) {
   new_job.id = jobid;
   new_job.starting_points = request.points;
   new_job.points.push_back(rand_point(request.width, request.height));
+  node_jobs.push_back(new_job);
   sort(node_jobs.begin(), node_jobs.end());
-  mtx.unlock();
 }
 void backup(backup_request request) {
-  mtx.lock();
   for (int i = 0; i < node_jobs.size(); i++) {
     if (node_jobs[i].id == request.jobid) {
       node_jobs[i].backup[request.uuid].push_back(request.point);
       break;
     }
   }
-  mtx.unlock();
 }
 void remove_job(string jobid) {
-  mtx.lock();
   for (auto it = node_jobs.begin(); it != node_jobs.end(); it++) {
     if (it->id == jobid) {
       node_jobs.erase(it);
@@ -321,10 +380,9 @@ void remove_job(string jobid) {
     }
   }
   p.erase(jobid);
-  mtx.unlock();
 }
-void work() {  // generise sledecu tacku
-  mtx.lock();
+void work() {
+  if (node_jobs.size() == 0) return;  // no jobs
   int idx = node_info.uuid % node_jobs.size();
   double _p = p[node_jobs[idx].id];
   point X = node_jobs[idx].starting_points[rand() % node_jobs[idx].starting_points.size()];
@@ -332,7 +390,22 @@ void work() {  // generise sledecu tacku
   P.x = P.x + (X.x - P.x) * _p;
   P.y = P.y + (X.y - P.y) * _p;
   node_jobs[idx].points.push_back(P);
-  mtx.unlock();
+}
+void send_backup() {
+  if (node_jobs.size() == 0) return;  // no jobs
+  int idx = node_info.uuid % node_jobs.size();
+  backup_request request;
+  request.uuid = node_info.uuid;
+  request.jobid = node_jobs[idx].id;
+  request.point = node_jobs[idx].points.back();
+  try {
+    requests::jobs_backup(e_next.ip, e_next.port, request);
+  } catch (exception& e) {
+  }
+  try {
+    requests::jobs_backup(e_prev.ip, e_prev.port, request);
+  } catch (exception& e) {
+  }
 }
 }  // jobs
 
@@ -505,18 +578,6 @@ inline void add_all_edges(ptree& out) {
 namespace requests {  // wrapperi za request (treba ga surround sa try/catch)
 using namespace ::network;
 using namespace ::jobs;
-struct status {
-  string msg;
-  string code;
-  status() { code = msg = ""; }
-  status(string _code, string _msg) : msg(_msg), code(_code) {}
-  status(const ptree& json) {
-    code = json.get<string>("status");
-    if (code == "error") {
-      msg = json.get<string>("message");
-    }
-  }
-};
 pair<node, status> hello(string ip, string port, string node_ip, string node_port) {
   HttpClient client(make_addr(ip, port));
   ptree in, out;
@@ -722,20 +783,20 @@ pair<vector<job_request>, vector<string>> jobs_all(string ip, string port) {
     if (DBG) cout << json_to_string(out);
     if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
-  vector<job_request> requests = json_to_job_requests(out.get_child("jobs"));
+  vector<job_request> requests;
   vector<string> ids;
-  BOOST_FOREACH (ptree::value_type& it, out.get_child("jobs")) { ids.push_back(it.second.get<string>("jobid")); }
+  if (key_exists(out, "jobs")) {
+    requests = json_to_job_requests(out.get_child("jobs"));
+    BOOST_FOREACH (ptree::value_type& it, out.get_child("jobs")) { ids.push_back(it.second.get<string>("jobid")); }
+  }
   return make_pair(requests, ids);
 }
 status jobs_backup(string ip, string port, backup_request request) {
   HttpClient client(make_addr(ip, port));
   ptree out, in;
   in = backup_request_to_json(request);
-  do {
-    read_json(client.request("POST", "/api/jobs/backup")->content, out);
-    if (DBG) cout << json_to_string(out);
-    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
-  } while (out.get<string>("status") == "wait");
+  read_json(client.request("POST", "/api/jobs/backup", make_json(backup_request_to_json(request)))->content, out);
+  if (DBG) cout << json_to_string(out);
   return status(out);
 }
 pair<vector<edge>, status> jobs_remove(string ip, string port, string jobid) {
@@ -771,7 +832,9 @@ pair<vector<string>, status> jobs_ids(string ip, string port) {
     if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   vector<string> ids;
-  BOOST_FOREACH (ptree::value_type& it, out.get_child("jobids")) { ids.push_back(it.second.get<string>("")); }
+  if (key_exists(out, "jobids")) {
+    BOOST_FOREACH (ptree::value_type& it, out.get_child("jobids")) { ids.push_back(it.second.get<string>("")); }
+  }
   return make_pair(ids, status(out));
 }
 pair<job_data, status> jobs_data(string ip, string port, string jobid) {
@@ -783,6 +846,24 @@ pair<job_data, status> jobs_data(string ip, string port, string jobid) {
     if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
   } while (out.get<string>("status") == "wait");
   return make_pair(json_to_job_data(out), status(out));
+}
+pair<vector<point>, map<int, vector<point>>> jobs_visualize(string ip, string port, string jobid) {
+  HttpClient client(make_addr(ip, port));
+  ptree out;
+  do {
+    read_json(client.request("GET", "/api/jobs/visualize/" + jobid)->content, out);
+    if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
+  } while (out.get<string>("status") == "wait");
+  vector<point> startingpoints;
+  map<int, vector<point>> point_map;
+  if (key_exists(out, "startingpoints")) {
+    startingpoints = json_to_points(out.get_child("startingpoints"));
+  }
+  if (key_exists(out, "points")) {
+    point_map = json_to_point_map(out.get_child("points"));
+  }
+  return make_pair(startingpoints, point_map);
 }
 }  // requests
 
