@@ -537,6 +537,8 @@ void jobs_visualize(HttpServer& server) {
       for (auto& it : node_jobs) {
         if (it.id == jobid) {
           out.add_child("startingpoints", points_to_json(it.starting_points));
+          out.put("width", it.request.width);
+          out.put("height", it.request.height);
           break;
         }
       }
