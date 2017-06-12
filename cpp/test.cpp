@@ -386,7 +386,7 @@ int main(int argc, char* argv[]) {
   // RUN_TEST(Node::network::test_get_edge);       // node/api/network/get_edge
   // RUN_TEST(Node::network::test_set_edge);       // node/api/network/set_edge
   // RUN_TEST(Node::network::test_get_set_edges);  // get_edge + set_edge + edges
-  // RUN_TEST(Node::network::test_adopt);          // node/api/network/adopt
+  RUN_TEST(Node::network::test_adopt);  // node/api/network/adopt
 
   if (oks + failures > 0) {
     output_results();

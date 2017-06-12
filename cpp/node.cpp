@@ -302,7 +302,7 @@ namespace jobs {
 using namespace ::jobs;
 using namespace ::network;
 void jobs_add(HttpServer& server) {
-  server.resource["/api/jobs/add/*"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+  server.resource["/api/jobs/add/(.+)"]["POST"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
@@ -408,7 +408,7 @@ void jobs_backup(HttpServer& server) {
   };
 }
 void jobs_remove(HttpServer& server) {
-  server.resource["/api/jobs/remove/*"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+  server.resource["/api/jobs/remove/(.+)"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
@@ -428,7 +428,7 @@ void jobs_remove(HttpServer& server) {
   };
 }
 void jobs_kill(HttpServer& server) {
-  server.resource["/api/jobs/kill/*"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+  server.resource["/api/jobs/kill/(.+)"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     string jobid = request_param(request->path);
     try {
       if (WAIT) {
@@ -468,6 +468,7 @@ void jobs_kill(HttpServer& server) {
 void jobs_ids(HttpServer& server) {
   server.resource["/api/jobs/ids"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     mtx.lock();
+    string jobid = request_param(request->path);
     try {
       if (WAIT) {
         send_wait(response);
@@ -488,6 +489,83 @@ void jobs_ids(HttpServer& server) {
       send_error(response, e.what());
     }
     mtx.unlock();
+  };
+}
+void jobs_data(HttpServer& server) {
+  server.resource["/api/jobs/data/(.+)"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    mtx.lock();
+    string jobid = request_param(request->path);
+    try {
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
+      string req_str = request->content.string();
+      log(logstream, "jobs_data_request_" + jobid, req_str);
+      ptree out = job_data_to_json(jobid);
+      send_ok(response, out);
+    } catch (exception& e) {
+      log(logstream, "jobs_data_error_" + jobid, e.what());
+      send_error(response, e.what());
+    }
+    mtx.unlock();
+  };
+}
+void jobs_visualize(HttpServer& server) {
+  server.resource["/api/jobs/visualize/(.+)"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
+    string jobid = request_param(request->path);
+    try {
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
+      string req_str = request->content.string();
+      log(logstream, "jobs_visualize_request_" + jobid, req_str);
+      ptree out;
+      mtx.lock();
+      for (auto& it : node_jobs) {
+        if (it.id == jobid) {
+          out.add_child("startingpoints", points_to_json(it.starting_points));
+          break;
+        }
+      }
+      mtx.unlock();
+      map<int, vector<point>> point_map;
+      map<int, bool> visited;
+      queue<node> Q;
+      Q.push(node_info);
+      while (!Q.empty()) {
+        node curr = Q.front();
+        Q.pop();
+        if (visited[curr.uuid]) continue;
+        visited[curr.uuid] = true;
+        job_data data;
+        vector<edge> neighbors;
+        try {
+          data = requests::jobs_data(curr.ip, curr.port, jobid).first;
+        } catch (exception& e) {
+          log(logstream, "bfs_error", e.what());
+        }
+        try {
+          merge(data.points, point_map[data.uuid]);
+          for (auto& it : data.backup) {
+            merge(it.second, point_map[it.first]);
+          }
+        } catch (exception& e) {
+          log(logstream, "visualize_point_data_merge_error", e.what());
+        }
+        for (edge& it : data.edges) {
+          if (!visited[it.uuid]) {
+            Q.push(edge_to_node(it));
+          }
+        }
+      }
+      out.add_child("points", point_map_to_json(point_map));
+      send_ok(response, out);
+    } catch (exception& e) {
+      log(logstream, "jobs_visualize_error_" + jobid, e.what());
+      send_error(response, e.what());
+    }
   };
 }
 }  // jobs
@@ -685,6 +763,8 @@ int main(int argc, char* argv[]) {
   Handlers::jobs::jobs_remove(server);
   Handlers::jobs::jobs_kill(server);
   Handlers::jobs::jobs_ids(server);
+  Handlers::jobs::jobs_data(server);
+  Handlers::jobs::jobs_visualize(server);
 
   thread server_thread([&server]() { server.start(); });
 

@@ -164,6 +164,18 @@ struct job {
 map<string, double> p;
 vector<job> node_jobs;
 
+struct job_data {
+  int uuid;
+  vector<point> points;
+  map<int, vector<point>> backup;
+  vector<edge> edges;
+};
+
+namespace network {
+void add_all_edges(ptree& out);
+void json_to_edges(ptree& json, vector<edge>& edges);
+}  // network declarations
+
 namespace jobs {
 // json
 inline ptree point_to_json(point& p) {
@@ -226,6 +238,45 @@ inline ptree job_requests_to_json(vector<job_request>& requests) {
     res.push_back(make_pair("", job_request_to_json(it)));
   }
   return res;
+}
+inline ptree point_map_to_json(map<int, vector<point>>& m) {
+  ptree out;
+  for (auto& it : m) {
+    ptree json;
+    json.put("uuid", it.first);
+    json.add_child("points", points_to_json(it.second));
+    out.push_back(make_pair("", json));
+  }
+  return out;
+}
+inline map<int, vector<point>> json_to_point_map(ptree& json) {
+  map<int, vector<point>> out;
+  BOOST_FOREACH (ptree::value_type& it, json) { out[it.second.get<int>("uuid")] = json_to_points(it.second.get_child("points")); }
+  return out;
+}
+
+inline ptree job_data_to_json(const string& jobid) {
+  ptree out;
+  network::add_all_edges(out);
+  out.put("uuid", node_info.uuid);
+  for (int i = 0; i < node_jobs.size(); i++) {
+    if (node_jobs[i].id == jobid) {
+      out.add_child("points", points_to_json(node_jobs[i].points));
+      out.add_child("backup", point_map_to_json(node_jobs[i].backup));
+      break;
+    }
+  }
+  return out;
+}
+inline job_data json_to_job_data(ptree& json) {
+  job_data out;
+  out.uuid = json.get<int>("uuid");
+  network::json_to_edges(json.get_child("edges"), out.edges);
+  out.points = json_to_points(json.get_child("points"));
+  BOOST_FOREACH (ptree::value_type& it, json.get_child("backup")) {
+    out.backup[it.second.get<int>("uuid")] = json_to_points(it.second.get_child("points"));
+  }
+  return out;
 }
 void merge(const vector<point>& in, vector<point>& out) {
   for (auto it : in) {
@@ -722,6 +773,16 @@ pair<vector<string>, status> jobs_ids(string ip, string port) {
   vector<string> ids;
   BOOST_FOREACH (ptree::value_type& it, out.get_child("jobids")) { ids.push_back(it.second.get<string>("")); }
   return make_pair(ids, status(out));
+}
+pair<job_data, status> jobs_data(string ip, string port, string jobid) {
+  HttpClient client(make_addr(ip, port));
+  ptree out;
+  do {
+    read_json(client.request("GET", "/api/jobs/data/" + jobid)->content, out);
+    if (DBG) cout << json_to_string(out);
+    if (out.get<string>("status") == "wait") this_thread::sleep_for(chrono::milliseconds(WAIT_DELAY));
+  } while (out.get<string>("status") == "wait");
+  return make_pair(json_to_job_data(out), status(out));
 }
 }  // requests
 

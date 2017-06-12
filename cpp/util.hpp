@@ -91,6 +91,8 @@ inline void log(stringstream& logz, const string& handler, T object) {
   oss << object;
   if (!oss.str().empty()) {
     logz << handler << " : " << oss.str() << "\n";
+  } else {
+    logz << handler << "\n";
   }
 }
 
