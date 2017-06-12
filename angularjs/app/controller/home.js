@@ -16,15 +16,20 @@
     }
 
     function loadJobIds() {
-      // NodeService.JobsIds()
-      //     .then(function (response)) {
-      //         vm.jobids = response.jobids; // todo: handlovati slucaj kada ne postoji .jobids (nijedan job nije startovan)
-      //     });
-      vm.jobids = [1, 2, 3, 4];
+      NodeService.JobsIds().then(function(response) {
+        console.log("/api/jobs/ids response");
+        console.log(response);
+        if (response.hasOwnProperty('status') && response.hasOwnProperty('jobids') && response.jobids != null) {
+          vm.jobids = response.jobids;
+        }
+      });
+      // vm.jobids = [1, 2, 3, 4];
     }
 
     function loadNetwork(request) {
       NodeService.NetworkVisualize().then(function(response) {
+        console.log("/api/network/visualize response");
+        console.log(response);
         var nodes = response.nodes;
         var edges = response.edges;
         if (response.status == "wait") {
@@ -70,5 +75,4 @@
       var network = new vis.Network(container, data, options);
     }
   }
-
 })();

@@ -50,7 +50,8 @@ int main(int argc, char* argv[]) {
 
   cout << "Koriscenje:\n"
        << "  1) up <n> - spawnuje n novih nodova.\n  2) k|kill n - ubija cvor na portu n.\n"
-       << "  3) k2|kill2 <n> <m> - ubija dva cvora istovremeno.\n  4) q|quit - napusta program i stopira mrezu.\n\n";
+       << "  3) k2|kill2 <n> <m> - ubija dva cvora istovremeno.\n  4) j|job <port> w h p n x_1 y_1 ... x_n y_n - pocetak posla\n"
+       << "  5) q|quit - napusta program i stopira mrezu.\n\n";
 
   string cmd;
   while (1) {
@@ -83,6 +84,26 @@ int main(int argc, char* argv[]) {
       cout << "Node stopped {ip = " << config::ip << ", port = " << m << "}\n";
     } else if (cmd == "q" || cmd == "quit") {
       break;
+    } else if (cmd == "j" || cmd == "job") {
+      job_request request;
+      int n;
+      string port;
+      cin >> port >> request.width >> request.height >> request.p >> n;
+      while (n--) {
+        double x, y;
+        cin >> x >> y;
+        request.points.push_back(point(x, y));
+      }
+      try {
+        pair<string, status> response = requests::jobs_new(config::ip, port, request);
+        if (response.second.code == "ok") {
+          cout << "Started job " << response.first << " on {ip = " << config::ip << ", port = " << port << "}\n";
+        } else {
+          cout << "Start failed, got response: " << response.second.code << "\n";
+        }
+      } catch (exception& e) {
+        cout << e.what() << endl;
+      }
     }
   }
   clean_up();
