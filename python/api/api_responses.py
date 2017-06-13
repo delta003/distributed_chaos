@@ -15,7 +15,7 @@ def ok_response(response):
 
 
 def extract_data(request, fields):
-    json_data = request.get_json()
+    json_data = request.json
     result = []
     for field in fields:
         if field not in json_data:
