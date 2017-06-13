@@ -1,0 +1,3 @@
+CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+$CWD/../start node localhost $1 localhost 9080 > /dev/null

@@ -1,0 +1,3 @@
+CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+$CWD/../stop node $1 > /dev/null

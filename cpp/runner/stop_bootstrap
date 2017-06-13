@@ -1,0 +1,3 @@
+CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+$CWD/../stop bs 9080 > /dev/null

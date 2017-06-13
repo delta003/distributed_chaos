@@ -9,10 +9,7 @@
 #ifndef TEST_CONFIG_HPP
 #define TEST_CONFIG_HPP
 
-string git_root() {
-  auto up = [](string file) { return file.substr(0, file.rfind("/")); };
-  return up(up(__FILE__));
-}
+#include "util.hpp"
 
 namespace config {
 
