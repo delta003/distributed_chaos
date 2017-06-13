@@ -6,6 +6,9 @@ w: <input type="text" size="4" id="w" ng-model="vm.job.width" ng-change="vm.resi
 h: <input type="text" size="4" id="h" ng-model="vm.job.height" ng-change="vm.resize()">
 p: <input type="text" size="4" id="p" ng-model="vm.job.p">
 <button id="newjob" ng-click="vm.start()">start job</button>
+<p>
+    {{ vm.newresponse }}
+</p>
 <br><br>
 <canvas id="newjobcanvas" width="500" height="500" ng-click="vm.draw($event)"></canvas>
 </div>

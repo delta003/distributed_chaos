@@ -10,6 +10,7 @@
     // data
     vm.job = {};
     vm.job.points = [];
+    vm.newresponse = ''
 
     // functions
     vm.draw = draw;
@@ -69,7 +70,7 @@
           if (response.status == 'ok') {
             $location.path('/');
           } else {
-            console.log(response);
+            vm.newresponse = response;
           }
         });
       } else {
