@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ $# -ne 1 ]; then
+    printf "Port is missing.\n"
+else
+    ps aux | grep Ddw.node.port=$1 | grep -v grep | awk '{print "kill " $2}' | sh
+fi
