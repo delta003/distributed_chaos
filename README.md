@@ -23,7 +23,10 @@ brew install cmake openssl boost gcc
 ```
 with xcode-select --install
 ```
-- Run ./cpp/start and ./cpp/stop to create or destroy nodes and bootstrap servers.
+- Starting a node: ./cpp/start node <node_ip> <node_port> <bootstrap_ip> <bootstrap_port>
+- Killing a node: ./cpp/stop node <node_port>
+- Starting bootstrap: ./cpp/start bs <bootstrap_port>
+- Killing bootstrap: ./cpp/stop bs <bootstrap_port>
 - Alternatively run ./cpp/client for an interactive client.
 
 ## C++ Unit Tests
