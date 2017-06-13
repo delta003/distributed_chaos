@@ -15,6 +15,7 @@ KIDS projekat
 - Run `./start_node $PORT` to start node server on port $PORT
 
 ## C++
+##Building
 - Install cmake, openssl, boost and gcc
 ```
 brew install cmake openssl boost gcc
@@ -26,8 +27,6 @@ with xcode-select --install
 - Run ./cpp/start and ./cpp/stop to create or destroy nodes and bootstrap servers.
 - Alternatively run ./cpp/client for an interactive client.
 
-## Unit Tests
-
-- Install homebrew, openssl, cmake, boost and gcc
+## C++ Unit Tests
 - Edit /cpp/test_config.hpp
 - Run ./cpp/test
