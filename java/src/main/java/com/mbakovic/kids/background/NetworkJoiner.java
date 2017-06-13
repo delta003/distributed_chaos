@@ -475,13 +475,13 @@ public class NetworkJoiner implements Runnable {
             return;
         }
 
-        for (JobWithUUID job : jobs.getJobs()) {
-            if (Node.getInstance().checkJobId(job.getUuid())) {
+        for (JobWithID job : jobs.getJobs()) {
+            if (Node.getInstance().checkJobId(job.getId())) {
                 continue;
             }
             JobExecution newJob = new JobExecution(job);
             Node.getInstance().addJob(newJob);
-            log.info("New job fetched with UUID: " + newJob.getJobUuid());
+            log.info("New job fetched with UUID: " + newJob.getJobId());
         }
 
         Node.getInstance().jobLockRelease();

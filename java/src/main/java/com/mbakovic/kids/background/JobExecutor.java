@@ -38,7 +38,7 @@ public class JobExecutor implements Runnable {
         int jobIndex = uuid % Node.getInstance().getJobs().size();
         JobExecution je = Node.getInstance().getJobs().get(jobIndex);
         PointDouble newPoint = je.computePoint();
-        String jobid = je.getJobUuid();
+        String jobid = je.getJobId();
 
         // Release job lock
         Node.getInstance().jobLockRelease();
