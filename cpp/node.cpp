@@ -31,7 +31,7 @@ namespace Handlers {
 void index(HttpServer& server) {
   server.default_resource["GET"] = [&server](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      auto web_root_path = boost::filesystem::canonical("../angularjs/app");
+      auto web_root_path = boost::filesystem::canonical(git_root() + "/angularjs/app");
       auto path = boost::filesystem::canonical(web_root_path / request->path);
 
       if (distance(web_root_path.begin(), web_root_path.end()) > distance(path.begin(), path.end()) ||
