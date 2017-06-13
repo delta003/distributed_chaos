@@ -97,16 +97,23 @@ public final class HttpHelper {
         }
     }
 
-    public IPAndPortAndUUIDResponse basicInfo(IPAndPort ipAndPort) {
-        try {
-            HttpRequest httpRequest = getRequestFactory().buildGetRequest(
-                    new GenericUrl("http://" + ipAndPort.toString() + "/api/basic/info")
-            );
-            return httpRequest.execute().parseAs(IPAndPortAndUUIDResponse.class);
-        } catch (Exception e) {
-            log.error("basicInfo failed: " + e.getMessage());
-            return null;
-        }
+    public IPAndPortAndUUIDResponse basicInfoWithRetry(IPAndPort ipAndPort) {
+        IPAndPortAndUUIDResponse response;
+        do {
+            try {
+                HttpRequest httpRequest = getRequestFactory().buildGetRequest(
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/basic/info")
+                );
+                response = httpRequest.execute().parseAs(IPAndPortAndUUIDResponse.class);
+            } catch (Exception e) {
+                log.error("basicInfo failed: " + e.getMessage());
+                return null;
+            }
+            if (response.getStatus() == Status.WAIT) {
+                sleep(RETRY_DELAY);
+            }
+        } while (response.getStatus() == Status.WAIT);
+        return response;
     }
 
     public CheckResponse basicCheck(IPAndPort ipAndPort) {

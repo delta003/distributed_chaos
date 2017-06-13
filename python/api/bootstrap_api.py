@@ -19,12 +19,12 @@ def hello():
         [ip, port] = extract_data(request, ['ip', 'port'])
     except InvalidJsonRequest:
         return error_response('Invalid JSON in request')
-    except:
-        return error_response('Unknown error')
+    except Exception as e:
+        return error_response(str(e))
     try:
         response = hello_controller(ip, port)
-    except:
-        pass
+    except Exception as e:
+        return error_response(str(e))
     return ok_response(response)
 
 
@@ -32,8 +32,8 @@ def hello():
 def reset():
     try:
         response = reset_controller()
-    except:
-        pass
+    except Exception as e:
+        return error_response(str(e))
     return ok_response(response)
 
 
@@ -41,8 +41,8 @@ def reset():
 def reset_done():
     try:
         response = reset_done_controller()
-    except:
-        pass
+    except Exception as e:
+        return error_response(str(e))
     return ok_response(response)
 
 
@@ -51,4 +51,3 @@ def reset_done():
 def test_receive():
     print("DEbUG")
     return ok_response({'message': 'sve je laz'})
-    pass

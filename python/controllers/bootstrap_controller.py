@@ -1,5 +1,5 @@
 def hello_controller(ip, port):
-    ret = {'uuid': bootstrap_data.uuid, 'ip': bootstrap_data.last_ip, 'port': bootstrap_data.last_port}
+    ret = {'uuid': bootstrap_data.get_uuid(), 'ip': bootstrap_data.get_last_ip(), 'port': bootstrap_data.get_last_port()}
     bootstrap_data.inc_uuid()
     bootstrap_data.set_last_ip(ip)
     bootstrap_data.set_last_port(port)
@@ -7,7 +7,9 @@ def hello_controller(ip, port):
 
 
 def reset_controller():
-    if bootstrap_data.can_reset:
+    if bootstrap_data.can_reset():
+        # TODO: treba i uuid da se stavi na nulu?
+        # možda samo pozvati default konstruktor
         bootstrap_data.set_can_reset(False)
         bootstrap_data.set_last_ip(None)
         bootstrap_data.set_last_port(None)
