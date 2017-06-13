@@ -87,7 +87,10 @@ void ok(HttpServer& server) {
 void info(HttpServer& server) {
   server.resource["/api/basic/info"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
-      // if (WAIT) { send_wait(response); return; }
+      if (WAIT) {
+        send_wait(response);
+        return;
+      }
       log(logstream, "info_request", request->content.string());
       ptree out;
       out.put("uuid", node_info.uuid);
@@ -600,6 +603,7 @@ void join() {
     e_prev.clear();
     e_children.clear();
     node bs_node = requests::hello(bootstrap_ip, bootstrap_port, node_info.ip, node_info.port).first;
+    log(logstream, "join-bootstrap-returned", bs_node);
     if (node_info.uuid == -1) {
       node_info.uuid = bs_node.uuid;
     }
@@ -609,7 +613,7 @@ void join() {
       return;
     }
     node x = requests::info(bs_node.ip, bs_node.port).first;
-    log(logstream, "join-node-bootstrap-returned", x);
+    log(logstream, "join-bootstrap-node-returned", x);
     vector<edge> edges = requests::edges(x.ip, x.port).first;
     log(logstream, "join-bootstrap-edges", edges);
     if (!get_edge(edges, "parent").exists()) {
