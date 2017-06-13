@@ -1,0 +1,17 @@
+<div class="col-md-8">
+<h1>Start New Job</h1>
+<a href="/">Back</a>
+<br>
+w: <input type="text" size="4" id="w" ng-model="vm.job.width" ng-change="vm.resize()">
+h: <input type="text" size="4" id="h" ng-model="vm.job.height" ng-change="vm.resize()">
+p: <input type="text" size="4" id="p" ng-model="vm.job.p">
+<button id="newjob" ng-click="vm.start()">start job</button>
+<br><br>
+<canvas id="newjobcanvas" width="500" height="500" ng-click="vm.draw($event)"></canvas>
+</div>
+<div class="col-md-3">
+<h2>Points</h2>
+<ul>
+    <li ng-repeat="p in vm.job.points">x = {{ p.x }}, y = {{ p.y }} <img src="/static/remove.png" width="10px" height="10px" ng-click="vm.remove(p)"></img></li>
+</ul>
+</div>
