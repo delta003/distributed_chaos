@@ -1,5 +1,5 @@
-# distributed_chaos
-KIDS projekat
+# Distributed Game of Chaos
+KIDS project
 
 ## Docs
 - Projekat https://drive.google.com/file/d/0B6P2gDjQqRbDMVptM3dfZmNWbVU/view?usp=sharing
