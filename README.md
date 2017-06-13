@@ -15,7 +15,6 @@ KIDS projekat
 - Run `./start_node $PORT` to start node server on port $PORT
 
 ## C++
-##Building
 - Install cmake, openssl, boost and gcc
 ```
 brew install cmake openssl boost gcc
