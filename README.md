@@ -19,7 +19,10 @@ KIDS projekat
 ```
 brew install cmake openssl boost gcc
 ```
-- You should install the Xcode Command Line tools with xcode-select --install to get a version of clang that searches /usr/local by default.
+- Install Xcode Command Line tools 
+```
+with xcode-select --install
+```
 - Run ./cpp/start and ./cpp/stop to create or destroy nodes and bootstrap servers.
 - Alternatively run ./cpp/client for an interactive client.
 
