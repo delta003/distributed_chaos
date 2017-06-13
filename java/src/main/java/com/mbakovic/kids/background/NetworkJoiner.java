@@ -81,7 +81,7 @@ public class NetworkJoiner implements Runnable {
         }
 
         // Get uuid of main contact
-        IPAndPortAndUUIDResponse mainContactInfo = HttpHelper.getInstance().basicInfo(
+        IPAndPortAndUUIDResponse mainContactInfo = HttpHelper.getInstance().basicInfoWithRetry(
                 new IPAndPort(bootstrapResponse.getIp(), bootstrapResponse.getPort()));
         if (mainContactInfo == null) {
             log.error("Main contact unreachable for info.");

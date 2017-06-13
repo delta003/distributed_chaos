@@ -21,7 +21,12 @@ public final class BasicResource implements BasicService {
 
     @Override
     public StatusResponse info() {
-        return new IPAndPortAndUUIDResponse(Node.getInstance().getMyself());
+        if (!Node.getInstance().lock()) {
+            return StatusResponse.ofWait();
+        }
+        IPAndPortAndUUIDResponse response = new IPAndPortAndUUIDResponse(Node.getInstance().getMyself());
+        Node.getInstance().lockRelease();
+        return response;
     }
 
     @Override
