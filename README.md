@@ -1,9 +1,7 @@
-# distributed_chaos
-KIDS projekat
-
+# Distributed Game of Chaos
 ## Docs
-- Projekat https://drive.google.com/file/d/0B6P2gDjQqRbDMVptM3dfZmNWbVU/view?usp=sharing
-- Dizajn https://docs.google.com/document/d/1YzOaIMauOf1US_li-Wa6A-0cFraVSx2Tim-j10xJb0k/edit?usp=sharing
+- Project https://drive.google.com/file/d/0B6P2gDjQqRbDMVptM3dfZmNWbVU/view?usp=sharing
+- Design https://docs.google.com/document/d/1YzOaIMauOf1US_li-Wa6A-0cFraVSx2Tim-j10xJb0k/edit?usp=sharing
 
 ## AngularJs
 - Each server should serve static files from `/angularjs/app` and routes with `/api` prefix should accept and return `Content-Type: application/json`
@@ -16,7 +14,7 @@ KIDS projekat
 
 ## C++
 ##### Installation
-- Install g++ and make sure it's on your path variable. On OS X:
+- Install gcc and make sure it's on your path variable. On OS X:
 ```
 brew install gcc
 ```
@@ -30,6 +28,8 @@ brew install boost
 ```
 xcode-select --install
 ```
+##### Building
+- Run ./cpp/build, however building is not necessary. Scripts that spawn nodes will use md5 to hash your files, and call ./cpp/build if the project hasn't been built yet, or if some of the source code was changed.
 
 ##### Running
 - Starting node: ./cpp/start node <node_ip> <node_port> <bootstrap_ip> <bootstrap_port>
