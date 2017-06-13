@@ -436,6 +436,63 @@ public class NetworkJoiner implements Runnable {
     }
 
     private void fetchJobs() {
-        // TODO
+        log.info("Fetching jobs started...");
+
+        // Take jobs lock
+        while (!Node.getInstance().jobLock()) {
+            sleep(1000);
+        }
+
+        Edge edge = Node.getInstance().getEdgeByType(EdgeType.NEXT);
+        if (edge == null) {
+            log.error("Next is null when asking for jobs");
+            return;
+        }
+        if (Node.getInstance().getMyself().getUuid().equals(edge.getUuid())) {
+            log.info("No jobs to fetch.");
+            Node.getInstance().jobLockRelease();
+            return;
+        }
+
+        AllJobsResponse jobs = HttpHelper.getInstance().jobsAllWithRetry(
+                new IPAndPort(edge.getIp(), edge.getPort()));
+        if (jobs == null) {
+            log.error(String.format("Next not reachable for fetch all jobs - %s:%s (%s)",
+                    edge.getIp(), edge.getPort(), edge.getUuid()));
+            Node.getInstance().jobLockRelease();
+            return;
+        }
+        if (jobs.getStatus() == Status.ERROR) {
+            log.error(String.format("Next responded with error for fetch all jobs - %s:%s (%s): %s",
+                    edge.getIp(), edge.getPort(), edge.getUuid(), jobs.getMessage()));
+            Node.getInstance().jobLockRelease();
+            return;
+        }
+        if (jobs.getJobs() == null) {
+            log.error(String.format("Next responded without jobs for fetch all jobs - %s:%s (%s)",
+                    edge.getIp(), edge.getPort(), edge.getUuid()));
+            Node.getInstance().jobLockRelease();
+            return;
+        }
+
+        for (JobWithUUID job : jobs.getJobs()) {
+            if (Node.getInstance().checkJobId(job.getUuid())) {
+                continue;
+            }
+            JobExecution newJob = new JobExecution(job);
+            Node.getInstance().addJob(newJob);
+            log.info("New job fetched with UUID: " + newJob.getJobUuid());
+        }
+
+        Node.getInstance().jobLockRelease();
+        log.info("Fetching jobs completed.");
+    }
+
+    private void sleep(long duration) {
+        try {
+            Thread.sleep(duration);
+        } catch (InterruptedException e) {
+            log.warn("NetworkJoiner sleep interrupted.");
+        }
     }
 }

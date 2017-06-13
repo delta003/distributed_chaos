@@ -31,6 +31,11 @@ std::ostream& operator<<(std::ostream& os, const std::vector<T>& v) {
   return os;
 }
 
+string git_root() {
+  auto up = [](string file) { return file.substr(0, file.rfind("/")); };
+  return up(up(__FILE__));
+}
+
 inline string request_param(string path) {
   string res = path.substr(path.rfind("/") + 1);
   boost::trim(res);

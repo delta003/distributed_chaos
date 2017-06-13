@@ -1,0 +1,2 @@
+#!/bin/bash
+java -Ddw.logging.level=OFF -Ddw.node.type=bootstrap -Ddw.server.connector.port=9080 -Ddw.node.port=9080 -jar target/distributed-chaos-0.1.jar server config.yml > /dev/null 2>&1 &

@@ -80,7 +80,7 @@
           var y = parseFloat(list[j].y);
           ctx.fillRect(x - pxsize / 2.0, y - pxsize / 2.0, pxsize, pxsize);
         }
-        vm.colors.push({node: node, color: color});
+        vm.colors.push({node: node, color: color, size: list.length});
       }
     }
   }

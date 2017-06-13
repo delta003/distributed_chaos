@@ -1,0 +1,2 @@
+#!/bin/bash
+java -Ddw.logging.level=OFF -Ddw.assets.overrides./=angularjs/app -Ddw.node.type=bootstrap -Ddw.server.connector.port=9080 -Ddw.node.port=9080 -jar java/target/distributed-chaos-0.1.jar server java/config.yml > /dev/null 2>&1 &

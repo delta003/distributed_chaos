@@ -1,0 +1,2 @@
+#!/bin/bash
+ps aux | grep Ddw.node.port=9080 | grep -v grep | awk '{print "kill " $2}' | sh

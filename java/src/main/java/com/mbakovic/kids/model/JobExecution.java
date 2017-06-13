@@ -30,6 +30,17 @@ public class JobExecution implements Comparable<JobExecution> {
         backups = new ArrayList<>();
     }
 
+    public JobExecution(JobWithUUID job) {
+        this.job = job;
+        dWidth = Double.parseDouble(job.getWidth());
+        dHeight = Double.parseDouble(job.getHeight());
+        dp = Double.parseDouble(job.getP());
+        startingPoints = new ArrayList<>();
+        startingPoints.addAll(job.getPoints().stream().map(PointDouble::fromPoint).collect(Collectors.toList()));
+        computedPoints = new ArrayList<>();
+        backups = new ArrayList<>();
+    }
+
     public JobWithUUID getJob() {
         return job;
     }
@@ -106,7 +117,7 @@ public class JobExecution implements Comparable<JobExecution> {
             return newPoint;
         }
         PointDouble last = computedPoints.get(computedPoints.size() - 1);
-        PointDouble randomPoint = randomPoint();
+        PointDouble randomPoint = randomStaringPoint();
         PointDouble newPoint = new PointDouble(
                 last.x() + dp * (randomPoint.x() - last.x()),
                 last.y() + dp * (randomPoint.y() - last.y()));

@@ -30,6 +30,7 @@ public final class Node extends Server {
         bootstrap = null;
         edges = new ArrayList<>();
         jobServerStatus = ServerStatus.OK;
+        jobs = new ArrayList<>();
     }
 
     public IPAndPortAndUUID getMyself() {
