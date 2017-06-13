@@ -1,3 +1,5 @@
 CWD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-$CWD/../start node localhost $1 localhost 9080 > /dev/null
+IP="$( ifconfig | grep "inet " | grep -Fv 127.0.0.1 | awk '{print $2}'  )"
+
+$CWD/../start node $IP $1 $IP 9080 > /dev/null
