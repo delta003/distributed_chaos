@@ -25,28 +25,41 @@ def basic_info():
 
 @app.route('/api/basic/check', methods=['POST'])
 def basic_check():
-    pass
+    # TODO: what is the usecase for this one?
+    raise NotImplemented()
 
 
 # Network API
 @app.route('/api/network/edges', methods=['GET'])
 def network_edges():
-    pass
+    return ok_response(network_edges_controller())
 
 
 @app.route('/api/network/get_edge', methods=['POST'])
 def network_get_edge():
-    pass
+    try:
+        [type] = extract_data(request, ['type'])
+    except Exception as e:
+        return error_response(str(e))
+    return ok_response(network_get_edge_controller(type))
 
 
 @app.route('/api/network/set_edge', methods=['POST'])
 def network_set_edge():
-    pass
+    try:
+        [edge] = extract_data(request, ['edge'])
+    except Exception as e:
+        return error_response(str(e))
+    return ok_response(network_set_edge_controller(edge))
 
 
 @app.route('/api/network/adopt', methods=['POST'])
 def network_adopt():
-    pass
+    try:
+        [edge, can_redirect] = extract_data(request, ['edge', 'can_redirect'])
+    except Exception as e:
+        return error_response(str(e))
+    return ok_response(network_adopt_controller(edge, can_redirect))
 
 
 @app.route('/api/network/reset', methods=['GET'])
