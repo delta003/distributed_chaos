@@ -15,24 +15,29 @@ KIDS projekat
 - Run `./start_node $PORT` to start node server on port $PORT
 
 ## C++
+##### Installation
 - Install g++ and make sure it's on your path variable. On OS X:
 ```
 brew install gcc
 ```
--Install boost to /usr/local/include/boost. On OS X:
+
+- Install boost to /usr/local/include/boost. On OS X:
 ```
 brew install boost
 ```
--Make sure boost is on your path variable. On OS X:
+
+- Make sure boost is on your path variable. On OS X:
 ```
 xcode-select --install
 ```
+
+##### Running
 - Starting node: ./cpp/start node <node_ip> <node_port> <bootstrap_ip> <bootstrap_port>
 - Killing node: ./cpp/stop node <node_port>
 - Starting bootstrap: ./cpp/start bs <bootstrap_port>
 - Killing bootstrap: ./cpp/stop bs <bootstrap_port>
-- Alternatively run ./cpp/client for an interactive client.
+- Alternatively run ./cpp/client for an interactive client
 
-## C++ Unit Tests
+##### Unit Tests
 - Edit /cpp/test_config.hpp
 - Run ./cpp/test
