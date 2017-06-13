@@ -22,17 +22,17 @@ public class NodeHealthcheck implements Runnable {
     public void run() {
         // Sleep to let node join the network
         sleep(LONG_HEALTHCHECK_SLEEP);
-//        while (true) {
-//
-//            boolean alive = checkAlive();
-//
-//            if (!alive) {
-//                resetNetwork();
-//                sleep(LONG_HEALTHCHECK_SLEEP);
-//            } else {
-//                sleep(HEALTHCHECK_SLEEP);
-//            }
-//        }
+        while (true) {
+
+            boolean alive = checkAlive();
+
+            if (!alive) {
+                resetNetwork();
+                sleep(LONG_HEALTHCHECK_SLEEP);
+            } else {
+                sleep(HEALTHCHECK_SLEEP);
+            }
+        }
     }
 
     private boolean checkAlive() {

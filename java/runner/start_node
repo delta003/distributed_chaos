@@ -2,5 +2,5 @@
 if [ $# -ne 1 ]; then
     printf "Port is missing.\n"
 else
-    java -Ddw.logging.level=OFF -Ddw.node.type=node -Ddw.server.connector.port=$1 -Ddw.node.port=$1 -jar java/target/distributed-chaos-0.1.jar server java/config.yml > /dev/null 2>&1 &
+    java -Ddw.logging.level=OFF -Ddw.assets.overrides./=angularjs/app -Ddw.node.type=node -Ddw.server.connector.port=$1 -Ddw.node.port=$1 -jar java/target/distributed-chaos-0.1.jar server java/config.yml > /dev/null 2>&1 &
 fi

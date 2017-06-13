@@ -4,8 +4,8 @@ import subprocess
 
 BOOTSTRAP_PORT = 9080
 BOOTSTRAP_LANG = None
-START_PORT = 10000
-PORTS = []
+START_PORT = 4000
+NODES = []
 LANG = {
     'cpp': 'cpp',
     'java': 'java',
@@ -20,152 +20,141 @@ def exec_build(lang):
 def exec_kill_node(lang, port):
     subprocess.call("./" + lang + "/runner/kill_node " + str(port), shell=True)
 
-def exec_start_bootstrap():
+def exec_start_bootstrap(lang):
     subprocess.call("./" + lang + "/runner/start_bootstrap", shell=True)
 
 def exec_start_node(lang, port):
     subprocess.call("./" + lang + "/runner/start_node " + str(port), shell=True)
 
-def exec_kill_node(lang, port):
-    subprocess.call("./" + lang + "/runner/kill_node " + str(port), shell=True)
+def exec_stop_bootstrap(lang):
+    subprocess.call("./" + lang + "/runner/stop_bootstrap", shell=True)
 # ------------------------------------------------------------------------------
 
-def start_bootstrap():
-    exec_start_bootstrap()
-
-def stop_bootstrap():
-    exec_kill_with_port(BOOTSTRAP_PORT)
-
-def start_node(port):
-    global PORTS
-    print "Starting node on port " + str(port) + "..."
-    if port in PORTS:
-        print "ERROR: Node already running on port " + str(port)
-        return
-    exec_start_node(port)
-    print "Node started"
-
-def stop_node(port):
-    global PORTS
-    print "Stopping node on port " + str(port) + "..."
-    if port not in PORTS:
-        print "ERROR: Node not running on port " + str(port)
-        return
-    exec_kill_with_port(port)
-    print "Node stopped"
-
-def start_nodes(n):
-    global START_PORT
-    global PORTS
-    print "Starting " + str(n) + " nodes..."
-    for i in range(0, n):
-        start_node(START_PORT)
-        PORTS.append(START_PORT)
-        START_PORT += 1
-    print "Nodes started"
-
-def stop_all_nodes():
-    global PORTS
-    print "Stopping all nodes..."
-    for port in PORTS:
-        stop_node(port)
-    print "Nodes stopped"
-
 # Commands
-# ---------------------------------------------
+# ------------------------------------------------------------------------------
 def cmd_help():
-    print "help - Prints commands"
-    print "ports - List used node ports"
-    print "startboot - Start bootstrap server"
-    print "startnodes N - Starts N node servers"
-    print "stop P - Stops server with port"
-    print "stop2 P1 P2 - Stops two servers"
-    print "stopboot - Stops bootstrap server"
-    print "end - Stops everything and exits"
+    print "help - Prints commands."
+    print "nodes - Lists used nodes with implementation and port."
+    print "startboot $LANG - Starts $LANG implementation of bootstrap server."
+    print "startnodes $LANG $N - Starts $N node servers with $LANG implementation."
+    print "stop $PORT - Stops server with port $PORT."
+    print "stop2 $PORT1 $PORT2 - Stops two servers with given ports."
+    print "stopboot - Stops bootstrap server."
+    print "end - Stops everything and exits."
 
-def cmd_ports():
-    global PORTS
-    for port in PORTS:
-        print port
+def cmd_nodes():
+    global NODES
+    for node in NODES:
+        print node[0] + " : " + str(node[1])
 
 def cmd_build(lang):
-    pass
+    print "Building for " + lang + "..."
+    exec_build(lang)
+    print "Building for " + lang + " completed."
 
 def cmd_startboot(lang):
-    start_bootstrap()
+    print "Staring bootstrap for " + lang + "..."
+    global BOOTSTRAP_LANG
+    if BOOTSTRAP_LANG is not None:
+        print "ERROR: Bootstrap already running."
+        return
+    BOOTSTRAP_LANG = lang
+    exec_start_bootstrap(lang)
+    print "Staring bootstrap for " + lang + " completed."
 
 def cmd_stopboot():
-    stop_bootstrap()
-
-def cmd_startnodes(cmd):
-    parts = cmd.split(' ')
-    if len(parts) != 2:
-        print "Invalid command"
+    print "Stopping bootstrap for " + lang + "..."
+    global BOOTSTRAP_LANG
+    if BOOTSTRAP_LANG is None:
+        print "ERROR: Bootstrap not running."
         return
-    count = int(parts[1])
-    start_nodes(count)
+    exec_stop_bootstrap(BOOTSTRAP_LANG)
+    print "Stopping bootstrap for " + lang + " completed."
 
-def cmd_stop(cmd):
-    global PORTS
-    parts = cmd.split(' ')
-    if len(parts) != 2:
-        print "Invalid command"
-        return
-    port = int(parts[1])
-    stop_node(port)
-    PORTS.remove(port)
+def cmd_startnodes(lang, count):
+    print "Starting " + str(count) + " nodes for " + lang + "..."
+    global START_PORT
+    global NODES
+    for i in range(0, count):
+        node = (lang, START_PORT)
+        exec_start_node(lang, START_PORT)
+        START_PORT += 1
+        NODES.append(node)
+        print "New node on port " + str(node[1])
+    print "Starting " + str(count) + " nodes for " + lang + " completed."
 
-def cmd_stop2(cmd):
-    global PORTS
-    parts = cmd.split(' ')
-    if len(parts) != 3:
-        print "Invalid command"
-        return
-    port1 = int(parts[1])
-    port2 = int(parts[2])
-    stop_node(port1)
-    stop_node(port2)
-    PORTS.remove(port1)
-    PORTS.remove(port2)
+def cmd_stop(port):
+    print "Stopping node on port " + str(port) + "..."
+    global NODES
+    index = -1
+    for i, node in enumerate(NODES):
+        if node[1] == port:
+            index = i
+            exec_kill_node(node[0], node[1])
+            break
+    if index == -1:
+        print "ERROR: Node not found."
+    else:
+        NODES.pop(index)
+    print "Stopping node on port " + str(port) + " completed."
+
+def cmd_stop2(port1, port2):
+    print "Stopping two nodes on ports " + str(port1) + " and " + str(port2) + "..."
+    cmd_stop(port1)
+    cmd_stop(port2)
+    print "Stopping two nodes on ports " + str(port1) + " and " + str(port2) + " completed."
+
+# ------------------------------------------------------------------------------
 
 def stop_everything():
+    print "Stopping everything..."
+    global BOOTSTRAP_PORT
+    global BOOTSTRAP_LANG
+    global NODES
+    if BOOTSTRAP_LANG is not None:
+        print "Stopping bootstrap"
+        exec_stop_bootstrap(BOOTSTRAP_LANG)
+    for node in NODES:
+        print "Stopping " + node[0] + " node on port " + str(node[1])
+        exec_kill_node(node[0], node[1])
+    print "Stopping completed."
 
 
 def execute(cmd):
     global LANG
     if cmd == "help":
         cmd_help()
-    elif cmd == "ports":
-        cmd_ports()
+    elif cmd == "nodes":
+        cmd_nodes()
     elif cmd.startswith("build "):
         parts = cmd.split(' ')
         if len(parts) != 2 or parts[1] not in LANG.keys():
-            print "Invalid command"
+            print "Invalid usage"
             return
         cmd_build(LANG[parts[1]])
     elif cmd.startswith("startboot "):
         parts = cmd.split(' ')
         if len(parts) != 2 or parts[1] not in LANG.keys():
-            print "Invalid command"
+            print "Invalid usage"
             return
         cmd_startboot(LANG[parts[1]])
     elif cmd.startswith("startnodes "):
         parts = cmd.split(' ')
         if len(parts) != 3 or parts[1] not in LANG.keys():
-            print "Invalid command"
+            print "Invalid usage"
             return
         cmd_startnodes(LANG[parts[1]], int(parts[2]))
     elif cmd.startswith("stop "):
         parts = cmd.split(' ')
         if len(parts) != 2:
-            print "Invalid command"
+            print "Invalid usage"
             return
         port = int(parts[1])
         cmd_stop(port)
     elif cmd.startswith("stop2 "):
         parts = cmd.split(' ')
         if len(parts) != 3:
-            print "Invalid command"
+            print "Invalid usage"
             return
         port1 = int(parts[1])
         port2 = int(parts[2])
@@ -178,8 +167,11 @@ def execute(cmd):
 
 if __name__ == '__main__':
     print "Welcome to node runner!"
-    print "Type help for instructions"
+    print ""
     while (True):
+        print "----------------------------------------------------------------"
+        cmd_help()
+        print "----------------------------------------------------------------"
         cmd = raw_input("Command: ")
         if cmd == "end":
             stop_everything()

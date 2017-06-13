@@ -117,7 +117,7 @@ public class JobExecution implements Comparable<JobExecution> {
             return newPoint;
         }
         PointDouble last = computedPoints.get(computedPoints.size() - 1);
-        PointDouble randomPoint = randomPoint();
+        PointDouble randomPoint = randomStaringPoint();
         PointDouble newPoint = new PointDouble(
                 last.x() + dp * (randomPoint.x() - last.x()),
                 last.y() + dp * (randomPoint.y() - last.y()));
