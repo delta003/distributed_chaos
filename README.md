@@ -30,6 +30,8 @@ brew install boost
 ```
 xcode-select --install
 ```
+##### Building
+- Run ./cpp/build, however building is not necessary. Scripts that spawn nodes will use md5 to hash your files, and call ./cpp/build if the project hasn't been built yet, or some of the source code has changed.
 
 ##### Running
 - Starting node: ./cpp/start node <node_ip> <node_port> <bootstrap_ip> <bootstrap_port>
