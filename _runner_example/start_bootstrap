@@ -1,2 +1,3 @@
 # This script should start bootstrap on 9080 port
 # Script doesn't take any parameter
+# Bootstrap must be started in background and redirect all output to /dev/null

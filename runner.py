@@ -3,20 +3,32 @@
 import subprocess
 
 BOOTSTRAP_PORT = 9080
+BOOTSTRAP_LANG = None
 START_PORT = 10000
 PORTS = []
+LANG = {
+    'cpp': 'cpp',
+    'java': 'java',
+    'py': 'python'
+}
 
 # Script execution
-# ---------------------------------------------
-def exec_start_node(port):
-    subprocess.call("./start_node_background " + str(port), shell=True)
+# ------------------------------------------------------------------------------
+def exec_build(lang):
+    subprocess.call("./" + lang + "/runner/build", shell=True)
 
-def exec_kill_with_port(port):
-    subprocess.call("./kill_with_port " + str(port), shell=True)
+def exec_kill_node(lang, port):
+    subprocess.call("./" + lang + "/runner/kill_node " + str(port), shell=True)
 
 def exec_start_bootstrap():
-    subprocess.call("./start_bootstrap_background", shell=True)
-# ---------------------------------------------
+    subprocess.call("./" + lang + "/runner/start_bootstrap", shell=True)
+
+def exec_start_node(lang, port):
+    subprocess.call("./" + lang + "/runner/start_node " + str(port), shell=True)
+
+def exec_kill_node(lang, port):
+    subprocess.call("./" + lang + "/runner/kill_node " + str(port), shell=True)
+# ------------------------------------------------------------------------------
 
 def start_bootstrap():
     exec_start_bootstrap()
@@ -76,7 +88,10 @@ def cmd_ports():
     for port in PORTS:
         print port
 
-def cmd_startboot():
+def cmd_build(lang):
+    pass
+
+def cmd_startboot(lang):
     start_bootstrap()
 
 def cmd_stopboot():
@@ -113,32 +128,61 @@ def cmd_stop2(cmd):
     PORTS.remove(port1)
     PORTS.remove(port2)
 
-def cmd_end():
-    stop_bootstrap()
-    stop_all_nodes()
+def stop_everything():
 
-# ---------------------------------------------
+
+def execute(cmd):
+    global LANG
+    if cmd == "help":
+        cmd_help()
+    elif cmd == "ports":
+        cmd_ports()
+    elif cmd.startswith("build "):
+        parts = cmd.split(' ')
+        if len(parts) != 2 or parts[1] not in LANG.keys():
+            print "Invalid command"
+            return
+        cmd_build(LANG[parts[1]])
+    elif cmd.startswith("startboot "):
+        parts = cmd.split(' ')
+        if len(parts) != 2 or parts[1] not in LANG.keys():
+            print "Invalid command"
+            return
+        cmd_startboot(LANG[parts[1]])
+    elif cmd.startswith("startnodes "):
+        parts = cmd.split(' ')
+        if len(parts) != 3 or parts[1] not in LANG.keys():
+            print "Invalid command"
+            return
+        cmd_startnodes(LANG[parts[1]], int(parts[2]))
+    elif cmd.startswith("stop "):
+        parts = cmd.split(' ')
+        if len(parts) != 2:
+            print "Invalid command"
+            return
+        port = int(parts[1])
+        cmd_stop(port)
+    elif cmd.startswith("stop2 "):
+        parts = cmd.split(' ')
+        if len(parts) != 3:
+            print "Invalid command"
+            return
+        port1 = int(parts[1])
+        port2 = int(parts[2])
+        cmd_stop2(port1, port2)
+    elif cmd == "stopboot":
+        cmd_stopboot()
+    else:
+        print "Unknown command :("
+
 
 if __name__ == '__main__':
     print "Welcome to node runner!"
     print "Type help for instructions"
     while (True):
         cmd = raw_input("Command: ")
-        if cmd == "help":
-            cmd_help()
-        if cmd == "ports":
-            cmd_ports()
-        elif cmd == "startboot":
-            cmd_startboot()
-        elif cmd.startswith("startnodes "):
-            cmd_startnodes(cmd)
-        elif cmd.startswith("stop "):
-            cmd_stop(cmd)
-        elif cmd.startswith("stop2 "):
-            cmd_stop2(cmd)
-        elif cmd.startswith("stopboot"):
-            cmd_stopboot()
-        elif cmd == "end":
-            cmd_end()
+        if cmd == "end":
+            stop_everything()
             break
+        execute(cmd)
     print "Goodbye!"
