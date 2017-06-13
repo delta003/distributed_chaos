@@ -26,8 +26,6 @@ with xcode-select --install
 - Run ./cpp/start and ./cpp/stop to create or destroy nodes and bootstrap servers.
 - Alternatively run ./cpp/client for an interactive client.
 
-## Unit Tests
-
-- Install homebrew, openssl, cmake, boost and gcc
+## C++ - Unit Tests
 - Edit /cpp/test_config.hpp
 - Run ./cpp/test
