@@ -226,7 +226,7 @@ public final class HttpHelper {
         do {
             try {
                 HttpRequest httpRequest = getRequestFactory().buildPostRequest(
-                        new GenericUrl("http://" + ipAndPort.toString() + "/api/jobs/create/" + uuid),
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/jobs/add/" + uuid),
                         new JsonHttpContent(JSON_FACTORY, request)
 
                 );
@@ -280,11 +280,30 @@ public final class HttpHelper {
         return response;
     }
 
+    public AllJobsResponse jobsAllWithRetry(IPAndPort ipAndPort) {
+        AllJobsResponse response;
+        do {
+            try {
+                HttpRequest httpRequest = getRequestFactory().buildGetRequest(
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/jobs/all")
+                );
+                response = httpRequest.execute().parseAs(AllJobsResponse.class);
+            } catch (Exception e) {
+                log.error("jobsAllWithRetry failed: " + e.getMessage());
+                return null;
+            }
+            if (response.getStatus() == Status.WAIT) {
+                sleep(RETRY_DELAY);
+            }
+        } while (response.getStatus() == Status.WAIT);
+        return response;
+    }
+
     private void sleep(long duration) {
         try {
             Thread.sleep(duration);
         } catch (InterruptedException e) {
-            log.warn("NodeHealthcheck sleep interrupted.");
+            log.warn("HttpHelper sleep interrupted.");
         }
     }
 }

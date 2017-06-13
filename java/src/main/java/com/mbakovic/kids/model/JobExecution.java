@@ -30,6 +30,17 @@ public class JobExecution implements Comparable<JobExecution> {
         backups = new ArrayList<>();
     }
 
+    public JobExecution(JobWithUUID job) {
+        this.job = job;
+        dWidth = Double.parseDouble(job.getWidth());
+        dHeight = Double.parseDouble(job.getHeight());
+        dp = Double.parseDouble(job.getP());
+        startingPoints = new ArrayList<>();
+        startingPoints.addAll(job.getPoints().stream().map(PointDouble::fromPoint).collect(Collectors.toList()));
+        computedPoints = new ArrayList<>();
+        backups = new ArrayList<>();
+    }
+
     public JobWithUUID getJob() {
         return job;
     }

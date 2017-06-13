@@ -26,8 +26,8 @@ public class JobsResource implements JobsService {
             log.warn(lockErrorMsg);
             return StatusResponse.ofWait();
         }
-        JobExecution newJob = new JobExecution(request.getWidth(), request.getHeight(),
-                request.getP(), request.getPoints());
+        JobExecution newJob = new JobExecution(new JobWithUUID(request.getWidth(), request.getHeight(),
+                request.getP(), request.getPoints(), jobid));
         Node.getInstance().addJob(newJob);
         log.info("New job added with UUID: " + newJob.getJobUuid());
         EdgesResponse response = new EdgesResponse(Node.getInstance().getEdges());
@@ -246,7 +246,9 @@ public class JobsResource implements JobsService {
             return StatusResponse.ofError("Unknown jobid: " + jobid);
         }
         JobDataResponse response = new JobDataResponse(
-                e.getJobUuid(), e.getComputedPointsAsPoints(), e.getBackups(),
+                Node.getInstance().getMyself().getUuid(),
+                e.getComputedPointsAsPoints(),
+                e.getBackups(),
                 Node.getInstance().getEdges());
         Node.getInstance().jobLockRelease();
         Node.getInstance().lockRelease();
