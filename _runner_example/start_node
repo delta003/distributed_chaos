@@ -1,2 +1,3 @@
 # This script should start node on given port
 # Script takes one parameter, port number
+# Node must be started in background and redirect all output to /dev/null
