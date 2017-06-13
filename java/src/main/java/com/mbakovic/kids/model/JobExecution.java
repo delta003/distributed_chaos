@@ -7,7 +7,7 @@ public class JobExecution implements Comparable<JobExecution> {
 
     private JobWithUUID job;
 
-    private List<JobBackup> backups;
+    private List<NodeJobExecution> backups;
 
     private Double dWidth;
 
@@ -38,11 +38,11 @@ public class JobExecution implements Comparable<JobExecution> {
         this.job = job;
     }
 
-    public List<JobBackup> getBackups() {
+    public List<NodeJobExecution> getBackups() {
         return backups;
     }
 
-    public void setBackups(List<JobBackup> backups) {
+    public void setBackups(List<NodeJobExecution> backups) {
         this.backups = backups;
     }
 
@@ -114,7 +114,7 @@ public class JobExecution implements Comparable<JobExecution> {
         return newPoint;
     }
 
-    public List<Point> getPoints() {
+    public List<Point> getComputedPointsAsPoints() {
         return computedPoints.stream().map(PointDouble::toPoint).collect(Collectors.toList());
     }
 
@@ -123,9 +123,9 @@ public class JobExecution implements Comparable<JobExecution> {
         return job.getUuid().compareTo(o.getJob().getUuid());
     }
 
-    public JobBackup backupWithUUID(String uuid) {
-        for (JobBackup backup : backups) {
-            if (backup.getUuid().equals(uuid)) {
+    public NodeJobExecution backupWithUUID(String uuid) {
+        for (NodeJobExecution backup : backups) {
+            if (backup.getNodeUUID().equals(uuid)) {
                 return backup;
             }
         }
@@ -133,9 +133,9 @@ public class JobExecution implements Comparable<JobExecution> {
     }
 
     public void backUpPoint(String uuid, Point point) {
-        JobBackup backup = backupWithUUID(uuid);
+        NodeJobExecution backup = backupWithUUID(uuid);
         if (backup == null) {
-            backup = new JobBackup(uuid);
+            backup = new NodeJobExecution(uuid);
             backups.add(backup);
         }
         backup.getPoints().add(point);

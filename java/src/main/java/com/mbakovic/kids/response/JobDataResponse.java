@@ -3,7 +3,7 @@ package com.mbakovic.kids.response;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.google.api.client.util.Key;
 import com.mbakovic.kids.model.Edge;
-import com.mbakovic.kids.model.JobBackup;
+import com.mbakovic.kids.model.NodeJobExecution;
 import com.mbakovic.kids.model.Point;
 import com.mbakovic.kids.model.Status;
 
@@ -13,13 +13,13 @@ import java.util.List;
 public class JobDataResponse extends StatusResponse {
 
     @Key
-    private String uuid;
+    private String uuid;  // This is node uuid
 
     @Key
     private List<Point> points;
 
     @Key
-    private List<JobBackup> backups;
+    private List<NodeJobExecution> backups;
 
     @Key
     private List<Edge> edges;
@@ -27,7 +27,7 @@ public class JobDataResponse extends StatusResponse {
     public JobDataResponse() {
     }
 
-    public JobDataResponse(String uuid, List<Point> points, List<JobBackup> backups, List<Edge> edges) {
+    public JobDataResponse(String uuid, List<Point> points, List<NodeJobExecution> backups, List<Edge> edges) {
         super(Status.OK, null);
         this.uuid = uuid;
         this.points = points;
@@ -51,11 +51,11 @@ public class JobDataResponse extends StatusResponse {
         this.points = points;
     }
 
-    public List<JobBackup> getBackups() {
+    public List<NodeJobExecution> getBackups() {
         return backups;
     }
 
-    public void setBackups(List<JobBackup> backups) {
+    public void setBackups(List<NodeJobExecution> backups) {
         this.backups = backups;
     }
 
@@ -65,5 +65,9 @@ public class JobDataResponse extends StatusResponse {
 
     public void setEdges(List<Edge> edges) {
         this.edges = edges;
+    }
+
+    public boolean valid() {
+        return (uuid != null && points != null && backups != null && edges != null);
     }
 }

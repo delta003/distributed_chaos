@@ -261,6 +261,25 @@ public final class HttpHelper {
         return response;
     }
 
+    public JobDataResponse jobsDataWithRetry(IPAndPort ipAndPort, String uuid) {
+        JobDataResponse response;
+        do {
+            try {
+                HttpRequest httpRequest = getRequestFactory().buildGetRequest(
+                        new GenericUrl("http://" + ipAndPort.toString() + "/api/jobs/data/" + uuid)
+                );
+                response = httpRequest.execute().parseAs(JobDataResponse.class);
+            } catch (Exception e) {
+                log.error("jobsDataWithRetry failed: " + e.getMessage());
+                return null;
+            }
+            if (response.getStatus() == Status.WAIT) {
+                sleep(RETRY_DELAY);
+            }
+        } while (response.getStatus() == Status.WAIT);
+        return response;
+    }
+
     private void sleep(long duration) {
         try {
             Thread.sleep(duration);
