@@ -613,7 +613,7 @@ void join() {
       return;
     }
     node x = requests::info(bs_node.ip, bs_node.port).first;
-    log(logstream, "join-bootstrap-node-returned", x);
+    log(logstream, "join-bootstrap-node-info-returned", x);
     vector<edge> edges = requests::edges(x.ip, x.port).first;
     log(logstream, "join-bootstrap-edges", edges);
     if (!get_edge(edges, "parent").exists()) {
