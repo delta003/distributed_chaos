@@ -8,6 +8,7 @@
     var vm = this;
 
     vm.jobids = [];
+    vm.nodes = {};
     initController();
 
     function initController() {
@@ -59,6 +60,7 @@
     function showNetwork(nodes, edges) {
       var dataNodes = [];
       for (var i = 0; i < nodes.length; i++) {
+        vm.nodes[parseInt(nodes[i].uuid)] = nodes[i];
         dataNodes.push({id: parseInt(nodes[i].uuid), label: "" + nodes[i].uuid + " (" + nodes[i].ip + ":" + nodes[i].port + ")"});
       }
       var nodes = new vis.DataSet(dataNodes);
@@ -73,6 +75,23 @@
       var data = {nodes: nodes, edges: edges};
       var options = {};
       var network = new vis.Network(container, data, options);
+      network.on('click', function(properties) {
+        var node = properties.nodes;
+        if (node[0] != undefined) {
+            var n = vm.nodes[node[0]];
+            if (n) {
+                console.log(n.ip + ":" + n.port);
+                var win = window.open('http://' + n.ip + ":" + n.port, '_blank');
+                if (win) {
+                    //Browser has allowed it to be opened
+                    win.focus();
+                } else {
+                    //Browser has blocked it
+                    alert('Please allow popups for this visualization.');
+                }
+            }
+        }
+      });
     }
   }
 })();
