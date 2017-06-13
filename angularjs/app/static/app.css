@@ -4,6 +4,9 @@
       border: 1px solid lightgray;
 }
 
-#canvas {
+#canvas, #newjobcanvas {
       border: 1px solid lightgray;
+}
+#resize {
+   font-size: 70%;
 }
