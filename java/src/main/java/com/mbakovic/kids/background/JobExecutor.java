@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 public class JobExecutor implements Runnable {
     private static final long EXECUTOR_SLEEP = 1000;
-    private static final long LONG_EXECUTOR_SLEEP = 10000;
+    private static final long LONG_EXECUTOR_SLEEP = 5000;
     private static Logger log = Logger.getLogger(JobExecutor.class);
 
     @Override

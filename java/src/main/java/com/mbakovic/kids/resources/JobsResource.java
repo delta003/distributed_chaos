@@ -312,7 +312,7 @@ public class JobsResource implements JobsService {
             // Add data
             executionMap.put(jobDataResponse.getUuid(),
                     new NodeJobExecution(jobDataResponse.getUuid(), jobDataResponse.getPoints()));
-            addBackups(backupsMap, jobDataResponse.getBackups());
+            addBackups(backupsMap, jobDataResponse.getBackup());
 
             // Add edges to queue
             List<Edge> nextEdges = jobDataResponse.getEdges();

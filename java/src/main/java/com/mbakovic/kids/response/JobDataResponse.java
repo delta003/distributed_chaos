@@ -19,7 +19,7 @@ public class JobDataResponse extends StatusResponse {
     private List<Point> points;
 
     @Key
-    private List<NodeJobExecution> backups;
+    private List<NodeJobExecution> backup;
 
     @Key
     private List<Edge> edges;
@@ -31,7 +31,7 @@ public class JobDataResponse extends StatusResponse {
         super(Status.OK, null);
         this.uuid = uuid;
         this.points = points;
-        this.backups = backups;
+        this.backup = backups;
         this.edges = edges;
     }
 
@@ -51,12 +51,12 @@ public class JobDataResponse extends StatusResponse {
         this.points = points;
     }
 
-    public List<NodeJobExecution> getBackups() {
-        return backups;
+    public List<NodeJobExecution> getBackup() {
+        return backup;
     }
 
-    public void setBackups(List<NodeJobExecution> backups) {
-        this.backups = backups;
+    public void setBackup(List<NodeJobExecution> backup) {
+        this.backup = backup;
     }
 
     public List<Edge> getEdges() {
@@ -68,6 +68,6 @@ public class JobDataResponse extends StatusResponse {
     }
 
     public boolean valid() {
-        return (uuid != null && points != null && backups != null && edges != null);
+        return (uuid != null && points != null && backup != null && edges != null);
     }
 }
