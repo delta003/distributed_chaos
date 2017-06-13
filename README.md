@@ -15,13 +15,17 @@ KIDS projekat
 - Run `./start_node $PORT` to start node server on port $PORT
 
 ## C++
-- Install cmake, openssl, boost and gcc
+- Install g++ and make sure it's on your path variable. On OS X:
 ```
-brew install cmake openssl boost gcc
+brew install gcc
 ```
-- Install Xcode Command Line tools 
+-Install boost to /usr/local/include/boost. On OS X:
 ```
-with xcode-select --install
+brew install boost
+```
+-Make sure boost is on your path variable. On OS X:
+```
+xcode-select --install
 ```
 - Starting node: ./cpp/start node <node_ip> <node_port> <bootstrap_ip> <bootstrap_port>
 - Killing node: ./cpp/stop node <node_port>
