@@ -16,7 +16,7 @@ KIDS projekat
 
 ## C++
 ##### Installation
-- Install g++ and make sure it's on your path variable. On OS X:
+- Install gcc and make sure it's on your path variable. On OS X:
 ```
 brew install gcc
 ```
