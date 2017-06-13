@@ -25,8 +25,8 @@ public interface JobsService {
     StatusResponse all();
 
     @POST
-    @Path("/backup/{jobid}")
-    StatusResponse backup(@PathParam("jobid") String jobid, JobBackUpRequest request);
+    @Path("/backup")
+    StatusResponse backup(JobBackUpRequest request);
 
     @GET
     @Path("/remove/{jobid}")

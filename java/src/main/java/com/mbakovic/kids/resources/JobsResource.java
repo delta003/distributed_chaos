@@ -113,7 +113,7 @@ public class JobsResource implements JobsService {
     }
 
     @Override
-    public StatusResponse backup(String jobid, JobBackUpRequest request) {
+    public StatusResponse backup(JobBackUpRequest request) {
         if (request.getJobid() == null || request.getUuid() == null) {
             return StatusResponse.ofError("JobId or UUID is null.");
         }

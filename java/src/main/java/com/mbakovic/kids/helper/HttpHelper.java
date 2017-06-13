@@ -228,7 +228,6 @@ public final class HttpHelper {
                 HttpRequest httpRequest = getRequestFactory().buildPostRequest(
                         new GenericUrl("http://" + ipAndPort.toString() + "/api/jobs/add/" + uuid),
                         new JsonHttpContent(JSON_FACTORY, request)
-
                 );
                 response = httpRequest.execute().parseAs(EdgesResponse.class);
             } catch (Exception e) {
@@ -297,6 +296,19 @@ public final class HttpHelper {
             }
         } while (response.getStatus() == Status.WAIT);
         return response;
+    }
+
+    public StatusResponse jobsBackup(IPAndPort ipAndPort, JobBackUpRequest request) {
+        try {
+            HttpRequest httpRequest = getRequestFactory().buildPostRequest(
+                    new GenericUrl("http://" + ipAndPort.toString() + "/api/jobs/backup"),
+                    new JsonHttpContent(JSON_FACTORY, request)
+            );
+            return httpRequest.execute().parseAs(StatusResponse.class);
+        } catch (Exception e) {
+            log.error("jobsBackup failed: " + e.getMessage());
+            return null;
+        }
     }
 
     private void sleep(long duration) {
