@@ -20,13 +20,22 @@ def basic_ok():
 
 @app.route('/api/basic/info', methods=['GET'])
 def basic_info():
+    # TODO: avoid returning values without try/except (change this for each node)
     return ok_response(basic_info_controller())
 
 
 @app.route('/api/basic/check', methods=['POST'])
 def basic_check():
-    # TODO: what is the usecase for this one?
-    raise NotImplemented()
+    try:
+        [ip, port] = extract_data(request, ['ip', 'port'])
+    except Exception as e:
+        return error_response(str(e))
+
+    try:
+        ret = basic_check_controller(ip, port)
+    except Exception as e:
+        return error_response(str(e))
+    return ret
 
 
 # Network API
@@ -64,7 +73,12 @@ def network_adopt():
 
 @app.route('/api/network/reset', methods=['GET'])
 def network_reset():
-    pass
+    try:
+        ret = network_reset_controller()
+    except Exception as e:
+        return error_response(str(e))
+
+    return ret
 
 
 @app.route('/api/network/visualize', methods=['GET'])

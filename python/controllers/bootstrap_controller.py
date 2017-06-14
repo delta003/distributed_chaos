@@ -8,8 +8,6 @@ def hello_controller(ip, port):
 
 def reset_controller():
     if bootstrap_data.can_reset():
-        # TODO: treba i uuid da se stavi na nulu?
-        # možda samo pozvati default konstruktor
         bootstrap_data.set_can_reset(False)
         bootstrap_data.set_last_ip(None)
         bootstrap_data.set_last_port(None)
@@ -20,7 +18,6 @@ def reset_controller():
 
 def reset_done_controller():
     bootstrap_data.set_can_reset(True)
-    # TODO: call network reconfiguration here
     return {}
 
 

@@ -20,5 +20,5 @@ def create_request(method, ip, port, endpoint, fields=[], data={}):
     return ret
 
 
-def create_bootstrap_request(method, endpoint, fields, data={}):
+def create_bootstrap_request(method, endpoint, fields=[], data={}):
     return create_request(method, endpoint=endpoint, ip=bootstrap_ip, port=bootstrap_port, data=data, fields=fields)

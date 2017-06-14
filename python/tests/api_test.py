@@ -5,7 +5,7 @@ from config.bootstrap_config import bootstrap_port as bootstrap_port
 
 
 class ApiTestCase(unittest.TestCase):
-    # TODO: put this inside __init__ method and create instance of bootstrap app
+    # TODO: put this inside __init__ method and create an instance of bootstrap app
     bootstrap_address = 'http://%s:%s' % (bootstrap_ip, bootstrap_port)
 
     def verify_json(self, json_data):
