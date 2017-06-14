@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 from controllers.node_controller import *
 from communication.response_creator import *
 
@@ -6,10 +6,10 @@ app = Flask('node')
 app.debug = True
 
 
-# defaults
+# visualization
 @app.route('/')
 def default_response():
-    pass
+    return send_from_directory('../angular')
 
 
 # Node API

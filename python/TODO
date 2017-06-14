@@ -1,4 +1,3 @@
 * add runner script
-* find clever way node_controller.py into basic, network and job controller files so that they share information
-* add visualization
+* find a way to split node_controller.py into basic, network and job controller files so that they share information
 * add job threads

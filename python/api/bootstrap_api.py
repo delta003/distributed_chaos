@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, send_from_directory
 
 from controllers.bootstrap_controller import *
 from communication.response_creator import *
@@ -7,10 +7,10 @@ app = Flask('bootstrap')
 app.debug = True
 
 
-# defaults
+# visualization
 @app.route('/', methods=['POST', 'GET'])
 def default_response():
-    pass
+    return send_from_directory('../angular/')
 
 
 # bootstrap API
