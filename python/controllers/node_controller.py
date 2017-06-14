@@ -137,12 +137,13 @@ def join():
 
     # link previous level
     new_next = rc.get_edge(edge=mng_edge, type='next')
-    new_prev = rc.get_edge(edge=mng_edge, type='prev')
+    new_prev = rc.get_edge(edge=this_prev2, type='prev')
 
-    # change parents
+    # link previous level
     rc.set_edge(edge=new_next, e=new_prev, type='prev')
     rc.set_edge(edge=new_prev, e=new_next, type='next')
 
+    # change parents
     rc.adopt(edge=this_prev0, e=this_prev2)
     rc.set_edge(edge=this_prev2, e=this_prev0, type='parent')
 
