@@ -29,5 +29,5 @@ xcode-select --install
 todo
 
 ## Running
-- Start runner.py
+Start runner.py for an interactive client.
 
