@@ -11,8 +11,8 @@ if __name__ == '__main__':
     if len(sys.argv) > 3:
         print("Ignoring ip and port for bootstrap!!!")
     try:
-        ip = sys.argv[1]
-        port = sys.argv[2]
+        ip = '127.0.0.1'
+        port = sys.argv[1]
         # bootstrap_ip = sys.argv[3]
         # bootstrap_port = sys.argv[4]
     except IndexError:
@@ -31,4 +31,4 @@ if __name__ == '__main__':
 
         controllers.node_controller.ping()
 
-    app.run(ip, port=int(port))
+    app.run(port=int(port))

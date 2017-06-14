@@ -1,0 +1,2 @@
+#!/bin/bash
+./python/myvenv/bin/python3.5 python/bootstrap_starter.py > /dev/null 2>&1 &

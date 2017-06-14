@@ -9,7 +9,7 @@ NODES = []
 LANG = {
     'cpp': 'cpp',
     'java': 'java',
-    'py': 'python'
+    'python': 'python'
 }
 
 # Script execution

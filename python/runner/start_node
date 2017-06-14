@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ $# -ne 1 ]; then
+    printf "Port is missing.\n"
+else
+    ./python/myvenv/bin/python3.5 python/node_starter.py $1 > /dev/null 2>&1 &
+fi

@@ -9,7 +9,7 @@ app.debug = True
 # visualization
 @app.route('/')
 def default_response():
-    return send_from_directory('../angularjs/')
+    return send_from_directory('../angularjs/', filename='')
 
 
 # Node API
