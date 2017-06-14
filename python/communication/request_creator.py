@@ -144,7 +144,7 @@ def remove_job(edge, job_id):
 
 
 def kill_job(edge, job_id):
-    endpoint = '/api/jobs/kill/%d' %d job_id
+    endpoint = '/api/jobs/kill/%d' % job_id
     create_net_request(method='GET', edge=edge, endpoint=endpoint)
 
 

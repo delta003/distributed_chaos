@@ -135,14 +135,15 @@ def join():
     this_prev2 = children[2]
     this_prev3 = children[3]
 
-    # link previous level
+    # Exclude thisPrev2 and thisPrev3 from layer
     new_next = rc.get_edge(edge=mng_edge, type='next')
-    new_prev = rc.get_edge(edge=mng_edge, type='prev')
+    new_prev = rc.get_edge(edge=this_prev2, type='prev')
 
-    # change parents
+    # Previous level linking
     rc.set_edge(edge=new_next, e=new_prev, type='prev')
     rc.set_edge(edge=new_prev, e=new_next, type='next')
 
+    # Change parents
     rc.adopt(edge=this_prev0, e=this_prev2)
     rc.set_edge(edge=this_prev2, e=this_prev0, type='parent')
 
@@ -152,7 +153,7 @@ def join():
     rc.adopt(edge=this_prev1, e=this)
     rc.set_edge(edge=this, e=this_prev1, type='parent')
 
-    # make circles in new layer
+    # Make circle in new layer
     rc.set_edge(edge=this_prev3, e=this, type='next')
     rc.set_edge(edge=this_prev2, e=this, type='prev')
     links.set_next(uuid=this_prev2['uuid'], ip=this_prev2['ip'], port=this_prev2['port'])
@@ -244,7 +245,11 @@ def jobs_add_controller(jobid, width, height, p, points):
 
 
 def jobs_new_controller(width, height, p, points):
-    pass
+    job_id = node_info.get_uuid()
+    job_info.add_job(job_id, width, height, p, points)
+    graph_traversal = bfs(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
+    for
+    return {'job_id', str(job_id)}
 
 
 def jobs_all_controller():
