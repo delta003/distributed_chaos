@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 public class JobExecution implements Comparable<JobExecution> {
 
-    private JobWithUUID job;
+    private JobWithID job;
 
     private List<NodeJobExecution> backups;
 
@@ -20,7 +20,7 @@ public class JobExecution implements Comparable<JobExecution> {
     private List<PointDouble> computedPoints;
 
     public JobExecution(String width, String height, String p, List<Point> points) {
-        job = new JobWithUUID(width, height, p, points);
+        job = new JobWithID(width, height, p, points);
         dWidth = Double.parseDouble(width);
         dHeight = Double.parseDouble(height);
         dp = Double.parseDouble(p);
@@ -30,7 +30,7 @@ public class JobExecution implements Comparable<JobExecution> {
         backups = new ArrayList<>();
     }
 
-    public JobExecution(JobWithUUID job) {
+    public JobExecution(JobWithID job) {
         this.job = job;
         dWidth = Double.parseDouble(job.getWidth());
         dHeight = Double.parseDouble(job.getHeight());
@@ -41,11 +41,11 @@ public class JobExecution implements Comparable<JobExecution> {
         backups = new ArrayList<>();
     }
 
-    public JobWithUUID getJob() {
+    public JobWithID getJob() {
         return job;
     }
 
-    public void setJob(JobWithUUID job) {
+    public void setJob(JobWithID job) {
         this.job = job;
     }
 
@@ -131,7 +131,7 @@ public class JobExecution implements Comparable<JobExecution> {
 
     @Override
     public int compareTo(JobExecution o) {
-        return job.getUuid().compareTo(o.getJob().getUuid());
+        return job.getId().compareTo(o.getJob().getId());
     }
 
     public NodeJobExecution backupWithUUID(String uuid) {
@@ -152,10 +152,10 @@ public class JobExecution implements Comparable<JobExecution> {
         backup.getPoints().add(point);
     }
 
-    public String getJobUuid() {
+    public String getJobId() {
         if (job == null) {
             return null;  // This should never happen
         }
-        return job.getUuid();
+        return job.getId();
     }
 }

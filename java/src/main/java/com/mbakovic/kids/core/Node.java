@@ -2,7 +2,6 @@ package com.mbakovic.kids.core;
 
 import com.mbakovic.kids.background.NetworkJoiner;
 import com.mbakovic.kids.model.*;
-import com.mbakovic.kids.response.JobDataResponse;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -139,17 +138,17 @@ public final class Node extends Server {
         Collections.sort(jobs);
     }
 
-    public List<JobWithUUID> getJobsWithUUID() {
+    public List<JobWithID> getJobsWithUUID() {
         return jobs.stream().map(JobExecution::getJob).collect(Collectors.toList());
     }
 
     public List<String> getJobIds() {
-        return jobs.stream().map(JobExecution::getJobUuid).collect(Collectors.toList());
+        return jobs.stream().map(JobExecution::getJobId).collect(Collectors.toList());
     }
 
     public JobExecution jobWithId(String jobid) {
         for (JobExecution e : jobs) {
-            if (e.getJob().getUuid().equals(jobid)) {
+            if (e.getJobId().equals(jobid)) {
                 return e;
             }
         }

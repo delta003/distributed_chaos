@@ -81,7 +81,7 @@ public class NetworkJoiner implements Runnable {
         }
 
         // Get uuid of main contact
-        IPAndPortAndUUIDResponse mainContactInfo = HttpHelper.getInstance().basicInfo(
+        IPAndPortAndUUIDResponse mainContactInfo = HttpHelper.getInstance().basicInfoWithRetry(
                 new IPAndPort(bootstrapResponse.getIp(), bootstrapResponse.getPort()));
         if (mainContactInfo == null) {
             log.error("Main contact unreachable for info.");
@@ -475,13 +475,13 @@ public class NetworkJoiner implements Runnable {
             return;
         }
 
-        for (JobWithUUID job : jobs.getJobs()) {
-            if (Node.getInstance().checkJobId(job.getUuid())) {
+        for (JobWithID job : jobs.getJobs()) {
+            if (Node.getInstance().checkJobId(job.getId())) {
                 continue;
             }
             JobExecution newJob = new JobExecution(job);
             Node.getInstance().addJob(newJob);
-            log.info("New job fetched with UUID: " + newJob.getJobUuid());
+            log.info("New job fetched with UUID: " + newJob.getJobId());
         }
 
         Node.getInstance().jobLockRelease();

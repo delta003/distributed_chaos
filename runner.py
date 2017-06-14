@@ -63,13 +63,13 @@ def cmd_startboot(lang):
     print "Staring bootstrap for " + lang + " completed."
 
 def cmd_stopboot():
-    print "Stopping bootstrap for " + lang + "..."
     global BOOTSTRAP_LANG
     if BOOTSTRAP_LANG is None:
         print "ERROR: Bootstrap not running."
         return
+    print "Stopping bootstrap for " + BOOTSTRAP_LANG + "..."
     exec_stop_bootstrap(BOOTSTRAP_LANG)
-    print "Stopping bootstrap for " + lang + " completed."
+    print "Stopping bootstrap for " + BOOTSTRAP_LANG + " completed."
 
 def cmd_startnodes(lang, count):
     print "Starting " + str(count) + " nodes for " + lang + "..."
@@ -167,11 +167,10 @@ def execute(cmd):
 
 if __name__ == '__main__':
     print "Welcome to node runner!"
-    print ""
+    print "----------------------------------------------------------------"
+    cmd_help()
+    print "----------------------------------------------------------------"
     while (True):
-        print "----------------------------------------------------------------"
-        cmd_help()
-        print "----------------------------------------------------------------"
         cmd = raw_input("Command: ")
         if cmd == "end":
             stop_everything()

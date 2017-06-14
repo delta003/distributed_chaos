@@ -26,10 +26,10 @@ public class JobsResource implements JobsService {
             log.warn(lockErrorMsg);
             return StatusResponse.ofWait();
         }
-        JobExecution newJob = new JobExecution(new JobWithUUID(request.getWidth(), request.getHeight(),
+        JobExecution newJob = new JobExecution(new JobWithID(request.getWidth(), request.getHeight(),
                 request.getP(), request.getPoints(), jobid));
         Node.getInstance().addJob(newJob);
-        log.info("New job added with UUID: " + newJob.getJobUuid());
+        log.info("New job added with UUID: " + newJob.getJobId());
         EdgesResponse response = new EdgesResponse(Node.getInstance().getEdges());
         Node.getInstance().jobLockRelease();
         return response;
@@ -47,9 +47,9 @@ public class JobsResource implements JobsService {
         JobExecution newJob = new JobExecution(request.getWidth(), request.getHeight(),
                 request.getP(), request.getPoints());
         Node.getInstance().addJob(newJob);
-        log.info("New job created with UUID: " + newJob.getJobUuid());
-        broadcastNewJob(newJob.getJobUuid(), request);
-        JobIDResponse response = new JobIDResponse(newJob.getJobUuid());
+        log.info("New job created with UUID: " + newJob.getJobId());
+        broadcastNewJob(newJob.getJobId(), request);
+        JobIDResponse response = new JobIDResponse(newJob.getJobId());
         Node.getInstance().jobLockRelease();
         return response;
     }
