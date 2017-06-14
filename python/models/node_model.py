@@ -135,16 +135,54 @@ class Job:
         self._height = None
         self._p = None
         self._points = None
+        self._job_id = None
 
     def __le__(self, other):
-        return
+        return self._job_id < other.get_job_id()
+
+    def __eq__(self, other):
+        return self._job_id == other.get_job_id()
+
+    def get_job_id(self):
+        return self._job_id
+
+    def get_points(self):
+        return self._points
+
+    def get_as_dict(self):
+        return {'uuid': str(self._job_id), 'points': self._points}
 
 
 class NodeJobData:
     def __init__(self):
         self._jobs = []
+        self._my_job = Job()
+        self._prev_backup = Job()
+        self._next_backup = Job()
 
     def add_job(self, job):
+        if job in self._jobs:
+            return
         self._jobs.append(job)
-        self._jobs.sort()  # TODO: add comparator by id
+        self._jobs.sort()
 
+    def get_jobs(self):
+        return self._jobs  # TODO: return as dict
+
+    def add_backup(self, uuid, job_id, point):
+        pass
+
+    def remove_job(self, job_id):
+        pass
+
+    def list_ids(self):
+        pass
+
+    def get_my_points(self):
+        return self._my_job.get_points()
+
+    def get_prev_backup(self):
+        return self._prev_backup.get_as_dict()
+
+    def get_next_backup(self):
+        return self._next_backup.get_as_dict()

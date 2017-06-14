@@ -1,7 +1,7 @@
 import queue
 import threading
 import time
-import requests.request_creator as rc
+import communication.request_creator as rc
 
 
 def __init__(link_data, address_data, data, job_data):
@@ -50,7 +50,7 @@ def reconfigure():
     for e in graph_traversal:
         if e['uuid'] == node_info.get_uuid():
             continue
-        rc.reset(edge=e)
+        rc.reset_node(edge=e)
     links.reset()
     time.sleep(5)
     rc.bootstrap_reset_done()
@@ -64,7 +64,7 @@ def bfs(uuid, ip, port):
     while not q.empty():
         curr = q.get()
         result.append(curr)
-        edge_list = rc.edges(edge=curr)
+        edge_list = rc.all_edges(edge=curr)
         for e in edge_list:
             next_uuid = int(e['uuid'])
             if next_uuid in visited:
@@ -104,7 +104,7 @@ def join():
             links.set_next(uuid=x_nxt['uuid'], ip=x_nxt['ip'], port=x_nxt['port'])
 
         else:
-            rc.adopt(mng_edge, this)
+            rc.adopt_child(mng_edge, this)
             mng_edge['type'] = 'parent'
             links.set_edge(mng_edge)
             this['type'] = 'next'
@@ -113,9 +113,9 @@ def join():
             links.set_edge(this)
         return
 
-    redirected, level_created, children, next = rc.adopt(parent_edge, this, can_redirect=True)
+    redirected, level_created, children, next = rc.adopt_child(parent_edge, this, can_redirect=True)
     if redirected:
-        rc.adopt(edge=next, e=this, can_redirect=False)
+        rc.adopt_child(edge=next, e=this, can_redirect=False)
         parent = next
 
     parent_edge['type'] = 'parent'
@@ -144,13 +144,13 @@ def join():
     rc.set_edge(edge=new_prev, e=new_next, type='next')
 
     # Change parents
-    rc.adopt(edge=this_prev0, e=this_prev2)
+    rc.adopt_child(edge=this_prev0, e=this_prev2)
     rc.set_edge(edge=this_prev2, e=this_prev0, type='parent')
 
-    rc.adopt(edge=this_prev0, e=this_prev3)
+    rc.adopt_child(edge=this_prev0, e=this_prev3)
     rc.set_edge(edge=this_prev3, e=this_prev0, type='parent')
 
-    rc.adopt(edge=this_prev1, e=this)
+    rc.adopt_child(edge=this_prev1, e=this)
     rc.set_edge(edge=this, e=this_prev1, type='parent')
 
     # Make circle in new layer
@@ -239,6 +239,11 @@ def network_reset_controller():
     return ret
 
 
+# Job controllers
+def job_handler():
+    threading.Timer(1, ping).start()
+
+
 def jobs_add_controller(jobid, width, height, p, points):
     job_info.add_job(jobid, width, height, p, points)
     return network_edges_controller()
@@ -248,33 +253,44 @@ def jobs_new_controller(width, height, p, points):
     job_id = node_info.get_uuid()
     job_info.add_job(job_id, width, height, p, points)
     graph_traversal = bfs(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
-    for
+    for node in graph_traversal:
+        rc.add_job(edge=node, job_id=job_id, width=width, height=height, p=p, points=points)
     return {'job_id', str(job_id)}
 
 
 def jobs_all_controller():
-    pass
+    return job_info.get_jobs()
 
 
-def jobs_backup_controller(uuid, jobid, point):
-    pass
+def jobs_backup_controller(uuid, job_id, point):
+    job_info.add_backup(uuid=uuid, job_id=job_id, point=point)
 
 
-def jobs_remove_controller(jobid):
-    pass
+def jobs_remove_controller(job_id):
+    job_info.remove_job(job_id)
+    return network_edges_controller()
 
 
-def jobs_kill_controller(jobid):
-    pass
+def jobs_kill_controller(job_id):
+    graph_traversal = bfs(node_info.get_uuid(), addresses.get_ip(), addresses.get_port())
+    for node in graph_traversal:
+        rc.remove_job(node, job_id)
+    return {}
 
 
 def jobs_ids_controller():
-    pass
+    return job_info.list_ids()
 
 
-def jobs_data_controller(jobid):
-    pass
+def jobs_data_controller(job_id):
+    uuid = node_info.get_uuid()
+    points = job_info.get_points()
+    backup = [job_info.get_prev_backup(), job_info.get_next_backup()]
+    edges = network_edges_controller()
+    return str(uuid), points, backup, edges
 
 
-def jobs_visualize_controller(jobid):
-    pass
+def jobs_visualize_controller(job_id):
+    graph_traversal = bfs(node_info.get_uuid(), addresses.get_ip(), addresses.get_port())
+    for node in graph_traversal:
+        rc.job_data(edge=node, job_id=job_id)

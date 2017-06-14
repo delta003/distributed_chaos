@@ -1,6 +1,6 @@
 from flask import Flask
 from controllers.node_controller import *
-from requests.response_creator import *
+from communication.response_creator import *
 
 app = Flask('node')
 app.debug = True
@@ -146,7 +146,7 @@ def jobs_backup():
         return error_response(str(e))
 
     try:
-        ret = jobs_backup_controller(uuid=uuid, jobid=jobid, point=point)
+        ret = jobs_backup_controller(uuid=uuid, job_id=jobid, point=point)
     except Exception as e:
         return error_response(str(e))
     return ret
@@ -155,7 +155,7 @@ def jobs_backup():
 @app.route('/api/jobs/remove/<int:jobid>', methods=['GET'])
 def jobs_remove(jobid):
     try:
-        ret = jobs_remove_controller(jobid=jobid)
+        ret = jobs_remove_controller(job_id=jobid)
     except Exception as e:
         return error_response(str(e))
     return ret
@@ -164,7 +164,7 @@ def jobs_remove(jobid):
 @app.route('/api/jobs/kill/<int:jobid>', methods=['GET'])
 def jobs_kill(jobid):
     try:
-        ret = jobs_kill_controller(jobid=jobid)
+        ret = jobs_kill_controller(job_id=jobid)
     except Exception as e:
         return error_response(str(e))
     return ret
@@ -182,16 +182,16 @@ def jobs_ids():
 @app.route('/api/jobs/data/<int:jobid>', methods=['GET'])
 def jobs_data(jobid):
     try:
-        ret = jobs_data_controller(jobid=jobid)
+        ret = jobs_data_controller(job_id=jobid)
     except Exception as e:
         return error_response(str(e))
     return ret
 
 
 @app.route('/api/jobs/visualize/<int:jobid>', methods=['GET'])
-def jobs_visualize():
+def jobs_visualize(jobid):
     try:
-        ret = jobs_visualize_controller(jobid=jobid)
+        ret = jobs_visualize_controller(job_id=jobid)
     except Exception as e:
         return error_response(str(e))
     return ret
