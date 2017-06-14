@@ -2,6 +2,7 @@ import queue
 import threading
 import time
 import communication.request_creator as rc
+import random
 
 
 def __init__(link_data, address_data, data, job_data):
@@ -243,6 +244,19 @@ def network_reset_controller():
 def job_handler():
     threading.Timer(1, ping).start()
 
+    last_point = job_info.get_last_point()
+    next_point = random.choice(job_info.get_starting_points())
+    p = job_info.get_p()
+    x = last_point['x'] + (next_point['x'] - last_point['x']) * p
+    y = last_point['y'] + (next_point['y'] - last_point['y']) * p
+
+    new_point = {'x': x, 'y': y}
+    job_info.add_point(new_point)
+    rc.backup_jobs(edge=links.get_edge('next'), uuid=node_info.get_uuid(),
+                   job_id=job_info.get_my_job_id(), point=new_point)
+    rc.backup_jobs(edge=links.get_edge('prev'), uuid=node_info.get_uuid(),
+                   job_id=job_info.get_my_job_id(), point=new_point)
+
 
 def jobs_add_controller(jobid, width, height, p, points):
     job_info.add_job(jobid, width, height, p, points)
@@ -264,6 +278,9 @@ def jobs_all_controller():
 
 def jobs_backup_controller(uuid, job_id, point):
     job_info.add_backup(uuid=uuid, job_id=job_id, point=point)
+
+    last_point = job_info.get_last_point()
+    starting_points = job_info.get_starting_points()
 
 
 def jobs_remove_controller(job_id):

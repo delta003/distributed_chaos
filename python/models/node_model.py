@@ -152,6 +152,12 @@ class Job:
     def get_as_dict(self):
         return {'uuid': str(self._job_id), 'points': self._points}
 
+    def add_point(self, x, y):
+        self._points.append({'x': x, 'y': y})
+
+    def get_last_point(self):
+        return self._points[-1]
+
 
 class NodeJobData:
     def __init__(self):
@@ -167,16 +173,17 @@ class NodeJobData:
         self._jobs.sort()
 
     def get_jobs(self):
-        return self._jobs  # TODO: return as dict
+        return self._jobs
 
     def add_backup(self, uuid, job_id, point):
-        pass
+        self._prev_backup.add_point(point['x'], point['y'])
+        self._next_backup.add_point(point['x'], point['y'])
 
     def remove_job(self, job_id):
-        pass
+        self._my_job = Job()
 
     def list_ids(self):
-        pass
+        return [x['jobid'] for x in self._jobs]
 
     def get_my_points(self):
         return self._my_job.get_points()
@@ -186,3 +193,9 @@ class NodeJobData:
 
     def get_next_backup(self):
         return self._next_backup.get_as_dict()
+
+    def add_point(self, x, y):
+        self._my_job.add_point(x, y)
+
+    def get_last_point(self):
+        return self._my_job.get_last_point()
