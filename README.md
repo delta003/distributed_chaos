@@ -53,6 +53,10 @@ brew install python3
 ```
 python3 -m pip install flask
 ```
+- Install requests
+```
+python3 -m pip install requests
+```
 
 ##### Running
 - Starting node: python3 python/node_starter.py <node_ip> <node_port>
