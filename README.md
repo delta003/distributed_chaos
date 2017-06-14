@@ -20,7 +20,7 @@ brew install gcc
 ```
 brew install boost
 ```
-- Make sure boost is on your path variable.
+- Install command line tools.
 ```
 xcode-select --install
 ```
