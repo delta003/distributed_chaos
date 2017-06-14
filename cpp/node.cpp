@@ -75,7 +75,6 @@ void ok(HttpServer& server) {
   server.resource["/api/basic/ok"]["GET"] = [](shared_ptr<HttpServer::Response> response, shared_ptr<HttpServer::Request> request) {
     try {
       // if (WAIT) { send_wait(response); return; }
-      log(logstream, "ok_request", request->content.string());
       ptree out;
       send_ok(response, out);
     } catch (exception& e) {
