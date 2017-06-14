@@ -1,5 +1,5 @@
 # Distributed Game of Chaos
-## Docs
+## Introduction
 - Project https://drive.google.com/file/d/0B6P2gDjQqRbDMVptM3dfZmNWbVU/view?usp=sharing
 - Design https://docs.google.com/document/d/1YzOaIMauOf1US_li-Wa6A-0cFraVSx2Tim-j10xJb0k/edit?usp=sharing
 - Network architecture https://imgur.com/a/yql0r
