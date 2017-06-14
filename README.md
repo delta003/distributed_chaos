@@ -53,7 +53,7 @@ brew install python3
 ```
 python3 -m pip install flask
 ```
-- Install requests
+- Install requests for python3
 ```
 python3 -m pip install requests
 ```
