@@ -2,6 +2,7 @@
 ## Docs
 - Project https://drive.google.com/file/d/0B6P2gDjQqRbDMVptM3dfZmNWbVU/view?usp=sharing
 - Design https://docs.google.com/document/d/1YzOaIMauOf1US_li-Wa6A-0cFraVSx2Tim-j10xJb0k/edit?usp=sharing
+- Network architecture https://imgur.com/a/yql0r
 
 ## AngularJs
 - Each server should serve static files from `/angularjs/app` and routes with `/api` prefix should accept and return `Content-Type: application/json`
