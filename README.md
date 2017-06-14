@@ -45,19 +45,7 @@ xcode-select --install
 
 ## Python
 ##### Installation
-- Install python3 
-```
-brew install python3
-```
-- Install flask for python3
-```
-python3 -m pip install flask
-```
-- Install requests for python3
-```
-python3 -m pip install requests
-```
+todo
 
 ##### Running
-- Starting node: python3 python/node_starter.py <node_ip> <node_port>
-- Starting bootstrap: python3 python/bootstrap_starter.py (default is 127.0.0.1:9080, you can change that in config/bootstrap_config.py)
+todo
