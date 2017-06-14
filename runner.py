@@ -35,11 +35,11 @@ def exec_stop_bootstrap(lang):
 def cmd_help():
     print "help - Prints commands."
     print "nodes - Lists used nodes with implementation and port."
-    print "build $LANG - Runs build for $LANG implementation."
-    print "startboot $LANG - Starts $LANG implementation of bootstrap server."
-    print "startnodes $LANG $N - Starts $N node servers with $LANG implementation."
-    print "stop $PORT - Stops server with port $PORT."
-    print "stop2 $PORT1 $PORT2 - Stops two servers with given ports."
+    print "build <cpp|java|python> - Runs build for specified implementation."
+    print "startboot <cpp|java|python> - Starts specified version of the bootstrap server."
+    print "startnodes <cpp|java|python> <n> - Starts <n> node servers in specified version."
+    print "stop <port> - Stops server with port <port>."
+    print "stop2 <port1> <port2> - Stops two servers with given ports."
     print "stopboot - Stops bootstrap server."
     print "end - Stops everything and exits."
 
