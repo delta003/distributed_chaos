@@ -1,6 +1,6 @@
-from flask import Flask, request
+from flask import Flask
 from controllers.node_controller import *
-from api.api_responses import *
+from requests.response_creator import *
 
 app = Flask('node')
 app.debug = True
@@ -15,13 +15,21 @@ def default_response():
 # Node API
 @app.route('/api/basic/ok', methods=['GET'])
 def basic_ok():
-    return ok_response(basic_ok_controller())
+    try:
+        ret = basic_ok_controller()
+    except Exception as e:
+        return error_response(str(e))
+    return ok_response(ret)
 
 
+# TODO: convert all values from json into appropriate data types before calling controller methods
 @app.route('/api/basic/info', methods=['GET'])
 def basic_info():
-    # TODO: avoid returning values without try/except (change this for each node)
-    return ok_response(basic_info_controller())
+    try:
+        ret = basic_info_controller()
+    except Exception as e:
+        return error_response(str(e))
+    return ok_response(ret)
 
 
 @app.route('/api/basic/check', methods=['POST'])
@@ -41,7 +49,11 @@ def basic_check():
 # Network API
 @app.route('/api/network/edges', methods=['GET'])
 def network_edges():
-    return ok_response(network_edges_controller())
+    try:
+        ret = network_edges_controller()
+    except Exception as e:
+        return error_response(str(e))
+    return ok_response(ret)
 
 
 @app.route('/api/network/get_edge', methods=['POST'])

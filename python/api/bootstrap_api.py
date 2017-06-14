@@ -1,6 +1,7 @@
-from flask import Flask, jsonify, request
+from flask import Flask
+
 from controllers.bootstrap_controller import *
-from api.api_responses import *
+from requests.response_creator import *
 
 app = Flask('bootstrap')
 app.debug = True
@@ -9,7 +10,7 @@ app.debug = True
 # defaults
 @app.route('/', methods=['POST', 'GET'])
 def default_response():
-    ok_response({})
+    pass
 
 
 # bootstrap API
@@ -45,9 +46,3 @@ def reset_done():
         return error_response(str(e))
     return ok_response(response)
 
-
-# testing routes
-@app.route('/test_receive', methods=['POST', 'GET'])
-def test_receive():
-    print("DEbUG")
-    return ok_response({'message': 'sve je laz'})
