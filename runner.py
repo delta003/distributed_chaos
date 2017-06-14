@@ -70,6 +70,7 @@ def cmd_stopboot():
     print "Stopping bootstrap for " + BOOTSTRAP_LANG + "..."
     exec_stop_bootstrap(BOOTSTRAP_LANG)
     print "Stopping bootstrap for " + BOOTSTRAP_LANG + " completed."
+    BOOTSTRAP_LANG = None
 
 def cmd_startnodes(lang, count):
     print "Starting " + str(count) + " nodes for " + lang + "..."
