@@ -236,3 +236,39 @@ def network_reset_controller():
     join_thrd = threading.Thread(target=join)
     join_thrd.start()
     return ret
+
+
+def jobs_add_controller(jobid, width, height, p, points):
+    pass
+
+
+def jobs_new_controller(width, height, p, points):
+    pass
+
+
+def jobs_all_controller():
+    pass
+
+
+def jobs_backup_controller(uuid, jobid, point):
+    pass
+
+
+def jobs_remove_controller(jobid):
+    pass
+
+
+def jobs_kill_controller(jobid):
+    pass
+
+
+def jobs_ids_controller():
+    pass
+
+
+def jobs_data_controller(jobid):
+    pass
+
+
+def jobs_visualize_controller(jobid):
+    pass
