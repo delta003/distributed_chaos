@@ -6,9 +6,9 @@
 
 ## Prerequisites for running (OS X)
 ##### Java
-- Install Maven.
+- Install maven.
 ```
-brew install gcc
+brew install maven
 ```
 
 ##### C++
