@@ -10,7 +10,7 @@ app.debug = True
 # visualization
 @app.route('/', methods=['POST', 'GET'])
 def default_response():
-    return send_from_directory('../angularjs/', filename='')
+    return send_from_directory('../angularjs/', filename='app/index.html')
 
 
 # bootstrap API
