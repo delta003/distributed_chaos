@@ -54,14 +54,14 @@ def cmd_build(lang):
     print "Building for " + lang + " completed."
 
 def cmd_startboot(lang):
-    print "Staring bootstrap for " + lang + "..."
+    print "Starting bootstrap for " + lang + "..."
     global BOOTSTRAP_LANG
     if BOOTSTRAP_LANG is not None:
         print "ERROR: Bootstrap already running."
         return
     BOOTSTRAP_LANG = lang
     exec_start_bootstrap(lang)
-    print "Staring bootstrap for " + lang + " completed."
+    print "Starting bootstrap for " + lang + " completed."
 
 def cmd_stopboot():
     global BOOTSTRAP_LANG
