@@ -61,7 +61,7 @@ def basic_check(edge, ip, port):
 
 
 # Network API
-def edges(edge):
+def all_edges(edge):
     ret = create_net_request(method='GET', endpoint='/api/network/edges', edge=edge)
     return ret['edges']
 
@@ -77,7 +77,7 @@ def set_edge(edge, e, type):
     return ret['oldedge']
 
 
-def adopt(edge, e, can_redirect=False):  # TODO: not sure if third argument is fine
+def adopt_child(edge, e, can_redirect=False):  # TODO: not sure if third argument is fine
     request_data = {'edge': e}
     if can_redirect:
         request_data['can_redirect'] = 'true'
@@ -103,11 +103,63 @@ def adopt(edge, e, can_redirect=False):  # TODO: not sure if third argument is f
     return redirect, create_level, edges, next
 
 
-def reset(edge):
+def reset_node(edge):
     ret = create_net_request(method='GET', edge=edge, endpoint='/api/network/reset')
     return ret['edges']
 
 
-def visualize(edge):
+def network_visualization(edge):
     ret = create_net_request(method='GET', edge=edge, endpoint='/api/network/visualize')
     return ret['nodes'], ret['edges']
+
+
+# Jobs API
+def add_job(edge, job_id, width, height, p, points):
+    endpoint = '/api/jobs/add/%d' % job_id
+    ret = create_net_request(method='POST', edge=edge, endpoint=endpoint,
+                             data={'width': width, 'height': height, 'p': p, 'points': points})
+    return ret['edges']
+
+
+def new_job(edge, width, height, p, points):
+    ret = create_net_request(method='POOST', edge=edge, endpoint='/api/jobs/new',
+                             data={'width': width, 'height': height, 'p': p, 'points': points})
+    return ret['jobid']
+
+
+def all_jobs(edge):
+    ret = create_net_request(method='GET', edge=edge, endpoint='/api/jobs/all')
+    return ret['jobs']
+
+
+def backup_jobs(edge, uuid, job_id, point):
+    create_net_request(method='POST', edge=edge, endpoint='/api/jobs/backup',
+                       data={'uuid': uuid, 'jobid': job_id, 'point': point})
+
+
+def remove_job(edge, job_id):
+    endpoint = '/api/jobs/remove/%d' % job_id
+    ret = create_net_request(method='GET', edge=edge, endpoint=endpoint)
+    return ret['edges']
+
+
+def kill_job(edge, job_id):
+    endpoint = '/api/jobs/kill/%d' %d job_id
+    create_net_request(method='GET', edge=edge, endpoint=endpoint)
+
+
+def list_ids(edge):
+    ret = create_net_request(method='GET', edge=edge, endpoint='/api/jobs/ids')
+    return ret['jobids']
+
+
+def job_data(edge, job_id):
+    endpoint = '/api/jobs/data/%d' % job_id
+    ret = create_net_request(method='GET', edge=edge, endpoint=endpoint)
+    return ret['uuid'], ret['points'], ret['backup'], ret['edges']
+
+
+def job_visualization(edge, job_id):
+    endpoint = '/api/jobs/visualize/%d' % job_id
+    ret = create_net_request(method='GET', edge=edge, endpoint=endpoint)
+    return ret['startingpoints'], ret['points'], ret['width'], ret['height']
