@@ -15,7 +15,6 @@ class Edge:
         return {'uuid': self._uuid, 'kind': self._type, 'ip': self._ip, 'port': self._port}
 
 
-# TODO: return wait exception if node linking is in progress
 class NodeLinks:
     def __init__(self):
         self._wait_flag = False
@@ -76,6 +75,14 @@ class NodeLinks:
             return {type, self._prev}
         raise Exception('unknown edge type')
 
+    def reset(self):
+        self._level = None
+        self._idx = None
+        self._parent = None
+        self._prev = None
+        self._next = None
+        self._children = []
+
     def set_edge(self, edge):
         e = Edge(uuid=edge['uuid'], ip=edge['ip'], port=edge['port'], type=edge['type'])
         if edge['type'] == 'parent':
@@ -113,10 +120,13 @@ class NodeAddresses:
 
 class NodeData:
     def __init__(self):
-        self.uuid = -1
+        self._uuid = -1
 
     def set_uuid(self, uuid):
-        self.uuid = uuid
+        self._uuid = uuid
+
+    def get_uuid(self):
+        return self._uuid
 
 
 class NodeJobData:

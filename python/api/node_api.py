@@ -1,6 +1,6 @@
-from flask import Flask, request
+from flask import Flask
 from controllers.node_controller import *
-from api.api_responses import *
+from requests.response_creator import *
 
 app = Flask('node')
 app.debug = True
@@ -15,24 +15,45 @@ def default_response():
 # Node API
 @app.route('/api/basic/ok', methods=['GET'])
 def basic_ok():
-    return ok_response(basic_ok_controller())
+    try:
+        ret = basic_ok_controller()
+    except Exception as e:
+        return error_response(str(e))
+    return ok_response(ret)
 
 
+# TODO: convert all values from json into appropriate data types before calling controller methods
 @app.route('/api/basic/info', methods=['GET'])
 def basic_info():
-    return ok_response(basic_info_controller())
+    try:
+        ret = basic_info_controller()
+    except Exception as e:
+        return error_response(str(e))
+    return ok_response(ret)
 
 
 @app.route('/api/basic/check', methods=['POST'])
 def basic_check():
-    # TODO: what is the usecase for this one?
-    raise NotImplemented()
+    try:
+        [ip, port] = extract_data(request, ['ip', 'port'])
+    except Exception as e:
+        return error_response(str(e))
+
+    try:
+        ret = basic_check_controller(ip, port)
+    except Exception as e:
+        return error_response(str(e))
+    return ret
 
 
 # Network API
 @app.route('/api/network/edges', methods=['GET'])
 def network_edges():
-    return ok_response(network_edges_controller())
+    try:
+        ret = network_edges_controller()
+    except Exception as e:
+        return error_response(str(e))
+    return ok_response(ret)
 
 
 @app.route('/api/network/get_edge', methods=['POST'])
@@ -64,7 +85,12 @@ def network_adopt():
 
 @app.route('/api/network/reset', methods=['GET'])
 def network_reset():
-    pass
+    try:
+        ret = network_reset_controller()
+    except Exception as e:
+        return error_response(str(e))
+
+    return ret
 
 
 @app.route('/api/network/visualize', methods=['GET'])
