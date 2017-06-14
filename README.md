@@ -12,15 +12,15 @@ brew install gcc
 ```
 
 ##### C++
-- Install gcc and make sure it's on your path variable. On OS X:
+- Install gcc and make sure it's on your path variable.
 ```
 brew install gcc
 ```
-- Install boost to /usr/local/include/boost. On OS X:
+- Install boost to /usr/local/include/boost.
 ```
 brew install boost
 ```
-- Make sure boost is on your path variable. On OS X:
+- Make sure boost is on your path variable.
 ```
 xcode-select --install
 ```
