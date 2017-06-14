@@ -28,6 +28,7 @@ brew install boost
 ```
 xcode-select --install
 ```
+
 ##### Building
 - Run ./cpp/build, however building is not necessary. Scripts that spawn nodes will use md5 to hash your files, and call ./cpp/build if the project hasn't been built yet, or if some of the source code was changed.
 
@@ -41,3 +42,22 @@ xcode-select --install
 ##### Unit Tests
 - Edit /cpp/test_config.hpp
 - Run ./cpp/test
+
+## Python
+##### Installation
+- Install python3 
+```
+brew install python3
+```
+- Install flask for python3
+```
+python3 -m pip install flask
+```
+- Install requests for python3
+```
+python3 -m pip install requests
+```
+
+##### Running
+- Starting node: python3 python/node_starter.py <node_ip> <node_port>
+- Starting bootstrap: python3 python/bootstrap_starter.py (default is 127.0.0.1:9080, you can change that in config/bootstrap_config.py)
