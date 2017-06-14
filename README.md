@@ -26,7 +26,22 @@ xcode-select --install
 ```
 
 ##### Python
-todo
+- Install Python 3.5
+```
+brew install python3.5
+```
+- Go to python folder
+```
+cd python
+```
+- Create virtual environment
+```
+python3.5 -m venv myvenv
+```
+- Install all required modules
+```
+myvenv/bin/pip3.5 install -r requirements.txt
+```
 
 ## Running
 Start runner.py for an interactive console.
