@@ -129,5 +129,22 @@ class NodeData:
         return self._uuid
 
 
+class Job:
+    def __init__(self):
+        self._width = None
+        self._height = None
+        self._p = None
+        self._points = None
+
+    def __le__(self, other):
+        return
+
+
 class NodeJobData:
-    pass
+    def __init__(self):
+        self._jobs = []
+
+    def add_job(self, job):
+        self._jobs.append(job)
+        self._jobs.sort()  # TODO: add comparator by id
+

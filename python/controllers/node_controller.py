@@ -5,11 +5,11 @@ import requests.request_creator as rc
 
 
 def __init__(link_data, address_data, data, job_data):
-    global links, addresses, node_info, jobs
+    global links, addresses, node_info, job_info
     links = link_data
     addresses = address_data
     node_info = data
-    jobs = job_data
+    job_info = job_data
 
 
 # ping next node every 1 sec
@@ -237,3 +237,40 @@ def network_reset_controller():
     join_thrd = threading.Thread(target=join)
     join_thrd.start()
     return ret
+
+
+def jobs_add_controller(jobid, width, height, p, points):
+    job_info.add_job(jobid, width, height, p, points)
+    return network_edges_controller()
+
+
+def jobs_new_controller(width, height, p, points):
+    pass
+
+
+def jobs_all_controller():
+    pass
+
+
+def jobs_backup_controller(uuid, jobid, point):
+    pass
+
+
+def jobs_remove_controller(jobid):
+    pass
+
+
+def jobs_kill_controller(jobid):
+    pass
+
+
+def jobs_ids_controller():
+    pass
+
+
+def jobs_data_controller(jobid):
+    pass
+
+
+def jobs_visualize_controller(jobid):
+    pass

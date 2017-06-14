@@ -101,44 +101,97 @@ def network_visualize():
 # Jobs API
 @app.route('/api/jobs/add/<int:jobid>', methods=['POST'])
 def jobs_add(jobid):
-    pass
+    try:
+        [width, height, p, points] = extract_data(request, ['width', 'height', 'p', 'points'])
+    except Exception as e:
+        return error_response(str(e))
+
+    try:
+        # TODO: extract points from json into array of pairs
+        ret = jobs_add_controller(jobid=jobid, width=int(width), height=int(height), p=float(p), points=points)
+    except Exception as e:
+        return error_response(str(e))
+    return ret
 
 
 @app.route('/api/jobs/new', methods=['POST'])
 def jobs_new():
-    pass
+    try:
+        [width, height, p, points] = extract_data(request, fields=['width', 'height', 'p', 'points'])
+    except Exception as e:
+        return error_response(str(e))
+
+    try:
+        # TODO: extract points from json into array of pairs
+        ret = jobs_new_controller(width=int(width), height=int(height), p=float(p), points=points)
+    except Exception as e:
+        return error_response(str(e))
+    return ret
 
 
 @app.route('/api/jobs/all', methods=['GET'])
 def jobs_all():
-    pass
+    try:
+        ret = jobs_all_controller()
+    except Exception as e:
+        return error_response(e)
+    return ret
 
 
 @app.route('/api/jobs/backup', methods=['POST'])
 def jobs_backup():
-    pass
+    try:
+        [uuid, jobid, point] = extract_data(request, fields=['uuid', 'jobid', 'point'])
+    except Exception as e:
+        return error_response(str(e))
+
+    try:
+        ret = jobs_backup_controller(uuid=uuid, jobid=jobid, point=point)
+    except Exception as e:
+        return error_response(str(e))
+    return ret
 
 
 @app.route('/api/jobs/remove/<int:jobid>', methods=['GET'])
 def jobs_remove(jobid):
-    pass
+    try:
+        ret = jobs_remove_controller(jobid=jobid)
+    except Exception as e:
+        return error_response(str(e))
+    return ret
 
 
 @app.route('/api/jobs/kill/<int:jobid>', methods=['GET'])
 def jobs_kill(jobid):
-    pass
+    try:
+        ret = jobs_kill_controller(jobid=jobid)
+    except Exception as e:
+        return error_response(str(e))
+    return ret
 
 
 @app.route('/api/jobs/ids', methods=['GET'])
 def jobs_ids():
-    pass
+    try:
+        ret = jobs_ids_controller()
+    except Exception as e:
+        return error_response(str(e))
+    return ret
 
 
 @app.route('/api/jobs/data/<int:jobid>', methods=['GET'])
 def jobs_data(jobid):
-    pass
+    try:
+        ret = jobs_data_controller(jobid=jobid)
+    except Exception as e:
+        return error_response(str(e))
+    return ret
 
 
 @app.route('/api/jobs/visualize/<int:jobid>', methods=['GET'])
 def jobs_visualize():
-    pass
+    try:
+        ret = jobs_visualize_controller(jobid=jobid)
+    except Exception as e:
+        return error_response(str(e))
+    return ret

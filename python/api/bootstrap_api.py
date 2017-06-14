@@ -1,7 +1,7 @@
 from flask import Flask
 
 from controllers.bootstrap_controller import *
-from requests.response_creator import *
+from communication.response_creator import *
 
 app = Flask('bootstrap')
 app.debug = True

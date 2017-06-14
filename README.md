@@ -28,6 +28,7 @@ brew install boost
 ```
 xcode-select --install
 ```
+
 ##### Building
 - Run ./cpp/build, however building is not necessary. Scripts that spawn nodes will use md5 to hash your files, and call ./cpp/build if the project hasn't been built yet, or if some of the source code was changed.
 
@@ -41,3 +42,10 @@ xcode-select --install
 ##### Unit Tests
 - Edit /cpp/test_config.hpp
 - Run ./cpp/test
+
+## Python
+##### Installation
+todo
+
+##### Running
+todo
