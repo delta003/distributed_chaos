@@ -59,11 +59,10 @@ def reconfigure():
 
 
 def bfs(uuid, ip, port):
-    print('')
-    logger.log('bfs')
+    print('bfs')
     q = queue.Queue()
     q.put({'uuid': uuid, 'ip': ip, 'port': port})
-    visited = {uuid: True}
+    visited = {int(uuid): True}
     nodes = []
     edges = []
     while not q.empty():
@@ -78,7 +77,8 @@ def bfs(uuid, ip, port):
                 continue
             visited[next_uuid] = True
             q.put({'uuid': next_uuid, 'ip': e['ip'], 'port': e['port']})
-    return nodes
+    print('DONE WITH BFS')
+    return nodes, edges
 
 
 # joining node into network

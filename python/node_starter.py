@@ -22,8 +22,9 @@ if __name__ == '__main__':
     addresses = NodeAddresses(ip=ip, port=port, bootstrap_ip=bootstrap_ip, bootstrap_port=bootstrap_port)
     node_data = NodeData()
     job_info = NodeJobData()
+    app.logger.setLevel(0)
     controllers.node_controller.__init__(link_data=links, address_data=addresses,
-                                         data=node_data, job_data=job_info, app_logger=None)
+                                         data=node_data, job_data=job_info, app_logger=app.logger)
 
     join_thrd = threading.Thread(target=controllers.node_controller.join)
     join_thrd.start()

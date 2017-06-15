@@ -10,7 +10,6 @@ git_root = path.abspath(path.join(__file__, "../../.."))
 app = Flask('node', static_folder=git_root + '/angularjs/app/static')
 
 
-# visualization
 @app.route('/')
 def default_response():
     return send_from_directory(git_root + '/angularjs/app', filename="index.html")
@@ -125,7 +124,7 @@ def network_visualize():
         print(ret)
     except Exception as e:
         return error_response(str(e))
-    return ret
+    return ok_response(ret)
 
 
 # Jobs API
