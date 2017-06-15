@@ -82,7 +82,6 @@ def network_edges():
 @app.route('/api/network/get_edge', methods=['POST'])
 def network_get_edge():
     try:
-        print (request)
         [type] = extract_data(request, ['type'])
     except Exception as e:
         return error_response(str(e))
