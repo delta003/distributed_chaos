@@ -1,6 +1,7 @@
 from flask import Flask, send_from_directory
 from controllers.node_controller import *
 from communication.response_creator import *
+from controllers.node_controller import NetworkWaitException
 
 import os.path as path
 import sys
@@ -45,11 +46,12 @@ def basic_ok():
     return ok_response(ret)
 
 
-# TODO: convert all values from json into appropriate data types before calling controller methods
 @app.route('/api/basic/info', methods=['GET'])
 def basic_info():
     try:
         ret = basic_info_controller()
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     return ok_response(ret)
@@ -119,9 +121,7 @@ def network_reset():
 @app.route('/api/network/visualize', methods=['GET'])
 def network_visualize():
     try:
-        print('entering controller')
         ret = network_visualize_controller()
-        print(ret)
     except Exception as e:
         return error_response(str(e))
     return ok_response(ret)

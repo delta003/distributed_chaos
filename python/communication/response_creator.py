@@ -9,6 +9,10 @@ def error_response(message):
     return jsonify({'status': 'error', 'message': message})
 
 
+def wait_response():
+    return jsonify({'status': 'wait'})
+
+
 def ok_response(response):
     status = {'status': 'ok'}
     return jsonify({**response, **status})

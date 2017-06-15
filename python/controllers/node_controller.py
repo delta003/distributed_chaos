@@ -5,6 +5,10 @@ import communication.request_creator as rc
 import random
 
 
+class NetworkWaitException(Exception):
+    pass
+
+
 def __init__(link_data, address_data, data, job_data, app_logger):
     global links, addresses, node_info, job_info, logger
     links = link_data
@@ -59,7 +63,6 @@ def reconfigure():
 
 
 def bfs(uuid, ip, port):
-    print('bfs')
     q = queue.Queue()
     q.put({'uuid': uuid, 'ip': ip, 'port': port})
     visited = {int(uuid): True}
@@ -67,7 +70,6 @@ def bfs(uuid, ip, port):
     edges = []
     while not q.empty():
         curr = q.get()
-        print(curr)
         nodes.append(curr)
         edge_list = rc.all_edges(edge=curr)
         for e in edge_list:
@@ -77,7 +79,6 @@ def bfs(uuid, ip, port):
                 continue
             visited[next_uuid] = True
             q.put({'uuid': next_uuid, 'ip': e['ip'], 'port': e['port']})
-    print('DONE WITH BFS')
     return nodes, edges
 
 
@@ -121,6 +122,7 @@ def join():
             links.set_edge(this)
             this['type'] = 'prev'
             links.set_edge(this)
+
         links.set_wait(False)
         return
 
@@ -139,6 +141,7 @@ def join():
         links.set_edge(mng_edge)
         x_nxt['type'] = 'next'
         links.set_edge(x_nxt)
+
         links.set_wait(False)
         return
 
@@ -170,6 +173,7 @@ def join():
     rc.set_edge(edge=this_prev2, e=this, type='prev')
     links.set_next(uuid=this_prev2['uuid'], ip=this_prev2['ip'], port=this_prev2['port'])
     links.set_prev(uuid=this_prev3['uuid'], ip=this_prev3['ip'], port=this_prev3['port'])
+    links.set_wait(False)
 
 
 def basic_ok_controller():
@@ -177,6 +181,8 @@ def basic_ok_controller():
 
 
 def basic_info_controller():
+    if links.should_wait():
+        raise NetworkWaitException()
     return {'uuid': str(node_info.get_uuid()), 'ip': addresses.get_ip(), 'port': addresses.get_port()}
 
 
@@ -190,6 +196,8 @@ def basic_check_controller(ip, port):
 
 
 def network_edges_controller():
+    if links.should_wait():
+        raise NetworkWaitException()
     ret = []
     if links.get_parent():
         ret.append(links.get_parent())
@@ -205,10 +213,14 @@ def network_edges_controller():
 
 
 def network_get_edge_controller(type):
+    if links.should_wait():
+        raise NetworkWaitException()
     return {'edge': links.get_edge_as_dict(type)}
 
 
 def network_set_edge_controller(edge):
+    if links.should_wait():
+        raise NetworkWaitException()
     ret = links.get_edge_as_dict(edge['type'])
     links.set_edge(edge)
     return {'oldedge': ret}
@@ -216,6 +228,8 @@ def network_set_edge_controller(edge):
 
 # TODO: refactor responses so that they rely on requests.response_creator.py
 def network_adopt_controller(edge, can_redirect):
+    if links.should_wait():
+        raise NetworkWaitException()
     if can_redirect == 'true':
         can_redirect = True
     else:
@@ -243,6 +257,8 @@ def network_adopt_controller(edge, can_redirect):
 
 
 def network_reset_controller():
+    if links.should_wait():
+        raise NetworkWaitException()
     ret = network_edges_controller()
     links.reset()
     join_thrd = threading.Thread(target=join)
@@ -251,9 +267,9 @@ def network_reset_controller():
 
 
 def network_visualize_controller():
-    print('asdf')
+    if links.should_wait():
+        raise NetworkWaitException()
     nodes, edges = bfs(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
-    print(nodes)
     return {'nodes': nodes, 'edges': edges}
 
 

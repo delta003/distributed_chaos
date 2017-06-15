@@ -7,9 +7,19 @@ def create_ip_request(method, ip, port, endpoint, data={}):
         endpoint = "/" + endpoint
     address = "http://%s:%s%s" % (ip, port, endpoint)
     if method == 'GET':
-        return requests.get(address, json=data).json()
+        while True:
+            try:
+                ret = requests.get(address, json=data).json()
+            except Exception as e:
+                continue
+            return ret
     else:
-        return requests.post(address, json=data).json()
+        while True:
+            try:
+                ret = requests.post(address, json=data).json()
+            except Exception as e:
+                continue
+            return ret
 
 
 def create_net_request(method, edge, endpoint, data={}):

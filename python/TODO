@@ -1,2 +1,1 @@
 uuid is sometimes returned as int in json resonse
-use wait when request fails
