@@ -7,13 +7,15 @@ import sys
 
 git_root = path.abspath(path.join(__file__, "../../.."))
 
-app = Flask('node', static_folder=git_root+'/angularjs/app/static')
+app = Flask('node', static_folder=git_root + '/angularjs/app/static')
 app.debug = True
+
 
 # visualization
 @app.route('/')
 def default_response():
     return send_from_directory(git_root + '/angularjs/app', filename="index.html")
+
 
 @app.route('/controller/<path:filename>')
 def serve_controller(filename):
@@ -118,7 +120,14 @@ def network_reset():
 
 @app.route('/api/network/visualize', methods=['GET'])
 def network_visualize():
-    pass
+    try:
+        print('entering controller')
+        ret = network_visualize_controller()
+        print(ret)
+    except Exception as e:
+        return error_response(str(e))
+    return ret
+
 
 # Jobs API
 @app.route('/api/jobs/add/<int:jobid>', methods=['POST'])
@@ -194,6 +203,7 @@ def jobs_kill(jobid):
 
 @app.route('/api/jobs/ids', methods=['GET'])
 def jobs_ids():
+    return ok_response({'jobids': []})
     try:
         ret = jobs_ids_controller()
     except Exception as e:

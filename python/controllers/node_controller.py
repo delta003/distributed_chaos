@@ -59,21 +59,24 @@ def reconfigure():
 
 
 def bfs(uuid, ip, port):
+    logger.log('bfs')
     q = queue.Queue()
     q.put({'uuid': uuid, 'ip': ip, 'port': port})
     visited = {uuid: True}
-    result = []
+    nodes = []
+    edges = []
     while not q.empty():
         curr = q.get()
-        result.append(curr)
+        nodes.append(curr)
         edge_list = rc.all_edges(edge=curr)
         for e in edge_list:
+            edges.append({'start_uuid': curr['uuid'], 'end_uuid': e['uuid'], 'type': e['type']})
             next_uuid = int(e['uuid'])
             if next_uuid in visited:
                 continue
             visited[next_uuid] = True
             q.put({'uuid': next_uuid, 'ip': e['ip'], 'port': e['port']})
-    return result
+    return nodes
 
 
 # joining node into network
@@ -172,7 +175,7 @@ def basic_ok_controller():
 
 
 def basic_info_controller():
-    return {'uuid': node_info.get_uuid(), 'ip': addresses.get_ip(), 'port': addresses.get_port()}
+    return {'uuid': str(node_info.get_uuid()), 'ip': addresses.get_ip(), 'port': addresses.get_port()}
 
 
 def basic_check_controller(ip, port):
@@ -186,13 +189,13 @@ def basic_check_controller(ip, port):
 
 def network_edges_controller():
     ret = []
-    if links.get_parent() is not None:
+    if links.get_parent():
         ret.append(links.get_parent())
 
-    if links.get_prev() is not None:
+    if links.get_prev():
         ret.append(links.get_prev())
 
-    if links.get_next() is not None:
+    if links.get_next():
         ret.append(links.get_next())
 
     ret = ret + links.get_children()
@@ -243,6 +246,13 @@ def network_reset_controller():
     join_thrd = threading.Thread(target=join)
     join_thrd.start()
     return ret
+
+
+def network_visualize_controller():
+    logger.log('fffs')
+    nodes, edges = bfs(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
+    print(nodes)
+    return {'nodes': nodes, 'edges': edges}
 
 
 # Job controllers
