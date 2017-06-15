@@ -33,19 +33,19 @@ class NodeLinks:
         self._wait_flag = b
 
     def get_parent(self):
-        return self._parent
+        return self._parent.get() if self._parent is not None else {}
 
     def set_parent(self, uuid, ip, port):
         self._parent = Edge(uuid=uuid, ip=ip, port=port, type='parent')
 
     def get_next(self):
-        return self._next
+        return self._next.get() if self._next is not None else {}
 
     def set_next(self, uuid, ip, port):
         self._next = Edge(uuid=uuid, ip=ip, port=port, type='next')
 
     def get_prev(self):
-        return self._prev
+        return self._prev.get() if self._prev is not None else {}
 
     def set_prev(self, uuid, ip, port):
         self._prev = Edge(uuid=uuid, ip=ip, port=port, type='prev')
