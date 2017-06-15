@@ -120,7 +120,6 @@ def join():
         rc.adopt_child(edge=next, e=this, can_redirect=False)
         parent = next
 
-    print(parent_edge)
     parent_edge['type'] = 'parent'
     links.set_edge(parent_edge)
 
@@ -201,7 +200,7 @@ def network_get_edge_controller(type):
 
 
 def network_set_edge_controller(edge):
-    ret = links.get_edge_as_dict(type)
+    ret = links.get_edge_as_dict(edge['type'])
     links.set_edge(edge)
     return ret
 

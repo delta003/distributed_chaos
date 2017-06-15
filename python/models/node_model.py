@@ -93,7 +93,8 @@ class NodeLinks:
             self._next = e
         elif edge['type'] == 'child':
             self._children.append(e)
-        raise Exception('unknown edge type')
+        else:
+            raise Exception('unknown edge type')
 
 
 class NodeAddresses:

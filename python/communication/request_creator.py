@@ -76,6 +76,7 @@ def get_edge(edge, type):
 
 def set_edge(edge, e, type):
     e['type'] = type
+    print(e)
     ret = create_net_request(method='POST', endpoint='/api/network/set_edge', edge=edge, data={'edge': e})
     return ret['oldedge']
 
