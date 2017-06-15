@@ -100,6 +100,7 @@ def join():
 
         if mng_prev['uuid'] == mng_next['uuid']:
             x_nxt = rc.set_edge(edge=mng_edge, e=this, type='next')
+            print(x_nxt)
             rc.set_edge(edge=x_nxt, e=this, type='prev')
             links.set_prev(uuid=x_nxt['uuid'], ip=x_nxt['ip'], port=x_nxt['port'])
             links.set_next(uuid=x_nxt['uuid'], ip=x_nxt['ip'], port=x_nxt['port'])
@@ -196,7 +197,7 @@ def network_edges_controller():
 
 
 def network_get_edge_controller(type):
-    return links.get_edge_as_dict(type)
+    return {'edge': links.get_edge_as_dict(type)}
 
 
 def network_set_edge_controller(edge):
@@ -217,8 +218,7 @@ def network_adopt_controller(edge, can_redirect):
         return {'redirect': 'false', 'create_level': 'false'}
     elif children_count == 2:
         if can_redirect:
-            ret = links.get_edge_as_dict('next')
-            ret['redirect'] = 'true'
+            ret = {'next': links.get_edge_as_dict('next'), 'redirect': 'true'}
             return ret
         else:
             links.add_child(uuid=edge['uuid'], ip=edge['ip'], port=edge['port'])
@@ -235,7 +235,7 @@ def network_adopt_controller(edge, can_redirect):
 
 
 def network_reset_controller():
-    ret = links.get_edge_as_dict()
+    ret = network_edges_controller()
     links.reset()
     join_thrd = threading.Thread(target=join)
     join_thrd.start()
