@@ -7,7 +7,6 @@ from models.node_model import NodeAddresses, NodeJobData, NodeData, NodeLinks
 import threading
 import os
 
-
 if __name__ == '__main__':
     if len(sys.argv) > 3:
         print("Ignoring ip and port for bootstrap!!!")
@@ -30,7 +29,6 @@ if __name__ == '__main__':
     app.logger.info('Starting node joining')
     join_thrd = threading.Thread(target=controllers.node_controller.join)
     join_thrd.start()
-    #controllers.node_controller.ping()
+    # controllers.node_controller.ping()
 
-    app.run(port=int(port), debug=True, use_reloader=False)
-
+    app.run(port=int(port), debug=False, use_reloader=False, threaded=True)

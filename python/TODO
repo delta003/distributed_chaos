@@ -1,0 +1,2 @@
+uuid is sometimes returned as int in json resonse
+/api/network/edges should not contain {} inside a list of edges

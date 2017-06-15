@@ -8,7 +8,6 @@ import sys
 git_root = path.abspath(path.join(__file__, "../../.."))
 
 app = Flask('node', static_folder=git_root + '/angularjs/app/static')
-app.debug = True
 
 
 # visualization

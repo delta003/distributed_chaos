@@ -250,6 +250,7 @@ def network_reset_controller():
 
 def network_visualize_controller():
     logger.log('fffs')
+    print('asdf')
     nodes, edges = bfs(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
     print(nodes)
     return {'nodes': nodes, 'edges': edges}
