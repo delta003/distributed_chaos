@@ -59,6 +59,7 @@ def reconfigure():
 
 
 def bfs(uuid, ip, port):
+    print('')
     logger.log('bfs')
     q = queue.Queue()
     q.put({'uuid': uuid, 'ip': ip, 'port': port})
@@ -67,6 +68,7 @@ def bfs(uuid, ip, port):
     edges = []
     while not q.empty():
         curr = q.get()
+        print(curr)
         nodes.append(curr)
         edge_list = rc.all_edges(edge=curr)
         for e in edge_list:
@@ -249,7 +251,6 @@ def network_reset_controller():
 
 
 def network_visualize_controller():
-    logger.log('fffs')
     print('asdf')
     nodes, edges = bfs(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
     print(nodes)

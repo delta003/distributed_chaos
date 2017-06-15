@@ -23,10 +23,8 @@ if __name__ == '__main__':
     node_data = NodeData()
     job_info = NodeJobData()
     controllers.node_controller.__init__(link_data=links, address_data=addresses,
-                                         data=node_data, job_data=job_info, app_logger=app.logger)
-    # When in debug mode, node_starter.py is executed two times. Be careful!
+                                         data=node_data, job_data=job_info, app_logger=None)
 
-    app.logger.info('Starting node joining')
     join_thrd = threading.Thread(target=controllers.node_controller.join)
     join_thrd.start()
     # controllers.node_controller.ping()

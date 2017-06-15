@@ -7,4 +7,4 @@ if __name__ == '__main__':
     global bootstrap_data
     bootstrap_data = BootstrapData()
     controllers.bootstrap_controller.__init__(bootstrap_data)
-    app.run(bootstrap_ip, use_reloader=False, debug=True, port=int(bootstrap_port))
+    app.run(bootstrap_ip, use_reloader=False, port=int(bootstrap_port))
