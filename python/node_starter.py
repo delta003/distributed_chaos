@@ -7,6 +7,7 @@ from models.node_model import NodeAddresses, NodeJobData, NodeData, NodeLinks
 import threading
 import os
 
+
 if __name__ == '__main__':
     if len(sys.argv) > 3:
         print("Ignoring ip and port for bootstrap!!!")
@@ -23,12 +24,11 @@ if __name__ == '__main__':
     node_data = NodeData()
     job_info = NodeJobData()
     controllers.node_controller.__init__(link_data=links, address_data=addresses, data=node_data, job_data=job_info)
+    app.logger.info('Starting node joining')
     # When in debug mode, node_starter.py is executed two times. Be careful!
-
     if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         join_thrd = threading.Thread(target=controllers.node_controller.join)
         join_thrd.start()
 
         controllers.node_controller.ping()
-
     app.run(port=int(port))

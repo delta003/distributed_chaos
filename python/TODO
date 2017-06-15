@@ -1,2 +1,0 @@
-* add runner script
-* find a way to split node_controller.py into basic, network and job controller files so that they share information

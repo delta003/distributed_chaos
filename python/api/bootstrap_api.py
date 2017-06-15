@@ -3,14 +3,34 @@ from flask import Flask, send_from_directory
 from controllers.bootstrap_controller import *
 from communication.response_creator import *
 
-app = Flask('bootstrap')
+app = Flask('bootstrap', static_folder='../angularjs/app/static')
 app.debug = True
 
 
 # visualization
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/')
 def default_response():
-    return send_from_directory('../angularjs/', filename='app/index.html')
+    return send_from_directory('../angularjs/app', filename='index.html')
+
+
+@app.route('/controller/<path:filename>')
+def serve_controller(filename):
+    return send_from_directory('../angularjs/app/controller', filename=filename)
+
+
+@app.route('/service/<path:filename>')
+def serve_service(filename):
+    return send_from_directory('../angularjs/app/service', filename=filename)
+
+
+@app.route('/app.js')
+def serve_appjs():
+    return send_from_directory('../angularjs/app', filename='app.js')
+
+
+@app.route('/view/<path:filename>')
+def serve_views(filename):
+    return send_from_directory('../angularjs/app/view', filename=filename)
 
 
 # bootstrap API
@@ -45,4 +65,3 @@ def reset_done():
     except Exception as e:
         return error_response(str(e))
     return ok_response(response)
-

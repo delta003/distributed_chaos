@@ -91,10 +91,9 @@ def join():
     this = {'uuid': str(uuid), 'ip': addresses.get_ip(), 'port': addresses.get_port()}
     if node_info.get_uuid() is None:
         node_info.set_uuid(uuid)
-    try:
-        parent_edge = rc.get_edge(edge=mng_edge, type='parent')
-    except ValueError:
-        # parent is None
+
+    parent_edge = rc.get_edge(edge=mng_edge, type='parent')
+    if parent_edge is None:
         mng_prev = rc.get_edge(edge=mng_edge, type='prev')
         mng_next = rc.get_edge(edge=mng_edge, type='next')
 

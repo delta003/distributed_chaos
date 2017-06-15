@@ -68,6 +68,8 @@ def all_edges(edge):
 
 def get_edge(edge, type):
     ret = create_net_request(method='POST', endpoint='/api/network/get_edge', edge=edge, data={'type': type})
+    if 'edge' not in ret:
+        return None
     return ret['edge']
 
 
