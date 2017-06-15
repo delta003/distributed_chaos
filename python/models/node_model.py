@@ -12,7 +12,7 @@ class Edge:
         self._port = port
 
     def get(self):
-        return {'uuid': self._uuid, 'kind': self._type, 'ip': self._ip, 'port': self._port}
+        return {'uuid': self._uuid, 'type': self._type, 'ip': self._ip, 'port': self._port}
 
 
 class NodeLinks:

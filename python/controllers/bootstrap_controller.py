@@ -1,5 +1,8 @@
 def hello_controller(ip, port):
-    ret = {'uuid': bootstrap_data.get_uuid(), 'ip': bootstrap_data.get_last_ip(), 'port': bootstrap_data.get_last_port()}
+    ret = {'uuid': bootstrap_data.get_uuid()}
+    if bootstrap_data.get_last_ip() is not None:
+        ret['ip'] = bootstrap_data.get_last_ip()
+        ret['port'] = bootstrap_data.get_last_port()
     bootstrap_data.inc_uuid()
     bootstrap_data.set_last_ip(ip)
     bootstrap_data.set_last_port(port)

@@ -9,7 +9,6 @@ def create_ip_request(method, ip, port, endpoint, data={}):
     if method == 'GET':
         return requests.get(address, json=data).json()
     else:
-        print(data)
         return requests.post(address, json=data).json()
 
 

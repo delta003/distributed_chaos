@@ -3,9 +3,10 @@ from flask import Flask, send_from_directory
 from controllers.bootstrap_controller import *
 from communication.response_creator import *
 import os.path as path
+
 git_root = path.abspath(path.join(__file__, "../../.."))
 
-app = Flask('bootstrap', static_folder=git_root+'/angularjs/app/static')
+app = Flask('bootstrap', static_folder=git_root + '/angularjs/app/static')
 app.debug = True
 
 
@@ -13,6 +14,7 @@ app.debug = True
 @app.route('/', methods=['GET', 'POST'])
 def default_response():
     return ok_response({})
+
 
 # bootstrap API
 @app.route('/api/hello', methods=['POST'])

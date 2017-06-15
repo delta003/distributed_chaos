@@ -93,7 +93,6 @@ def join():
     if node_info.get_uuid() is None:
         node_info.set_uuid(uuid)
 
-    print (mng_edge)
     parent_edge = rc.get_edge(edge=mng_edge, type='parent')
     if parent_edge is None:
         mng_prev = rc.get_edge(edge=mng_edge, type='prev')
@@ -121,6 +120,7 @@ def join():
         rc.adopt_child(edge=next, e=this, can_redirect=False)
         parent = next
 
+    print(parent_edge)
     parent_edge['type'] = 'parent'
     links.set_edge(parent_edge)
 
