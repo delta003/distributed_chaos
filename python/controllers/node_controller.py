@@ -102,7 +102,8 @@ def join():
             x_nxt = rc.set_edge(edge=mng_edge, e=this, type='next')
             print(x_nxt)
             rc.set_edge(edge=x_nxt, e=this, type='prev')
-            links.set_prev(uuid=x_nxt['uuid'], ip=x_nxt['ip'], port=x_nxt['port'])
+            mng_edge['type'] = 'prev'
+            links.set_edge(mng_edge)
             links.set_next(uuid=x_nxt['uuid'], ip=x_nxt['ip'], port=x_nxt['port'])
 
         else:
