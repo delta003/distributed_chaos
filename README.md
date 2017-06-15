@@ -28,7 +28,7 @@ xcode-select --install
 ##### Python
 - Install Python 3.5
 ```
-brew install python3.5
+brew install python3
 ```
 - Go to python folder
 ```
