@@ -51,7 +51,7 @@ class NodeLinks:
         self._prev = Edge(uuid=uuid, ip=ip, port=port, type='prev')
 
     def get_children(self):
-        return self._children
+        return [x.get() for x in self._children]
 
     def add_child(self, uuid, ip, port):
         child = Edge(uuid=uuid, ip=ip, port=port, type='child')
