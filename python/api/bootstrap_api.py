@@ -10,30 +10,9 @@ app.debug = True
 
 
 # visualization
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def default_response():
-    print (git_root + '/angularjs/app/index.html')
-    return send_from_directory(git_root + '/angularjs/app', filename="index.html")
-
-@app.route('/controller/<path:filename>')
-def serve_controller(filename):
-    return send_from_directory(git_root + '/angularjs/app/controller', filename=filename)
-
-
-@app.route('/service/<path:filename>')
-def serve_service(filename):
-    return send_from_directory(git_root + '/angularjs/app/service', filename=filename)
-
-
-@app.route('/app.js')
-def serve_appjs():
-    return send_from_directory(git_root + '/angularjs/app', filename='app.js')
-
-
-@app.route('/view/<path:filename>')
-def serve_views(filename):
-    return send_from_directory(git_root + '/angularjs/app/view', filename=filename)
-
+    return ok_response({})
 
 # bootstrap API
 @app.route('/api/hello', methods=['POST'])
