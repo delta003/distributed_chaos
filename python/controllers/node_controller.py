@@ -90,6 +90,7 @@ def join():
         links.set_prev(uuid=uuid, ip=addresses.get_ip(), port=addresses.get_port())
         links.set_wait(False)
         return
+    mng_edge['uuid'] = rc.basic_info(mng_edge)[0]
     this = {'uuid': str(uuid), 'ip': addresses.get_ip(), 'port': addresses.get_port()}
     if node_info.get_uuid() is None:
         node_info.set_uuid(uuid)
