@@ -84,7 +84,7 @@ class NodeLinks:
         self._children = []
 
     def set_edge(self, edge):
-        e = Edge(uuid=edge['uuid'] if 'uuid' in edge else None, ip=edge['ip'], port=edge['port'], type=edge['type'])
+        e = Edge(uuid=edge['uuid'], ip=edge['ip'], port=edge['port'], type=edge['type'])
         if edge['type'] == 'parent':
             self._parent = e
         elif edge['type'] == 'prev':
