@@ -13,7 +13,6 @@ app.debug = True
 # visualization
 @app.route('/')
 def default_response():
-    print (git_root + '/angularjs/app/index.html')
     return send_from_directory(git_root + '/angularjs/app', filename="index.html")
 
 @app.route('/controller/<path:filename>')
@@ -83,6 +82,7 @@ def network_edges():
 @app.route('/api/network/get_edge', methods=['POST'])
 def network_get_edge():
     try:
+        print (request)
         [type] = extract_data(request, ['type'])
     except Exception as e:
         return error_response(str(e))
