@@ -121,7 +121,6 @@ def network_reset():
 def network_visualize():
     pass
 
-
 # Jobs API
 @app.route('/api/jobs/add/<int:jobid>', methods=['POST'])
 def jobs_add(jobid):

@@ -79,9 +79,12 @@ def bfs(uuid, ip, port):
 def join():
     links.set_wait(True)
 
+    mng_edge = {}
     try:
         uuid, mng_ip, mng_port = rc.bootstrap_hello(ip=addresses.get_ip(), port=addresses.get_port())
         mng_edge = {'ip': mng_ip, 'port': mng_port}
+        if mng_edge['ip'] is None:
+            raise ValueError;
     except ValueError:
         if node_info.get_uuid() is None:
             node_info.set_uuid(uuid)
@@ -92,6 +95,7 @@ def join():
     if node_info.get_uuid() is None:
         node_info.set_uuid(uuid)
 
+    print (mng_edge)
     parent_edge = rc.get_edge(edge=mng_edge, type='parent')
     if parent_edge is None:
         mng_prev = rc.get_edge(edge=mng_edge, type='prev')
