@@ -202,7 +202,7 @@ def network_get_edge_controller(type):
 def network_set_edge_controller(edge):
     ret = links.get_edge_as_dict(edge['type'])
     links.set_edge(edge)
-    return ret
+    return {'oldedge': ret}
 
 
 # TODO: refactor responses so that they rely on requests.response_creator.py
