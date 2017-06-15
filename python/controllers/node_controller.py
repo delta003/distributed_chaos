@@ -95,7 +95,7 @@ def join():
         node_info.set_uuid(uuid)
 
     parent_edge = rc.get_edge(edge=mng_edge, type='parent')
-    if parent_edge is None:
+    if not parent_edge:
         mng_prev = rc.get_edge(edge=mng_edge, type='prev')
         mng_next = rc.get_edge(edge=mng_edge, type='next')
 
