@@ -280,34 +280,42 @@ def job_handler():
     threading.Timer(1, ping).start()
 
     last_point = job_info.get_last_point()
-    next_point = random.choice(job_info.get_starting_points())
-    p = job_info.get_p()
-    x = last_point['x'] + (next_point['x'] - last_point['x']) * p
-    y = last_point['y'] + (next_point['y'] - last_point['y']) * p
+    last_x = float(last_point['x'])
+    last_y = float(last_point['y'])
 
-    new_point = {'x': x, 'y': y}
+    next_point = random.choice(job_info.get_starting_points())
+    next_x = float(next_point['x'])
+    next_y = float(next_point['y'])
+    p = float(job_info.get_p())
+    x = last_x + (next_x - last_x) * p
+    y = last_y + (next_y - last_y) * p
+
+    new_point = {'x': str(x), 'y': str(y)}
     job_info.add_point(new_point)
+
+    # TODO: add a queue for sending jobs
     rc.backup_jobs(edge=links.get_edge('next'), uuid=node_info.get_uuid(),
                    job_id=job_info.get_my_job_id(), point=new_point)
     rc.backup_jobs(edge=links.get_edge('prev'), uuid=node_info.get_uuid(),
                    job_id=job_info.get_my_job_id(), point=new_point)
 
 
-def jobs_add_controller(jobid, width, height, p, points):
-    job_info.add_job(jobid, width, height, p, points)
+def jobs_add_controller(job_id, width, height, p, points):
+    job_info.add_job(job_id, width, height, p, points)
     return network_edges_controller()
 
 
 def jobs_new_controller(width, height, p, points):
     job_id = node_info.get_uuid()
     job_info.add_job(job_id, width, height, p, points)
-    graph_traversal = bfs(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
-    for node in graph_traversal:
+    nodes, _ = bfs(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
+    for node in nodes:
         rc.add_job(edge=node, job_id=job_id, width=width, height=height, p=p, points=points)
     return {'job_id', str(job_id)}
 
 
 def jobs_all_controller():
+    ret = []
     return job_info.get_jobs()
 
 
@@ -331,7 +339,7 @@ def jobs_kill_controller(job_id):
 
 
 def jobs_ids_controller():
-    return job_info.list_ids()
+    return {'jobids': job_info.list_ids()}
 
 
 def jobs_data_controller(job_id):

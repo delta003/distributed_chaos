@@ -1,1 +1,2 @@
 uuid is sometimes returned as int in json resonse
+test if ping works

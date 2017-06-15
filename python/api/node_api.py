@@ -134,10 +134,8 @@ def jobs_add(jobid):
         [width, height, p, points] = extract_data(request, ['width', 'height', 'p', 'points'])
     except Exception as e:
         return error_response(str(e))
-
     try:
-        # TODO: extract points from json into array of pairs
-        ret = jobs_add_controller(jobid=jobid, width=int(width), height=int(height), p=float(p), points=points)
+        ret = jobs_add_controller(job_id=jobid, width=width, height=height, p=p, points=points)
     except Exception as e:
         return error_response(str(e))
     return ret
@@ -149,10 +147,8 @@ def jobs_new():
         [width, height, p, points] = extract_data(request, fields=['width', 'height', 'p', 'points'])
     except Exception as e:
         return error_response(str(e))
-
     try:
-        # TODO: extract points from json into array of pairs
-        ret = jobs_new_controller(width=int(width), height=int(height), p=float(p), points=points)
+        ret = jobs_new_controller(width=width, height=height, p=p, points=points)
     except Exception as e:
         return error_response(str(e))
     return ret
