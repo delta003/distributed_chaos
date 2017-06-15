@@ -9,6 +9,7 @@ def create_ip_request(method, ip, port, endpoint, data={}):
     if method == 'GET':
         return requests.get(address, json=data).json()
     else:
+        print(data)
         return requests.post(address, json=data).json()
 
 
@@ -67,6 +68,7 @@ def all_edges(edge):
 
 
 def get_edge(edge, type):
+    print(type)
     ret = create_net_request(method='POST', endpoint='/api/network/get_edge', edge=edge, data={'type': type})
     if 'edge' not in ret:
         return None

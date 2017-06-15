@@ -82,7 +82,6 @@ def join():
 
     uuid, mng_ip, mng_port = rc.bootstrap_hello(ip=addresses.get_ip(), port=addresses.get_port())
     mng_edge = {'ip': mng_ip, 'port': mng_port}
-    print(mng_edge)
     if mng_ip is None:
         if node_info.get_uuid() is None:
             node_info.set_uuid(uuid)
