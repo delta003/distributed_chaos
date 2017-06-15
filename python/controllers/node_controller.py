@@ -103,7 +103,8 @@ def join():
             # Node joins top level circle
             x_nxt = rc.set_edge(edge=mng_edge, e=this, type='next')
             rc.set_edge(edge=x_nxt, e=this, type='prev')
-            links.set_prev(uuid=uuid - 1, ip=mng_ip, port=mng_port)
+            mng_edge['type'] = 'prev'
+            links.set_edge(mng_edge)
             links.set_next(uuid=x_nxt['uuid'], ip=x_nxt['ip'], port=x_nxt['port'])
 
         else:
