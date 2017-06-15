@@ -1,5 +1,6 @@
 import requests
 from config.bootstrap_config import bootstrap_ip, bootstrap_port
+import time
 
 
 def create_ip_request(method, ip, port, endpoint, data={}):
@@ -10,14 +11,22 @@ def create_ip_request(method, ip, port, endpoint, data={}):
         while True:
             try:
                 ret = requests.get(address, json=data).json()
+                if ret['status'] == 'wait':
+                    time.sleep(1)
+                    continue
             except Exception as e:
+                time.sleep(1)
                 continue
             return ret
     else:
         while True:
             try:
                 ret = requests.post(address, json=data).json()
+                if ret['status'] == 'wait':
+                    time.sleep(1)
+                    continue
             except Exception as e:
+                time.sleep(1)
                 continue
             return ret
 
@@ -96,11 +105,12 @@ def adopt_child(edge, e, can_redirect=False):  # TODO: not sure if third argumen
     else:
         request_data['can_redirect'] = 'false'
     ret = create_net_request(method='POST', edge=edge, endpoint='/api/network/adopt', data=request_data)
+    print(ret)
     redirect = False
     if 'redirect' in ret and ret['redirect'] == 'true':
         redirect = True
 
-    create_level = True
+    create_level = False
     if 'create_level' in ret and ret['create_level'] == 'true':
         create_level = True
 

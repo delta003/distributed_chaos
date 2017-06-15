@@ -94,6 +94,7 @@ def join():
             node_info.set_uuid(uuid)
         links.set_next(uuid=uuid, ip=addresses.get_ip(), port=addresses.get_port())
         links.set_prev(uuid=uuid, ip=addresses.get_ip(), port=addresses.get_port())
+
         links.set_wait(False)
         return
     mng_edge['uuid'] = rc.basic_info(mng_edge)[0]
@@ -129,11 +130,11 @@ def join():
     redirected, level_created, children, next = rc.adopt_child(parent_edge, this, can_redirect=True)
     if redirected:
         rc.adopt_child(edge=next, e=this, can_redirect=False)
-        parent = next
+        parent_edge = next
 
     parent_edge['type'] = 'parent'
     links.set_edge(parent_edge)
-
+    print(level_created)
     if not level_created:
         x_nxt = rc.set_edge(edge=mng_edge, e=this, type='next')
         rc.set_edge(edge=x_nxt, e=this, type='prev')
@@ -173,6 +174,7 @@ def join():
     rc.set_edge(edge=this_prev2, e=this, type='prev')
     links.set_next(uuid=this_prev2['uuid'], ip=this_prev2['ip'], port=this_prev2['port'])
     links.set_prev(uuid=this_prev3['uuid'], ip=this_prev3['ip'], port=this_prev3['port'])
+
     links.set_wait(False)
 
 

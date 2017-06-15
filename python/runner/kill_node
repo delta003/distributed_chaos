@@ -2,5 +2,5 @@
 if [ $# -ne 1 ]; then
     printf "Port is missing.\n"
 else
-    lsof -P | grep :$1 | awk '{print $2}' | xargs kill -9
+    lsof -ti:$1 | xargs kill -9
 fi
