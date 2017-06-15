@@ -121,7 +121,7 @@ class NodeAddresses:
 
 class NodeData:
     def __init__(self):
-        self._uuid = -1
+        self._uuid = None
 
     def set_uuid(self, uuid):
         self._uuid = uuid

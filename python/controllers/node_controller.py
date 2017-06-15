@@ -82,6 +82,7 @@ def join():
 
     uuid, mng_ip, mng_port = rc.bootstrap_hello(ip=addresses.get_ip(), port=addresses.get_port())
     mng_edge = {'ip': mng_ip, 'port': mng_port}
+    node_info.set_uuid(uuid)
     if mng_ip is None:
         if node_info.get_uuid() is None:
             node_info.set_uuid(uuid)
@@ -99,10 +100,10 @@ def join():
         mng_next = rc.get_edge(edge=mng_edge, type='next')
 
         if mng_prev['uuid'] == mng_next['uuid']:
+            # Node joins top level circle
             x_nxt = rc.set_edge(edge=mng_edge, e=this, type='next')
-            print(x_nxt)
             rc.set_edge(edge=x_nxt, e=this, type='prev')
-            links.set_prev(uuid=x_nxt['uuid'], ip=x_nxt['ip'], port=x_nxt['port'])
+            links.set_prev(uuid=uuid - 1, ip=mng_ip, port=mng_port)
             links.set_next(uuid=x_nxt['uuid'], ip=x_nxt['ip'], port=x_nxt['port'])
 
         else:
