@@ -5,12 +5,13 @@ import communication.request_creator as rc
 import random
 
 
-def __init__(link_data, address_data, data, job_data):
-    global links, addresses, node_info, job_info
+def __init__(link_data, address_data, data, job_data, app_logger):
+    global links, addresses, node_info, job_info, logger
     links = link_data
     addresses = address_data
     node_info = data
     job_info = job_data
+    logger = app_logger
 
 
 # ping next node every 1 sec
@@ -79,17 +80,15 @@ def bfs(uuid, ip, port):
 def join():
     links.set_wait(True)
 
-    mng_edge = {}
-    try:
-        uuid, mng_ip, mng_port = rc.bootstrap_hello(ip=addresses.get_ip(), port=addresses.get_port())
-        mng_edge = {'ip': mng_ip, 'port': mng_port}
-        if mng_edge['ip'] is None:
-            raise ValueError;
-    except ValueError:
+    uuid, mng_ip, mng_port = rc.bootstrap_hello(ip=addresses.get_ip(), port=addresses.get_port())
+    mng_edge = {'ip': mng_ip, 'port': mng_port}
+    print(mng_edge)
+    if mng_ip is None:
         if node_info.get_uuid() is None:
             node_info.set_uuid(uuid)
         links.set_next(uuid=uuid, ip=addresses.get_ip(), port=addresses.get_port())
         links.set_prev(uuid=uuid, ip=addresses.get_ip(), port=addresses.get_port())
+        links.set_wait(False)
         return
     this = {'uuid': str(uuid), 'ip': addresses.get_ip(), 'port': addresses.get_port()}
     if node_info.get_uuid() is None:
@@ -115,6 +114,7 @@ def join():
             links.set_edge(this)
             this['type'] = 'prev'
             links.set_edge(this)
+        links.set_wait(False)
         return
 
     redirected, level_created, children, next = rc.adopt_child(parent_edge, this, can_redirect=True)
@@ -132,6 +132,7 @@ def join():
         links.set_edge(mng_edge)
         x_nxt['type'] = 'next'
         links.set_edge(x_nxt)
+        links.set_wait(False)
         return
 
     this_prev0 = children[0]

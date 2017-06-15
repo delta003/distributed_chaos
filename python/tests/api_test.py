@@ -2,9 +2,10 @@ import unittest
 import requests
 from config.bootstrap_config import bootstrap_ip as bootstrap_ip
 from config.bootstrap_config import bootstrap_port as bootstrap_port
+from flask_testing import TestCase
+from api.bootstrap_api import app
 
-
-class ApiTestCase(unittest.TestCase):
+class ApiTestCase(TestCase):
     # TODO: put this inside __init__ method and create an instance of bootstrap app
     bootstrap_address = 'http://%s:%s' % (bootstrap_ip, bootstrap_port)
 
@@ -22,6 +23,9 @@ class ApiTestCase(unittest.TestCase):
 
 
 class BootstrapApiTest(ApiTestCase):
+    def create_app(self):
+        pass
+
     def test_default(self):
         pass
 

@@ -64,15 +64,15 @@ class NodeLinks:
         if type == 'parent':
             if self._parent is None:
                 return {}
-            return {'edge', self._parent}
+            return {'edge': self._parent}
         elif type == 'next':
             if self._next is None:
                 return {}
-            return {'edge', self._next}
+            return {'edge': self._next}
         elif type == 'prev':
             if self._prev is None:
                 return {}
-            return {type, self._prev}
+            return {'edge': self._prev}
         raise Exception('unknown edge type')
 
     def reset(self):
