@@ -51,7 +51,10 @@ void json_to_string(const ptree& json, string& out);
 
 inline bool key_exists(const ptree& json, const string& key) {
   ptree::const_assoc_iterator it = json.find(key);
-  return it != json.not_found();
+  if (it == json.not_found() || json.get<string>(key) == "null") {
+    return false;
+  }
+  return true;
 }
 
 inline string make_json(const string& ip, const string& port) {
