@@ -105,7 +105,6 @@ def adopt_child(edge, e, can_redirect=False):  # TODO: not sure if third argumen
     else:
         request_data['can_redirect'] = 'false'
     ret = create_net_request(method='POST', edge=edge, endpoint='/api/network/adopt', data=request_data)
-    print(ret)
     redirect = False
     if 'redirect' in ret and ret['redirect'] == 'true':
         redirect = True

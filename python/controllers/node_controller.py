@@ -134,7 +134,6 @@ def join():
 
     parent_edge['type'] = 'parent'
     links.set_edge(parent_edge)
-    print(level_created)
     if not level_created:
         x_nxt = rc.set_edge(edge=mng_edge, e=this, type='next')
         rc.set_edge(edge=x_nxt, e=this, type='prev')
@@ -145,7 +144,7 @@ def join():
 
         links.set_wait(False)
         return
-
+    print(children)
     this_prev0 = children[0]
     this_prev1 = children[1]
     this_prev2 = children[2]
@@ -167,7 +166,7 @@ def join():
     rc.set_edge(edge=this_prev3, e=this_prev0, type='parent')
 
     rc.adopt_child(edge=this_prev1, e=this)
-    rc.set_edge(edge=this, e=this_prev1, type='parent')
+    links.set_parent(uuid=this_prev1['uuid'], ip=this_prev1['ip'], port=this_prev1['port'])
 
     # Make circle in new layer
     rc.set_edge(edge=this_prev3, e=this, type='next')
