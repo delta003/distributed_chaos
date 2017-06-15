@@ -42,13 +42,13 @@ class NodeLinks:
         return self._next
 
     def set_next(self, uuid, ip, port):
-        self._parent = Edge(uuid=uuid, ip=ip, port=port, type='next')
+        self._next = Edge(uuid=uuid, ip=ip, port=port, type='next')
 
     def get_prev(self):
         return self._prev
 
     def set_prev(self, uuid, ip, port):
-        self._parent = Edge(uuid=uuid, ip=ip, port=port, type='prev')
+        self._prev = Edge(uuid=uuid, ip=ip, port=port, type='prev')
 
     def get_children(self):
         return self._children
