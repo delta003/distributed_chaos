@@ -52,8 +52,8 @@ def reconfigure():
     if not can_reset:
         return
 
-    graph_traversal = bfs(node_info.get_uuid(), addresses.get_ip(), addresses.get_port())
-    for e in graph_traversal:
+    nodes, edges = bfs(node_info.get_uuid(), addresses.get_ip(), addresses.get_port())
+    for e in nodes:
         if e['uuid'] == node_info.get_uuid():
             continue
         rc.reset_node(edge=e)
@@ -65,7 +65,7 @@ def reconfigure():
 def bfs(uuid, ip, port):
     q = queue.Queue()
     q.put({'uuid': uuid, 'ip': ip, 'port': port})
-    visited = {int(uuid): True}
+    visited = {str(uuid): True}
     nodes = []
     edges = []
     while not q.empty():
@@ -74,7 +74,7 @@ def bfs(uuid, ip, port):
         edge_list = rc.all_edges(edge=curr)
         for e in edge_list:
             edges.append({'start_uuid': curr['uuid'], 'end_uuid': e['uuid'], 'type': e['type']})
-            next_uuid = int(e['uuid'])
+            next_uuid = e['uuid']
             if next_uuid in visited:
                 continue
             visited[next_uuid] = True
@@ -145,7 +145,7 @@ def join():
 
         links.set_wait(False)
         return
-    print(children)
+
     # New level should be created, adopt returned edges with 5 children
     this_prev0 = children[0]
     this_prev1 = children[1]
@@ -229,7 +229,6 @@ def network_set_edge_controller(edge):
     return {'oldedge': ret}
 
 
-# TODO: refactor responses so that they rely on requests.response_creator.py
 def network_adopt_controller(edge, can_redirect):
     if links.should_wait():
         raise NetworkWaitException()
@@ -238,7 +237,6 @@ def network_adopt_controller(edge, can_redirect):
     else:
         can_redirect = False
     children_count = len(links.get_children())
-    print(children_count)
     if children_count == 0 or children_count == 1 or children_count == 3:
         links.add_child(uuid=edge['uuid'], ip=edge['ip'], port=edge['port'])
         return {'redirect': 'false', 'create_level': 'false'}
@@ -301,6 +299,11 @@ def job_handler():
 
 
 def jobs_add_controller(job_id, width, height, p, points):
+    width = str(width)
+    height = str(height)
+    p = str(p)
+    points = [{'x': str(pp['x']), 'y': str(pp['y'])} for pp in points]
+    print(width, height, p, points)
     job_info.add_job(job_id, width, height, p, points)
     return network_edges_controller()
 
@@ -309,9 +312,10 @@ def jobs_new_controller(width, height, p, points):
     job_id = node_info.get_uuid()
     job_info.add_job(job_id, width, height, p, points)
     nodes, _ = bfs(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
+    #print(nodes)
     for node in nodes:
         rc.add_job(edge=node, job_id=job_id, width=width, height=height, p=p, points=points)
-    return {'job_id', str(job_id)}
+    return {'job_id': str(job_id)}
 
 
 def jobs_all_controller():
@@ -339,6 +343,7 @@ def jobs_kill_controller(job_id):
 
 
 def jobs_ids_controller():
+    print(job_info.list_ids())
     return {'jobids': job_info.list_ids()}
 
 
@@ -347,7 +352,7 @@ def jobs_data_controller(job_id):
     points = job_info.get_points()
     backup = [job_info.get_prev_backup(), job_info.get_next_backup()]
     edges = network_edges_controller()
-    return str(uuid), points, backup, edges
+    return {'uuid': str(uuid), 'points': points, 'backup': backup, 'edges': edges['edges']}
 
 
 def jobs_visualize_controller(job_id):

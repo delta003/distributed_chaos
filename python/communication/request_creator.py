@@ -7,6 +7,7 @@ def create_ip_request(method, ip, port, endpoint, data={}):
     if not endpoint.startswith("/"):
         endpoint = "/" + endpoint
     address = "http://%s:%s%s" % (ip, port, endpoint)
+
     if method == 'GET':
         while True:
             try:
@@ -14,6 +15,10 @@ def create_ip_request(method, ip, port, endpoint, data={}):
                 if ret['status'] == 'wait':
                     time.sleep(1)
                     continue
+            except ConnectionError:
+                # TODO: if /api/basic/info in address return
+                time.sleep(1)
+                continue
             except Exception as e:
                 time.sleep(1)
                 continue
@@ -25,6 +30,10 @@ def create_ip_request(method, ip, port, endpoint, data={}):
                 if ret['status'] == 'wait':
                     time.sleep(1)
                     continue
+            except ConnectionError:
+                # TODO: if /api/basic/info in address return
+                time.sleep(1)
+                continue
             except Exception as e:
                 time.sleep(1)
                 continue
@@ -115,7 +124,7 @@ def adopt_child(edge, e, can_redirect=False):  # TODO: not sure if third argumen
 
     edges = None
     if 'edges' in ret:
-        edges = ret['edges']
+        edges = [x for x in ret['edges'] if x['type'] == 'child']
 
     next = None
     if 'next' in ret:
@@ -136,7 +145,7 @@ def network_visualization(edge):
 
 # Jobs API
 def add_job(edge, job_id, width, height, p, points):
-    endpoint = '/api/jobs/add/%d' % job_id
+    endpoint = '/api/jobs/add/%s' % job_id
     ret = create_net_request(method='POST', edge=edge, endpoint=endpoint,
                              data={'width': width, 'height': height, 'p': p, 'points': points})
     return ret['edges']

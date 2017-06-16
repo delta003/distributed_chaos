@@ -6,13 +6,13 @@ class Edge:
         self._port = None
 
     def __init__(self, uuid, type, ip, port):
-        self._uuid = uuid
+        self._uuid = str(uuid)
         self._type = type
         self._ip = ip
         self._port = port
 
     def get(self):
-        return {'uuid': self._uuid, 'type': self._type, 'ip': self._ip, 'port': self._port}
+        return {'uuid': str(self._uuid), 'type': self._type, 'ip': self._ip, 'port': self._port}
 
 
 class NodeLinks:
