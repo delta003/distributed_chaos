@@ -160,7 +160,8 @@ class Job:
         return self._points
 
     def get_as_dict(self):
-        return {'uuid': str(self._job_id), 'points': self.get_points()}
+        return {'uuid': str(self._job_id), 'width': self._width, 'height': self._height,
+                'points': self.get_starting_points()}
 
     def add_point(self, x, y):
         self._points.append({'x': str(x), 'y': str(y)})
@@ -180,14 +181,17 @@ class NodeJobData:
         self._next_backup = Job()
 
     def add_job(self, jobid, width, height, p, points):
+        print(jobid)
         job = Job(jobid=jobid, width=width, height=height, p=p, points=points)
-        if job in self._jobs:
-            return
+        for x in self._jobs:
+            print('jobid', jobid, x.get_job_id())
+            if x.get_job_id() == jobid:
+                return
         self._jobs.append(job)
-        self._jobs.sort()
+        self._jobs.sort(key=lambda job: job.get_job_id())
 
     def get_jobs(self):
-        return self._jobs
+        return [x.get_as_dict() for x in self._jobs]
 
     def add_backup(self, uuid, job_id, point):
         # TODO: check where to insert based on uuid and jobid
@@ -214,3 +218,6 @@ class NodeJobData:
 
     def get_last_point(self):
         return self._my_job.get_last_point()
+
+    def get_points(self):
+        return self._my_job.get_points()

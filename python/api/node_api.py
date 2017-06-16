@@ -144,7 +144,7 @@ def jobs_new():
         [width, height, p, points] = extract_data(request, fields=['width', 'height', 'p', 'points'])
     except Exception as e:
         return error_response(str(e))
-
+        print(request.json)
     try:
         ret = jobs_new_controller(width=width, height=height, p=p, points=points)
     except Exception as e:

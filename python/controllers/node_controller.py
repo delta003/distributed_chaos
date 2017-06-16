@@ -3,7 +3,7 @@ import threading
 import time
 import communication.request_creator as rc
 import random
-
+import uuid
 
 class NetworkWaitException(Exception):
     pass
@@ -70,6 +70,7 @@ def bfs(uuid, ip, port, repeat_requests=False):
     while not q.empty():
         curr = q.get()
         nodes.append(curr)
+        print("PRE OVOGA PUCA")
         edge_list = rc.all_edges(edge=curr, repeat_request=repeat_requests)
         print (edge_list)
         for e in edge_list:
@@ -121,7 +122,7 @@ def join():
             links.set_next(uuid=x_nxt['uuid'], ip=x_nxt['ip'], port=x_nxt['port'])
 
         else:
-            rc.adopt_child(mng_edge, this)
+            rc.adopt_child(mng_edge, this, can_redirect=False)
             mng_edge['type'] = 'parent'
             links.set_edge(mng_edge)
             this['type'] = 'next'
@@ -165,13 +166,13 @@ def join():
     rc.set_edge(edge=new_prev, e=new_next, type='next')
 
     # Change parents
-    rc.adopt_child(edge=this_prev0, e=this_prev2)
+    rc.adopt_child(edge=this_prev0, e=this_prev2, can_redirect=False)
     rc.set_edge(edge=this_prev2, e=this_prev0, type='parent')
 
-    rc.adopt_child(edge=this_prev0, e=this_prev3)
+    rc.adopt_child(edge=this_prev0, e=this_prev3, can_redirect=False)
     rc.set_edge(edge=this_prev3, e=this_prev0, type='parent')
 
-    rc.adopt_child(edge=this_prev1, e=this)
+    rc.adopt_child(edge=this_prev1, e=this, can_redirect=False)
     links.set_parent(uuid=this_prev1['uuid'], ip=this_prev1['ip'], port=this_prev1['port'])
 
     # Make circle in new layer
@@ -304,23 +305,24 @@ def jobs_add_controller(job_id, width, height, p, points):
     p = str(p)
     points = [{'x': str(pp['x']), 'y': str(pp['y'])} for pp in points]
     print(width, height, p, points)
-    job_info.add_job(job_id, width, height, p, points)
+    job_info.add_job(str(job_id), width, height, p, points)
     return network_edges_controller()
 
 
 def jobs_new_controller(width, height, p, points):
-    job_id = node_info.get_uuid()
+    job_id = str(uuid.uuid1())
     job_info.add_job(job_id, width, height, p, points)
+    print("OVDE SAM")
     nodes, _ = bfs(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
-    # print(nodes)
+    print(nodes)
     for node in nodes:
         rc.add_job(edge=node, job_id=job_id, width=width, height=height, p=p, points=points)
-    return {'job_id': str(job_id)}
+    return {'jobid': str(job_id)}
 
 
 def jobs_all_controller():
-    ret = []
-    return job_info.get_jobs()
+    ret = job_info.get_jobs()
+    return {'jobs': ret}
 
 
 def jobs_backup_controller(uuid, job_id, point):
@@ -336,8 +338,8 @@ def jobs_remove_controller(job_id):
 
 
 def jobs_kill_controller(job_id):
-    graph_traversal = bfs(node_info.get_uuid(), addresses.get_ip(), addresses.get_port())
-    for node in graph_traversal:
+    nodes, edges = bfs(node_info.get_uuid(), addresses.get_ip(), addresses.get_port())
+    for node in nodes:
         rc.remove_job(node, job_id)
     return {}
 
@@ -356,6 +358,7 @@ def jobs_data_controller(job_id):
 
 
 def jobs_visualize_controller(job_id):
-    graph_traversal = bfs(node_info.get_uuid(), addresses.get_ip(), addresses.get_port())
-    for node in graph_traversal:
+    nodes, edges = bfs(node_info.get_uuid(), addresses.get_ip(), addresses.get_port())
+    for node in nodes:
         rc.job_data(edge=node, job_id=job_id)
+
