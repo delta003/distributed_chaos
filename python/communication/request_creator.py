@@ -91,10 +91,10 @@ def basic_info(edge):
 
 def basic_check(edge, ip, port):
     ret = create_net_request(method='POST', endpoint='/api/basic/check', edge=edge,
-                             data={'ip': ip, 'port': port})
-    if ret['alive'] == 'true':
-        return True
-    return False
+                             data={'ip': ip, 'port': port}, repeat=False)
+    if 'alive' not in ret or ret['alive'] == 'false':
+        return False
+    return True
 
 
 # Network API

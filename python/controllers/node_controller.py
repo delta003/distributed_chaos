@@ -55,8 +55,7 @@ def reconfigure():
             continue
         rc.reset_node(edge=e, repeat_requests=False)
     links.reset()
-    join_thrd = threading.Thread(target=join)
-    join_thrd.start()
+    join()
     time.sleep(5)
     rc.bootstrap_reset_done()
     return True
@@ -90,7 +89,9 @@ def join():
 
     uuid, mng_ip, mng_port = rc.bootstrap_hello(ip=addresses.get_ip(), port=addresses.get_port())
     mng_edge = {'ip': mng_ip, 'port': mng_port}
-
+    print (mng_edge)
+    print (addresses.get_ip())
+    print (addresses.get_port())
     if node_info.get_uuid() is None:
         node_info.set_uuid(uuid)
 
