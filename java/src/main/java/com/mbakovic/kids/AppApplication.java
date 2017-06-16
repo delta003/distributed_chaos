@@ -43,7 +43,7 @@ public final class AppApplication extends Application<AppConfiguration> {
             // Run as node
 
             // Set myself
-            String myIP = "127.0.0.1"; //InetAddress.getLocalHost().getHostAddress();
+            String myIP = InetAddress.getLocalHost().getHostAddress();
             String myPort = configuration.getNode().getPort();
             log.info(String.format("Node %s:%s", myIP, myPort));
             Node.getInstance().setMyself(new IPAndPortAndUUID(myIP, myPort, null));
