@@ -39,11 +39,7 @@ def serve_views(filename):
 # Node API
 @app.route('/api/basic/ok', methods=['GET'])
 def basic_ok():
-    try:
-        ret = basic_ok_controller()
-    except Exception as e:
-        return error_response(str(e))
-    return ok_response(ret)
+    return ok_response({})
 
 
 @app.route('/api/basic/info', methods=['GET'])

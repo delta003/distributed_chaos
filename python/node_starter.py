@@ -28,6 +28,6 @@ if __name__ == '__main__':
 
     join_thrd = threading.Thread(target=controllers.node_controller.join)
     join_thrd.start()
-    # controllers.node_controller.ping()
+    controllers.node_controller.ping()
 
     app.run(port=int(port), debug=False, use_reloader=False, threaded=True)

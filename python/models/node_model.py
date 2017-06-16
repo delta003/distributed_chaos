@@ -25,6 +25,7 @@ class NodeLinks:
         self._prev = None
         self._next = None
         self._children = []
+        self._failures = 0
 
     def should_wait(self):
         return self._wait_flag
@@ -82,6 +83,13 @@ class NodeLinks:
         self._prev = None
         self._next = None
         self._children = []
+
+    def inc_failures(self):
+        self._failures = self._failures + 1
+        return self._failures
+
+    def reset_failures(self):
+        self._failures = 0
 
     def set_edge(self, edge):
         e = Edge(uuid=edge['uuid'], ip=edge['ip'], port=edge['port'], type=edge['type'])

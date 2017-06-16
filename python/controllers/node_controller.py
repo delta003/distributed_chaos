@@ -25,26 +25,22 @@ def ping():
     if links.should_wait():
         return
 
-    failures = 0
     next_edge = links.get_next()
     next_ip = next_edge['ip']
     next_port = next_edge['port']
 
     prev_edge = links.get_prev()
-
-    try:
-        rc.basic_ok(edge=next_edge)
-    except Exception as e:
-        failures = failures + 1
+    ret = rc.basic_ok(edge=next_edge)
+    if not ret:
+        failures = links.inc_failures()
+        print(failures)
         if failures == 5:
-            try:
-                alive = rc.basic_check(edge=prev_edge, ip=next_ip, port=next_port)
-                if not alive:
-                    reconfigure()
-                else:
-                    failures = 0
-            except Exception as e:
+            print("PET")
+            alive = rc.basic_check(edge=prev_edge, ip=next_ip, port=next_port)
+            if not alive:
                 reconfigure()
+            else:
+                links.reset_failures()
 
 
 def reconfigure():
@@ -53,6 +49,7 @@ def reconfigure():
         return
 
     nodes, edges = bfs(node_info.get_uuid(), addresses.get_ip(), addresses.get_port())
+    print(nodes)
     for e in nodes:
         if e['uuid'] == node_info.get_uuid():
             continue
@@ -62,7 +59,7 @@ def reconfigure():
     rc.bootstrap_reset_done()
 
 
-def bfs(uuid, ip, port):
+def bfs(uuid, ip, port, repeat_requests=True):
     q = queue.Queue()
     q.put({'uuid': uuid, 'ip': ip, 'port': port})
     visited = {str(uuid): True}
@@ -71,8 +68,10 @@ def bfs(uuid, ip, port):
     while not q.empty():
         curr = q.get()
         nodes.append(curr)
-        edge_list = rc.all_edges(edge=curr)
+        edge_list = rc.all_edges(edge=curr, repeat_request=repeat_requests)
         for e in edge_list:
+            if not e:
+                continue
             edges.append({'start_uuid': curr['uuid'], 'end_uuid': e['uuid'], 'type': e['type']})
             next_uuid = e['uuid']
             if next_uuid in visited:
@@ -179,10 +178,6 @@ def join():
     links.set_wait(False)
 
 
-def basic_ok_controller():
-    return {}
-
-
 def basic_info_controller():
     if links.should_wait():
         raise NetworkWaitException()
@@ -193,7 +188,6 @@ def basic_check_controller(ip, port):
     try:
         edge = {'ip': ip, 'port': port}
         ret = rc.basic_ok(edge)
-        print(ret)
     except Exception as e:
         return {'alive': 'false'}
     return {'alive': 'true'} if ret else {'alive': 'false'}
@@ -313,7 +307,7 @@ def jobs_new_controller(width, height, p, points):
     job_id = node_info.get_uuid()
     job_info.add_job(job_id, width, height, p, points)
     nodes, _ = bfs(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
-    #print(nodes)
+    # print(nodes)
     for node in nodes:
         rc.add_job(edge=node, job_id=job_id, width=width, height=height, p=p, points=points)
     return {'job_id': str(job_id)}

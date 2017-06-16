@@ -89,7 +89,7 @@ def basic_info(edge):
 
 
 def basic_check(edge, ip, port):
-    ret = create_net_request(method='POST', endpoint='/api/basic/info', edge=edge,
+    ret = create_net_request(method='POST', endpoint='/api/basic/check', edge=edge,
                              data={'ip': ip, 'port': port})
     if ret['alive'] == 'true':
         return True
@@ -97,8 +97,8 @@ def basic_check(edge, ip, port):
 
 
 # Network API
-def all_edges(edge):
-    ret = create_net_request(method='GET', endpoint='/api/network/edges', edge=edge)
+def all_edges(edge, repeat_request):
+    ret = create_net_request(method='GET', endpoint='/api/network/edges', edge=edge, repeat=repeat_request)
     return ret['edges']
 
 
