@@ -71,6 +71,7 @@ def bfs(uuid, ip, port, repeat_requests=False):
         curr = q.get()
         nodes.append(curr)
         edge_list = rc.all_edges(edge=curr, repeat_request=repeat_requests)
+        print (edge_list)
         for e in edge_list:
             if not e:
                 continue

@@ -198,7 +198,7 @@ class NodeJobData:
         self._my_job = Job()
 
     def list_ids(self):
-        return [x['jobid'] for x in self._jobs]
+        return [x.get_job_id() for x in self._jobs]
 
     def get_my_points(self):
         return self._my_job.get_points()
