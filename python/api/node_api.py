@@ -72,6 +72,8 @@ def basic_check():
 def network_edges():
     try:
         ret = network_edges_controller()
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     return ok_response(ret)
@@ -81,6 +83,8 @@ def network_edges():
 def network_get_edge():
     try:
         [type] = extract_data(request, ['type'])
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     return ok_response(network_get_edge_controller(type))
@@ -90,6 +94,8 @@ def network_get_edge():
 def network_set_edge():
     try:
         [edge] = extract_data(request, ['edge'])
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     return ok_response(network_set_edge_controller(edge))
@@ -99,6 +105,8 @@ def network_set_edge():
 def network_adopt():
     try:
         [edge, can_redirect] = extract_data(request, ['edge', 'can_redirect'])
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     return ok_response(network_adopt_controller(edge, can_redirect))
@@ -108,6 +116,8 @@ def network_adopt():
 def network_reset():
     try:
         ret = network_reset_controller()
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
 
@@ -118,6 +128,8 @@ def network_reset():
 def network_visualize():
     try:
         ret = network_visualize_controller()
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     return ok_response(ret)
@@ -128,6 +140,8 @@ def network_visualize():
 def jobs_add(jobid):
     try:
         [width, height, p, points] = extract_data(request, ['width', 'height', 'p', 'points'])
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     print(width, height, p, points)
@@ -142,9 +156,10 @@ def jobs_add(jobid):
 def jobs_new():
     try:
         [width, height, p, points] = extract_data(request, fields=['width', 'height', 'p', 'points'])
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
-        print(request.json)
     try:
         ret = jobs_new_controller(width=width, height=height, p=p, points=points)
     except Exception as e:
@@ -156,8 +171,10 @@ def jobs_new():
 def jobs_all():
     try:
         ret = jobs_all_controller()
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
-        return error_response(e)
+        return error_response(str(e))
     return ok_response(ret)
 
 
@@ -165,9 +182,10 @@ def jobs_all():
 def jobs_backup():
     try:
         [uuid, jobid, point] = extract_data(request, fields=['uuid', 'jobid', 'point'])
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
-
     try:
         ret = jobs_backup_controller(uuid=uuid, job_id=jobid, point=point)
     except Exception as e:
@@ -179,6 +197,8 @@ def jobs_backup():
 def jobs_remove(jobid):
     try:
         ret = jobs_remove_controller(job_id=jobid)
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     return ok_response(ret)
@@ -188,6 +208,8 @@ def jobs_remove(jobid):
 def jobs_kill(jobid):
     try:
         ret = jobs_kill_controller(job_id=jobid)
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     return ok_response(ret)
@@ -197,6 +219,8 @@ def jobs_kill(jobid):
 def jobs_ids():
     try:
         ret = jobs_ids_controller()
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     return ok_response(ret)
@@ -206,6 +230,8 @@ def jobs_ids():
 def jobs_data(jobid):
     try:
         ret = jobs_data_controller(job_id=jobid)
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     return ok_response(ret)
@@ -215,6 +241,8 @@ def jobs_data(jobid):
 def jobs_visualize(jobid):
     try:
         ret = jobs_visualize_controller(job_id=jobid)
+    except NetworkWaitException:
+        return wait_response()
     except Exception as e:
         return error_response(str(e))
     return ok_response(ret)

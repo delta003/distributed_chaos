@@ -257,7 +257,10 @@ def network_adopt_controller(edge, can_redirect):
             return {'redirect': 'false', 'create_level': 'false'}
     elif children_count == 4:
         links.add_child(uuid=edge['uuid'], ip=edge['ip'], port=edge['port'])
-        ret = {'edges': links.get_children(), 'redirect': 'false', 'create_level': 'true'}
+        ret = network_edges_controller()
+        ret['redirect'] = 'false'
+        ret['create_level'] = 'true'
+        # ret = {'edges': links.get_children(), 'redirect': 'false', 'create_level': 'true'}
         for i in range(3):
             links.remove_child_at(2)
         return ret
