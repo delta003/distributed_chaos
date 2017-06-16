@@ -68,7 +68,7 @@ def basic_check():
         ret = basic_check_controller(ip, port)
     except Exception as e:
         return error_response(str(e))
-    return ret
+    return ok_response(ret)
 
 
 # Network API
@@ -115,7 +115,7 @@ def network_reset():
     except Exception as e:
         return error_response(str(e))
 
-    return ret
+    return ok_response(ret)
 
 
 @app.route('/api/network/visualize', methods=['GET'])

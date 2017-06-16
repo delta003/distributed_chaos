@@ -3,7 +3,7 @@ from config.bootstrap_config import bootstrap_ip, bootstrap_port
 import time
 
 
-def create_ip_request(method, ip, port, endpoint, data={}):
+def create_ip_request(method, ip, port, endpoint, data={}, repeat=True):
     if not endpoint.startswith("/"):
         endpoint = "/" + endpoint
     address = "http://%s:%s%s" % (ip, port, endpoint)
@@ -16,10 +16,13 @@ def create_ip_request(method, ip, port, endpoint, data={}):
                     time.sleep(1)
                     continue
             except ConnectionError:
-                # TODO: if /api/basic/info in address return
+                if not repeat:
+                    return {'status': 'error', 'message': 'my connection error'}
                 time.sleep(1)
                 continue
             except Exception as e:
+                if not repeat:
+                    return {}
                 time.sleep(1)
                 continue
             return ret
@@ -31,21 +34,26 @@ def create_ip_request(method, ip, port, endpoint, data={}):
                     time.sleep(1)
                     continue
             except ConnectionError:
-                # TODO: if /api/basic/info in address return
+                if not repeat:
+                    return {'status': 'error', 'message': 'my connection error'}
                 time.sleep(1)
                 continue
             except Exception as e:
+                if not repeat:
+                    return {}
                 time.sleep(1)
                 continue
             return ret
 
 
-def create_net_request(method, edge, endpoint, data={}):
-    return create_ip_request(method=method, ip=edge['ip'], port=edge['port'], endpoint=endpoint, data=data)
+def create_net_request(method, edge, endpoint, data={}, repeat=True):
+    return create_ip_request(method=method, ip=edge['ip'], port=edge['port'], endpoint=endpoint,
+                             data=data, repeat=repeat)
 
 
-def create_bootstrap_request(method, endpoint, data={}):
-    return create_ip_request(method, endpoint=endpoint, ip=bootstrap_ip, port=bootstrap_port, data=data)
+def create_bootstrap_request(method, endpoint, data={}, repeat=True):
+    return create_ip_request(method, endpoint=endpoint, ip=bootstrap_ip, port=bootstrap_port, data=data,
+                             repeat=repeat)
 
 
 # Bootstrap API
@@ -72,7 +80,7 @@ def bootstrap_reset_done():
 
 # Node basic API
 def basic_ok(edge):
-    create_net_request(method='GET', endpoint='/api/basic/ok', edge=edge)
+    return create_net_request(method='GET', endpoint='/api/basic/ok', edge=edge, repeat=False)
 
 
 def basic_info(edge):

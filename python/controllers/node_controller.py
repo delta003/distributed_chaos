@@ -192,10 +192,11 @@ def basic_info_controller():
 def basic_check_controller(ip, port):
     try:
         edge = {'ip': ip, 'port': port}
-        rc.basic_ok(edge)
+        ret = rc.basic_ok(edge)
+        print(ret)
     except Exception as e:
-        return {'alive': 'false'}  # TODO: zavisi koji je Exception
-    return {'alive': 'true'}
+        return {'alive': 'false'}
+    return {'alive': 'true'} if ret else {'alive': 'false'}
 
 
 def network_edges_controller():
