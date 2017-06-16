@@ -122,6 +122,7 @@ def join():
             links.set_next(uuid=x_nxt['uuid'], ip=x_nxt['ip'], port=x_nxt['port'])
 
         else:
+            mng_edge['type'] = 'child'
             rc.adopt_child(mng_edge, this, can_redirect=False)
             mng_edge['type'] = 'parent'
             links.set_edge(mng_edge)
@@ -133,8 +134,11 @@ def join():
         links.set_wait(False)
         return
 
+    this['type'] = 'child'
     redirected, level_created, children, next = rc.adopt_child(parent_edge, this, can_redirect=True)
+
     if redirected:
+        this['type'] = 'child'
         rc.adopt_child(edge=next, e=this, can_redirect=False)
         parent_edge = next
 
@@ -166,12 +170,15 @@ def join():
     rc.set_edge(edge=new_prev, e=new_next, type='next')
 
     # Change parents
+    this_prev2['type'] = 'child'
     rc.adopt_child(edge=this_prev0, e=this_prev2, can_redirect=False)
     rc.set_edge(edge=this_prev2, e=this_prev0, type='parent')
 
+    this_prev3['type'] = 'child'
     rc.adopt_child(edge=this_prev0, e=this_prev3, can_redirect=False)
     rc.set_edge(edge=this_prev3, e=this_prev0, type='parent')
 
+    this['type'] = 'child'
     rc.adopt_child(edge=this_prev1, e=this, can_redirect=False)
     links.set_parent(uuid=this_prev1['uuid'], ip=this_prev1['ip'], port=this_prev1['port'])
 
