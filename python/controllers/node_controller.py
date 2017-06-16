@@ -62,7 +62,7 @@ def reconfigure():
     return True
 
 
-def bfs(uuid, ip, port, repeat_requests=True):
+def bfs(uuid, ip, port, repeat_requests=False):
     q = queue.Queue()
     q.put({'uuid': uuid, 'ip': ip, 'port': port})
     visited = {str(uuid): True}
