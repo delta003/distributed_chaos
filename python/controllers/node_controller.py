@@ -88,7 +88,10 @@ def join():
 
     uuid, mng_ip, mng_port = rc.bootstrap_hello(ip=addresses.get_ip(), port=addresses.get_port())
     mng_edge = {'ip': mng_ip, 'port': mng_port}
-    node_info.set_uuid(uuid)
+
+    if node_info.get_uuid() is None:
+        node_info.set_uuid(uuid)
+
     if mng_ip is None:
         if node_info.get_uuid() is None:
             node_info.set_uuid(uuid)
@@ -99,8 +102,6 @@ def join():
         return
     mng_edge['uuid'] = rc.basic_info(mng_edge)[0]
     this = {'uuid': str(uuid), 'ip': addresses.get_ip(), 'port': addresses.get_port()}
-    if node_info.get_uuid() is None:
-        node_info.set_uuid(uuid)
 
     parent_edge = rc.get_edge(edge=mng_edge, type='parent')
     if not parent_edge:
@@ -145,6 +146,7 @@ def join():
         links.set_wait(False)
         return
     print(children)
+    # New level should be created, adopt returned edges with 5 children
     this_prev0 = children[0]
     this_prev1 = children[1]
     this_prev2 = children[2]
@@ -236,6 +238,7 @@ def network_adopt_controller(edge, can_redirect):
     else:
         can_redirect = False
     children_count = len(links.get_children())
+    print(children_count)
     if children_count == 0 or children_count == 1 or children_count == 3:
         links.add_child(uuid=edge['uuid'], ip=edge['ip'], port=edge['port'])
         return {'redirect': 'false', 'create_level': 'false'}
@@ -248,9 +251,7 @@ def network_adopt_controller(edge, can_redirect):
             return {'redirect': 'false', 'create_level': 'false'}
     elif children_count == 4:
         links.add_child(uuid=edge['uuid'], ip=edge['ip'], port=edge['port'])
-        ret = network_edges_controller()
-        ret['redirect'] = 'false'
-        ret['create_level'] = 'true'
+        ret = {'edges': links.get_children(), 'redirect': 'false', 'create_level': 'true'}
         for i in range(3):
             links.remove_child_at(2)
         return ret
