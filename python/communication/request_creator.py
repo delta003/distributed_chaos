@@ -99,7 +99,7 @@ def basic_check(edge, ip, port):
 # Network API
 def all_edges(edge, repeat_request):
     ret = create_net_request(method='GET', endpoint='/api/network/edges', edge=edge, repeat=repeat_request)
-    return ret['edges']
+    return ret['edges'] if 'edges' in ret else []
 
 
 def get_edge(edge, type):

@@ -34,29 +34,31 @@ def ping():
     if not ret:
         failures = links.inc_failures()
         print(failures)
-        if failures == 5:
+        if failures >= 5:
             print("PET")
             alive = rc.basic_check(edge=prev_edge, ip=next_ip, port=next_port)
             if not alive:
-                reconfigure()
-            else:
-                links.reset_failures()
+                if reconfigure():
+                    links.reset_failures()
 
 
 def reconfigure():
     can_reset = rc.bootstrap_reset()
+    print('reset?', can_reset)
     if not can_reset:
-        return
+        return False
 
-    nodes, edges = bfs(node_info.get_uuid(), addresses.get_ip(), addresses.get_port())
+    nodes, edges = bfs(node_info.get_uuid(), addresses.get_ip(), addresses.get_port(), repeat_requests=False)
     print(nodes)
     for e in nodes:
         if e['uuid'] == node_info.get_uuid():
             continue
         rc.reset_node(edge=e)
     links.reset()
+    join()
     time.sleep(5)
     rc.bootstrap_reset_done()
+    return True
 
 
 def bfs(uuid, ip, port, repeat_requests=True):
