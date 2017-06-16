@@ -53,9 +53,10 @@ def reconfigure():
     for e in nodes:
         if e['uuid'] == node_info.get_uuid():
             continue
-        rc.reset_node(edge=e)
+        rc.reset_node(edge=e, repeat_requests=False)
     links.reset()
-    join()
+    join_thrd = threading.Thread(target=join)
+    join_thrd.start()
     time.sleep(5)
     rc.bootstrap_reset_done()
     return True
@@ -96,13 +97,13 @@ def join():
     if mng_ip is None:
         if node_info.get_uuid() is None:
             node_info.set_uuid(uuid)
-        links.set_next(uuid=uuid, ip=addresses.get_ip(), port=addresses.get_port())
-        links.set_prev(uuid=uuid, ip=addresses.get_ip(), port=addresses.get_port())
+        links.set_next(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
+        links.set_prev(uuid=node_info.get_uuid(), ip=addresses.get_ip(), port=addresses.get_port())
 
         links.set_wait(False)
         return
     mng_edge['uuid'] = rc.basic_info(mng_edge)[0]
-    this = {'uuid': str(uuid), 'ip': addresses.get_ip(), 'port': addresses.get_port()}
+    this = {'uuid': str(node_info.get_uuid()), 'ip': addresses.get_ip(), 'port': addresses.get_port()}
 
     parent_edge = rc.get_edge(edge=mng_edge, type='parent')
     if not parent_edge:

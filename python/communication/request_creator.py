@@ -69,6 +69,7 @@ def bootstrap_hello(ip, port):
 
 def bootstrap_reset():
     ret = create_ip_request(method='GET', endpoint='/api/reset', ip=bootstrap_ip, port=bootstrap_port)
+    print(ret)
     if ret['can_reset'] == 'true':
         return True
     return False
@@ -141,9 +142,9 @@ def adopt_child(edge, e, can_redirect=False):  # TODO: not sure if third argumen
     return redirect, create_level, edges, next
 
 
-def reset_node(edge):
-    ret = create_net_request(method='GET', edge=edge, endpoint='/api/network/reset')
-    return ret['edges']
+def reset_node(edge, repeat_requests):
+    ret = create_net_request(method='GET', edge=edge, endpoint='/api/network/reset', repeat=repeat_requests)
+    return ret['edges'] if 'edges' in ret else {}
 
 
 def network_visualization(edge):

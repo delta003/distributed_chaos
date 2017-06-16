@@ -26,6 +26,7 @@ def hello():
         return error_response(str(e))
     try:
         response = hello_controller(ip, port)
+        print(response)
     except Exception as e:
         return error_response(str(e))
     return ok_response(response)
@@ -35,6 +36,7 @@ def hello():
 def reset():
     try:
         response = reset_controller()
+        print(response)
     except Exception as e:
         return error_response(str(e))
     return ok_response(response)
