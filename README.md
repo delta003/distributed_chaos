@@ -1,4 +1,8 @@
 # Distributed Game of Chaos
+Self-organized distributed system with nodes written in C++, Java and Python and resistance on simultaneous death of 2 nodes.
+
+Project is written for Concurrent and Distributed Systems class at Faculty of Computing in Belgrade (RAF) in team with Dragan Markovic and Lazar Milenkovic.
+
 ## Introduction
 - Project https://drive.google.com/file/d/0B6P2gDjQqRbDMVptM3dfZmNWbVU/view?usp=sharing
 - Design https://docs.google.com/document/d/1YzOaIMauOf1US_li-Wa6A-0cFraVSx2Tim-j10xJb0k/edit?usp=sharing
@@ -44,5 +48,5 @@ myvenv/bin/pip3.5 install -r requirements.txt
 ```
 
 ## Running
-Start runner.py for an interactive console.
+Start `runner.py` for an interactive console.
 
