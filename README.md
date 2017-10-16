@@ -1,5 +1,5 @@
 # Distributed Game of Chaos
-Self-organizing distributed system with nodes written in C++, Java and Python, that supports failover of upto 2 nodes at the same time.
+Self-organizing distributed system, that supports failover of upto 2 nodes at the same time. Nodes were written in C++, Java and Python.
 
 The project was written for Concurrent and Distributed Systems class at Faculty of Computing (RAF), in Belgrade, as part of a team effort with Dragan Marković and Lazar Milenković.
 
